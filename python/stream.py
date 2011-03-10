@@ -93,7 +93,7 @@ class StreamResource(Resource, Listener):
   isLeaf = True
 
   def gotFrame(self, frame, address):
-    print "StreamResource.gotFrame %s" % len(frame)
+    #print "StreamResource.gotFrame %s" % len(frame)
     size = len(frame)
     out=MULTIPARTRESPONSE % (MultiPartStream.BOUNDARY, "image/jpeg", size, frame)
 
@@ -118,7 +118,7 @@ class StreamResource(Resource, Listener):
     multipart.target = address
     if len(address) == 17:
       if not CameraFactory.isConnected(address):
-        method = request.args.get("method", "RFCOMM")
+        method = request.args.get("method", ["RFCOMM",])[-1]
         CameraFactory.connect(address, 1, method)
         CameraFactory.registerListener(address, self)
     return server.NOT_DONE_YET

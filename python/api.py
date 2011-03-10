@@ -40,9 +40,10 @@ class ConnectionTest():
     self.request = req
 
   def cleanup(self, address):
-    cli = CameraFactory.getCamera(address)
+    CameraFactory.disconnect(address)
     CameraFactory.removeListener(address, self)
-    self.request.write(json.dumps(makeDictForClient( cli, address )))
+    cli = CameraFactory.getCamera(address)
+    self.request.write(json.dumps(cli))
     self.request.finish()
 
   def lostConnection(self, reason, failed, address):
@@ -51,6 +52,7 @@ class ConnectionTest():
 
   def gotFrame(self, frame, address):
     print "ConnectionTest.gotFrame", address
+
     self.cleanup(address)
 
 class ConfigurationManager(Resource):
@@ -62,38 +64,37 @@ class ConfigurationManager(Resource):
       request.setHeader('Cache-Control', 'no-cache')
       request.setHeader('Connection', 'close')
       address=request.postpath[0].replace("_", ":")
-      cli = CameraFactory.getCamera(address)
-      if cli is not None or not request.args.get("test", None):
-        return json.dumps(
-          makeDictForClient( cli, address )
-        )
+      return json.dumps(CameraFactory.getCamera(address))
+
+    except Exception, err:
       CameraFactory.connect(address, 1, "RFCOMM")
       CameraFactory.registerListener(address, ConnectionTest(request))
       return server.NOT_DONE_YET
-    except Exception, err:
-      request.setHeader('Content-Type', 'text/html')
-      request.setHeader('Cache-Control', 'no-cache')
-      request.setHeader('Connection', 'close')
-      request.setResponseCode(500, str(err))
-      return "<html><h1>ERROR:</h1>\n<pre>%s</pre></html>" % (traceback.format_exc())
 
   def render_POST(self, request):
     out = {}
+    print str(request.args)
     for key, value in request.args.iteritems():
-      out[key]=value[-1]
+      if len(value) > 1:
+        out[key] = True
+      else:
+        out[key]=value[0]
     settings.setCamera(out)
+    print out
     settings.save()
+    cli = CameraFactory.getConnected(out['address'])
+    if cli:
+      cli.updateSettings()
     return "saved"
 
 
 class ConnectionManager(Resource):
   isLeaf = True
 
-
   def render_all(self, request):
     out = {}
     for addr, cli in CameraFactory.getConnected().iteritems():
-      out[addr] = makeDictForClient(cli, addr)
+      out[addr] = CameraFactory.getCamera(addr)
     return out
 
   def render_GET(self, request):
@@ -103,11 +104,9 @@ class ConnectionManager(Resource):
       request.setHeader('Connection', 'close')
       if len(request.postpath) > 0 and len(request.postpath[0])>0:
         address=request.postpath[0].replace("_", ":")
-        cli = CameraFactory.getConnected(address)
+        cli = CameraFactory.getCamera(address, silent=True)
         if cli is not None or not request.args.get("test", None):
-          return json.dumps(
-            makeDictForClient( cli, address )
-          )
+          return json.dumps(CameraFactory.getCamera(address))
         CameraFactory.connect(address, 1, "RFCOMM")
         CameraFactory.registerListener(address, ConnectionTest(request))
         return server.NOT_DONE_YET

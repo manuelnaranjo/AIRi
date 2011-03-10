@@ -82,25 +82,27 @@ class Settings():
     if key in ['reconnect_timeout', 'exposure']:
       val = int(val)
     elif key in ['reconnect', 'enable', 'voice', 'flash']:
-      val = val.lower() in ["true", "ok"]
+      if type(val) != bool:
+        val = val.lower() in ["true", "ok"]
     return str(val)
 
-  def setCameraSetting(self, address, key, value, section=None)
+  def setCameraSetting(self, address, key, value, section=None):
     if not section:
-      section = self.getCameraSection(configuration["address"], True)
-    if not val:
+      section = self.getCameraSection(address, True)
+    if not value:
       self._remove_option(section, key)
     else:
-      self._set(section, key, self.__sanitizeSetting(key, val))
+      self._set(section, key, self.__sanitizeSetting(key, value))
 
   def setCamera(self, configuration):
     if "address" not in configuration:
       raise Exception("You need to set address")
 
     section = self.getCameraSection(configuration["address"], True)
-    self.setCameraSetting(
-    for key, val in configuration.iteritems():
+
+    for key, value in configuration.iteritems():
       self.setCameraSetting(configuration["address"], key, value)
+    self.save()
 
   def setDongle(self, block, enable=False):
     self._set("dongles", block.replace(":", "_"), str(enable))

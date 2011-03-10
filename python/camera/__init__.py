@@ -13,14 +13,11 @@ class CameraProtocol():
   def getSize(self):
     raise NotImplementedError()
 
-  def getSizes(self):
-    raise NotImplementedError()
-
-  def getCapabilities(self):
-    raise NotImplementedError()
-
   def disconnect(self):
     dbg("CameraProtocol.disconnect not implemented")
+
+  def updateSettings(self):
+    dbg("CameraProtocol.updateSettings not implemented")
 
 class Listener():
   def lostConnection(self, reason, failed, *a, **kw):

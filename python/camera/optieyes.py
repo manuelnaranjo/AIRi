@@ -2,6 +2,9 @@
 from twisted.python import log
 from twisted.internet import reactor
 from camera import dbg, CameraProtocol
+from settings import getSettings
+
+settings=getSettings()
 
 SIZES={
     "VGA":	4,
@@ -36,19 +39,15 @@ class OptiEye(CameraProtocol):
   def getType(self):
     return 'OptiEye'
 
-  @classmethod
   def getCapabilities(self):
     return CAPABILITIES
 
-  @classmethod
   def getTransport(self):
     return "RFCOMM"
 
-  def __init__(self):
-    pass
-
   def __init__(self, client):
     self.client = client
+    self.address = client.address
     self.transport = client.transport
     self.doCommandMode()
 
@@ -66,6 +65,9 @@ class OptiEye(CameraProtocol):
   def __doCommand(self, command):
     self.transport.write("$GENIESYS%04X\r\n" % command)
 
+  def updateSettings(self):
+    self.doCommandMode()
+
   def doCommandMode(self):
     dbg("doCommandMode")
     self.state = COMMAND_MODE
@@ -76,7 +78,7 @@ class OptiEye(CameraProtocol):
     dbg("doSetSize")
     self.state = ECHO
     self.callLater = None
-    self.__doCommand(SIZES[self.size])
+    self.__doCommand(SIZES[settings.getCamera(self.address).get('size', 'QVGA')])
     self.callLater = reactor.callLater(1, self.doPreview)
 
   def doPreview(self):
@@ -110,6 +112,13 @@ class OptiEye(CameraProtocol):
     if self.state == PREVIEW:
       return self.previewData()
 
+  def set(self, option, value):
+    dbg("set %s->%s", option, value)
+
   def disconnect(self):
     dbg("OptiEyes.disconnect")
     self.__doCommand(1)
+
+OptiEye.Capabilities = CAPABILITIES
+OptiEye.Sizes = SIZES
+

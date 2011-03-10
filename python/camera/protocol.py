@@ -49,6 +49,15 @@ class Camera(Protocol):
     self.transport.loseConnection()
 
   def doINIT(self):
+    def welcomeCheck():
+      while len(self.buffer)>0 and self.buffer.find('\n')>-1:
+        welcome, self.buffer = self.buffer.split('\n', 1)
+        dbg("welcome", welcome)
+        welcome=welcome.strip().lower().strip('\x00')
+        for k,v in WELCOME.iteritems():
+          if welcome.find(v) > -1:
+            return k;
+
     dbg("doINIT", self.buffer)
     if self.buffer.find("\n") == -1:
       dbg("Welcome not received")
@@ -56,16 +65,8 @@ class Camera(Protocol):
         self.callLater = reactor.callLater(3, self.invalidCamera)
       self.callLater.reset(2)
       return
-    welcome, temp = self.buffer.split("\n", 1)
-    welcome=welcome.strip().lower().strip('\x00')
-    log.msg("welcome", welcome)
 
-    kind = None
-    for k,v in WELCOME.iteritems():
-      if welcome.find(v) > -1:
-        kind = k
-        break;
-
+    kind = welcomeCheck()
     if not kind:
       if not self.callLater:
         self.callLater = reactor.callLater(3, self.invalidCamera)
@@ -74,11 +75,12 @@ class Camera(Protocol):
 
     self.kind = kind
     log.msg("Connected to a %s camera" % self.kind)
-    self.buffer=temp
+    dbg("still in buffer", len(self.buffer))
     self.state=IDLE
-    settings.setCamera(self.address, "address", self.address)
-    settings.setCamera(self.address, "type", self.kind)
-    settings.setCamera(self.address, "last", strftime("%m/%d/%Y %H:%M:%S", localtime())
+    settings.setCameraSetting(self.address, "address", self.address)
+    settings.setCameraSetting(self.address, "type", self.kind)
+    settings.setCameraSetting(self.address, "name", self.getName())
+    settings.setCameraSetting(self.address, "last", strftime("%m/%d/%Y %H:%M:%S", localtime()))
     settings.save()
     self.client=TYPES[self.kind]["class"](self)
     if self.callLater:
@@ -100,7 +102,8 @@ class Camera(Protocol):
     dbg("__getattr__ %s" % val)
     if val in [
       'getType', 'getCapabilities', 'getSize', 'getFlash', 'getBattery',
-        'getTransport', 'getExposure', 'getZoom', 'getPan', 'getVoice']:
+        'getTransport', 'getExposure', 'getZoom', 'getPan', 'getVoice',
+        'updateSettings']:
         return getattr(self.client, val, lambda: False)
     raise AttributeError
 
@@ -120,7 +123,7 @@ class CameraFactory(ClientFactory):
 
   @classmethod
   def gotFrame(klass, addr, frame):
-    dbg("gotFrame %s" % addr)
+    #dbg("gotFrame %s" % addr)
     if addr not in klass.listeners:
       return
     for listener in klass.listeners[addr]:
@@ -178,6 +181,11 @@ class CameraFactory(ClientFactory):
     if klass.isConnected(address):
       raise RuntimeException("All ready connected to %s" % address)
 
+    settings = klass.getCamera(address, True)
+    dbg(str(settings))
+    dbg(method)
+    method=settings.get("transport", method)
+    dbg(method)
     c = getattr(twisted_bluetooth, "connect%s" % method)
 
     if klass.FACTORY == None:
@@ -187,12 +195,16 @@ class CameraFactory(ClientFactory):
 
   @classmethod
   def disconnect(klass, address):
-    if klass.isConnected(addresS):
-      klass.clients[address].client.disconnect()
-      klass.clients[address].transport.loseConnection()
+    if klass.isConnected(address):
+      try:
+        klass.clients[address].client.disconnect()
+        klass.clients[address].transport.loseConnection()
+      except Exception, err:
+        log.err(err)
 
     for listener in klass.listeners[address]:
-      listener.forcedDisconnect(address=address)
+      if getattr(listener, 'forcedDisconnect', None):
+        listener.forcedDisconnect(address=address)
 
     klass.__cleanup(address)
 
@@ -204,7 +216,10 @@ class CameraFactory(ClientFactory):
 
   @classmethod
   def removeListener(klass, address, listener):
-    klass.listeners[address].remove(listener)
+    try:
+      klass.listeners[address].remove(listener)
+    except:
+      pass
 
   @classmethod
   def getConnected(klass, address=None):
@@ -213,12 +228,15 @@ class CameraFactory(ClientFactory):
     return klass.clients
 
   @classmethod
-  def getCamera(klass, address):
+  def getCamera(klass, address, silent=False):
     out = settings.getCamera(address)
+    if "type" not in out:
+      if not silent:
+        raise Exception("Not known camera")
+      return out
     out["status"]=klass.isConnected(address)
-    if "type" in out:
-      
-    return settings.getCamera(address)
+    out["capabilities"]=TYPES[out["type"]]["class"].Capabilities
+    return out
 
 if __name__=='__main__':
   import sys

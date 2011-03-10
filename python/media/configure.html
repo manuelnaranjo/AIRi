@@ -27,7 +27,10 @@ function createDropDown(name, list){
 }
 
 function createSelectable(name, value, capable){
-  return $._input_({ name: name, type: 'checkbox', checked: value==true, disabled: capable==false }).text("")
+  //not used function, shame on me MN
+  value = eval(value.toLowerCase())
+  $._input_({ name: name, type: 'hidden', value: "false"}).appendTo("#"+name)
+  $._input_({ name: name, type: 'checkbox', checked: value==true, disabled: capable==false, value: "true"}).appendTo("#"+name)
 }
 
 function updateExposure(event, ui){
@@ -35,6 +38,18 @@ function updateExposure(event, ui){
       $("#exposure_text").text(seconds.toPrecision(4)+" secs");
       $("#exposure_form").attr("value", ui.value);
     }
+
+function postChanges(){
+  $("#main").hide()
+  $("#loading").show()
+  $( 'html, body' ).animate( { scrollTop: 0 }, "slow" );
+  $.post("/api/configure/", 
+    $("#main").serialize(), 
+    function(){
+      window.location.reload(true);
+    }
+  );
+}
 
 function load(){
   address_= window.location.search.substr(1);
@@ -102,7 +117,7 @@ function load(){
             $._input_({ 
               name: name, 
               type: 'checkbox', 
-              checked: value==true, 
+              checked: value.toLowerCase()=='true', 
               disabled: data['capabilities'][name]==false,
               value: "true",
             }).appendTo("#"+name)
@@ -111,7 +126,7 @@ function load(){
             $("#"+name).text(value==true?"Online":"Offline");
             return;
           case "reconnect":
-            $("#reconnect_ .out").attr("checked", value=="true");
+            $("#reconnect_ .out").attr("checked", value.toLowerCase()=='true');
             return
           case "reconnect_timeout":
             $("#reconnect_timeout").attr("value", value);
@@ -141,7 +156,7 @@ $(document).ready(load)
     <div id="body">
       <p id="loading">Loading Please Wait...</p>
       
-      <form action="/api/configure/" id="main" style="display:none" method="post">
+      <form id="main" style="display:none">
         <input type="hidden" name="address" id="address_form" />
         <input type="hidden" name="exposure" id="exposure_form" />
         <h1>Configuration</h1>
@@ -196,11 +211,11 @@ $(document).ready(load)
         <div class="label">Battery</div>
           <div class="value" id="battery"></div>
             <div class="table-reset"></div>
-        <div>
-          <input type="submit" value="Save Settings"/>
-          <input type="submit" value="Discard Changed" onclick="window.location.reload(true)" />
-        </div>
         </form>
+        <div>
+          <button name="save" value="Save Settings" onclick="postChanges()">Save Settings</button>
+          <button name="cancel" value="Discard Changed" onclick="window.location.reload(true)">Discard Changed</button>
+        </div>
     </div>
 
     <div id="footer">
