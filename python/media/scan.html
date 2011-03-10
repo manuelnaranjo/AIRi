@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <title>AIRi | Seen Devices</title>
+    <meta http-equiv="Content-type" content="text/html; charset=iso-8859-1"/>
+
+    <link type="text/css" href="/media/css/cupertino/jquery-ui-1.8.10.custom.css" rel="stylesheet" />
+    <link type="text/css" href="/media/css/airi.css" rel="stylesheet" />
+    <script type="text/javascript" src="/media/js/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript" src="/media/js/jquery-ui-1.8.10.custom.min.js"></script>
+    <script type="text/javascript" src="/media/js/jquery.createdomnodes.js"></script>
+    <script type="text/javascript">
+
+function updateRemoteDevices(){
+  $("#reload").hide()
+  $(".loading").remove()
+  $("#results").empty()
+
+  $._p_({"class": "loading"}).text("Scanning please wait...").appendTo("#results")
+
+  $.ajax({
+    url: "/api/devices/",
+    datatype: 'json',
+    error: function(jqXHR, textStatus, errorThrown){
+      $(".loading").remove()
+      $(jqXHR.responseText).appendTo("#results")
+
+    },
+    success: function(data, textStatus){
+      var item;
+      $(".loading").remove()
+      if (data.length > 0){
+        $.each(data, function(key, val) {
+          item=$._div_({class:'status ui-icon'})
+          if (val['state']==true)
+            item.addClass('ui-icon-check')
+          else
+            item.addClass('ui-icon-closethick')
+          item.appendTo("#results")
+
+          $._div({class:'configure'})._a_({
+            href: '/configure?'+val['address'].replace(/:/g, "_"),
+          }).text("Configure").div_().appendTo("#results")
+
+          $._div_({class: 'address'}).text(val["address"]).appendTo("#results")
+          $._div_({class: 'name'}).text(val["name"]).appendTo("#results")
+
+          $._div_({class:'table-reset'}).appendTo("#results")
+          $("#reload").show()
+        });
+      }
+      else {
+        $._p_({class: "no-results"}).text("No devices Found, try again.").appendTo("#results");
+        $("#reload").show()
+      }
+    }})
+}
+
+    $(document).ready(updateRemoteDevices)
+    </script>
+  </head>
+
+  <body>
+    <div id="header" style="height: 58px !important; position: relative; left: 0px !important; right: 0px !important;">
+      <a href="http://www.aircable.net" target="_blank">
+          <img style="height: 56px;" src="/media/images/aircable-logo.png" alt="AIRcable.net"/>
+      </a>
+    </div>
+    <div class="table-reset"></div>
+
+    <div id="results"></div>
+    <div class="table-reset"></div>
+
+    <br/>
+    <a id="reload" href="#" onClick="window.location.reload(true);">Reload</a>
+
+    <div id="footer">
+      <p>Powered by <a href="http://www.aircable.net" target="_blank">AIRcable.net</a> Copyright (c) 2011</p>
+    </div>
+    <div class="table-reset">
+
+  </body>
+</html>

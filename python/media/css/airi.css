@@ -1,0 +1,317 @@
+#resizable { 
+  width: 645px; 
+  height: 484px;
+}
+
+#chrome-warning {
+  width: 645px !important;
+  margin-bottom: 5px;
+}
+
+#resizable h3 { 
+  text-align: center; 
+  margin: 0; 
+}
+
+.ui-resizable-ghost { 
+  border: 3px dotted black; 
+}
+
+#object {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+iframe {
+  padding:  0 !important;
+  overflow: auto !important;
+  frameborder: 0;
+  scrolling: auto;
+}
+
+#header {
+  background-image: url(/media/images/wide-header-bg.png);
+  background-repeat: repeat no-repeat;
+  height: 95px !important;
+  position: absolute;
+  top: 0;
+  right: 21px;
+  left: 21px;
+  z-index: 100;
+}
+
+.aircable_logo {
+  display: block;
+  height: 56px !important;
+  width: 120px !important;
+  position: absolute;
+  top: 16px;
+  left: 16px;
+}
+
+.aircable_logo img {
+  position: relative;
+  top: 0px !important;
+  left: 0px !important;
+}
+
+
+.airi_logo {
+  display: block;
+  height: 56px !important;
+  width: 120px !important;
+  float: left;
+  position: absolute;
+  top: 16px;
+  left: 160px;
+}
+
+.airi_logo h1 {
+  padding: 0px;
+  margin: 0px;
+  height: 56px !important;
+  width: 120px !important;
+  font-size: 56px;
+}
+
+.ui-layout-east {
+  padding: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0px !important;
+  bottom: 0px !important;
+  height: 100% !important;
+}
+
+.ui-layout-east h3 { /* controls header */
+  font-size: 1.1em;
+  background: #EEF;
+  border: 1px solid #BBB;
+  border-width: 0 0 1px;
+  padding: 7px 10px;
+  margin: 0;
+}
+
+.ui-layout-south {
+  height: 1.3em !important;
+  font-size: 1em !important;
+}
+
+.ui-layout-south p{
+  margin: 0px;
+  padding: 0px;
+}
+
+.tools-menu {
+  padding: 0px;
+  margin: 0px;
+  overflow: hidden !important;
+
+}
+
+.control-button {
+  width: 100%;
+  height: 2em;
+}
+
+.tools-menu {
+  width: 100% !important;
+  margin: 0px !important;
+  padding: 0px !important;
+}
+
+.control-info, .control-info-disabled, .control-error {
+  width: 100%;
+  height: 2em;
+  margin: 0px !important;
+  padding: 0px !important;
+  cursor: default !important; 
+}
+
+#scan-info {
+  bottom : 0px !important;
+  position: absolute;
+}
+
+.ui-airi-icon {
+  background-image: url("/media/images/airi-icons.png") !important;
+}
+
+.ui-airi-nopan {
+  background-position: 0 0;
+}
+
+.ui-airi-nosco {
+  background-position: -16px 0;
+}
+
+.ui-airi-nozoom {
+  background-position: -32px 0;
+}
+
+.ui-airi-noflash {
+  background-position: -48px 0;
+}
+
+.ui-airi-pan {
+  background-position: 0 -16px;
+}
+
+.ui-airi-sco {
+  background-position: -16px -16px;
+}
+
+.ui-airi-zoom {
+  background-position: -32px -16px;
+}
+
+.ui-airi-flash {
+  background-position: -48px -16px;
+}
+
+.resizer-east-dragging,
+.resizer-east-open:hover {
+  background: url("/media/images/resizable-e.gif") repeat-y center;
+}
+
+.resizer-east-open {
+  background-color: #999;
+  opacity: 0.1;
+  filter: alpha(opactity=10);
+  width: 0px !important;
+}
+
+.resizer-east-open:hover {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+
+.resizer-dragging-limit {
+  background: #FF33000 !important;
+}
+
+.resizer-east {
+  top: 0px !important;
+  z-index: 100 !important;
+  bottom: 0px !important;
+}
+
+.resizer-east-closed {
+  background: #D1E6FC url(/media/images/D1E6FC_40x100_textures_10_dots_medium_90.png) 0 0 repeat;
+  border-top: 1px solid #777;
+  border-bottom: 1px solid #777;
+}
+
+.resizer-east-closed:hover {
+  background: #D1E6FC;
+}
+
+span.button-pin ,
+span.button-close {
+  position: absolute;
+  top:      0 !important;
+  width:    20px !important;
+  height:   20px !important;
+  z-index:  100 !important;
+  display:  block;
+  cursor:   pointer;
+}
+
+span.button-close-east  { 
+  right: 0; 
+}
+
+span.button-pin-east  { 
+  right:  0px !important;
+  top:    16px !important;
+}
+
+span.button-pin-up { 
+  background: url(/media/images/pin-up-off.gif) no-repeat center; 
+}
+span.button-pin-up:hover { 
+  background: url(/media/images/pin-up-on.gif)  no-repeat center; 
+}
+span.button-pin-down { 
+  background: url(/media/images/pin-dn-off.gif) no-repeat center; 
+}
+span.button-pin-down:hover { 
+  background: url(/media/images/pin-dn-on.gif)  no-repeat center; 
+}
+
+span.button-close-east { 
+  background: url(/media/images/go-rt-off.gif) no-repeat center; 
+}
+span.button-close-east:hover { 
+  background: url(/media/images/go-rt-on.gif)  no-repeat center; 
+}
+
+.toggler-east-closed { 
+  background: url(/media/images/go-lt-off.gif) no-repeat center; 
+}
+.toggler-east-closed:hover { 
+  background: url(/media/images/go-lt-on.gif)  no-repeat center; 
+}
+
+.ui-layout-resizer-east-closed  { border-right: 1px solid #BBB !important; }
+
+ul.NoBulletNoIdent {
+  list-style-type: none;
+  margin-left: 0px;
+  padding-left: 0px
+}
+
+.information {
+  border: 0px; 
+  display: block; 
+  height: auto !important; 
+  width: auto !important;
+  margin: 0px !important;
+  padding: 0px !important;
+}
+
+.label {
+  float: left;
+  width: 30%;
+  font-style: italic;
+  font-weight: bold;
+}
+
+#body .label {
+  width: 15%;
+}
+
+.value {
+  width: auto;
+  float: left;
+}
+
+.table-reset{
+  clear: both;
+}
+
+#results .address{
+  font-size: 1.3em;
+  font-family: monospace;
+  float: left;
+  margin-right: .5em;
+}
+
+#results .name {
+  float: left;
+}
+
+#results .status{
+  float: left;
+  margin-right: .5em;
+}
+
+#results .configure{
+  float: left;
+  margin-right: .5em;
+}
+
+.disabled {
+  color: lightgray;
+}

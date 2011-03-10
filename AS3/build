@@ -1,0 +1,5 @@
+mxmlc \
+    -use-network \
+    -static-link-runtime-shared-libraries \
+    -output airi.swf \
+    Main.as

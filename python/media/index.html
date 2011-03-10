@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <title>AIRi</title>
+    <meta http-equiv="Content-type" content="text/html; charset=iso-8859-1"/>
+
+    <script type="text/javascript" src="/media/js/swfobject.js"></script>
+    <link type="text/css" href="/media/css/cupertino/jquery-ui-1.8.10.custom.css" rel="stylesheet" />
+    <link type="text/css" href="/media/css/airi.css" rel="stylesheet" />
+    <script type="text/javascript" src="/media/js/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript" src="/media/js/jquery-ui-1.8.10.custom.min.js"></script>
+    <script type="text/javascript" src="/media/js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="/media/js/jquery.createdomnodes.js"></script>
+    <script type="text/javascript" src="/media/js/jquery.swfobject.1-1-1.min.js"></script>
+    <script type="text/javascript" src="/media/js/jquery.layout.min-1.2.0.js"></script>
+    <script type="text/javascript" src="/media/js/main.js"></script>
+  </head>
+
+  <body>
+    <div id="header" class="ui-layout-north">
+      <a class="aircable_logo" href="http://www.aircable.net" target="_blank">
+          <img class="aircable_logo" src="/media/images/aircable-logo.png" alt="AIRcable.net"/>
+      </a>
+      <a class="airi_logo" href="/">
+          <h1>AIR<i>i</i></h1>
+      </a>
+    </div>
+
+    <div id="center" class="ui-layout-center">
+      <div id="video" class="ui-layout-center" style="padding: 3px">
+      </div>
+    </div>
+
+    <div id="controls" class="ui-layout-east ui-widget-content" style="height: 100%">
+      <!--div class="header">AIR<i>i</i> Controls</div-->
+      <h3>AIR<i>i</i> Controls</h3>
+      <div id="tools">
+        <h3 id="o_remote"><a href="#">Remote Devices</a></h3>
+        <div id="remote_devices" class="tools-menu">
+          <!--input type="button" id="do_scan" class="control-button" value="Scan Again"/-->
+          <button id="do_scan" class="control-button">Scan Again</button>
+          <p id="scan-info" class="control-info-disabled">Results Cached for 30 seconds</p>
+        </div>
+
+        <h3 id="o_connected"><a href="#" >Connected Devices</a></h3>
+        <div id="connected_devices_container" class="tools-menu">
+          <div id="connected_devices"></div>
+        </div>
+
+        <h3 id="o_current"><a href="#" >Current Device</a></h3>
+        <div id="current_device" class="tools-menu">
+          <div id="current_device_">
+            <h4 class="ui-helper-reset ui-state-default ui-corner-all">Camera Information</h4>
+            <div class="information">
+                <div class="label">Address</div>
+                <div class="value" id="current_device_address"></div>
+              <div style="clear: both;"></div>
+                <div class="label">Name</div>
+                <div class="value" id="current_device_name"></div>
+              <div style="clear: both;"></div>
+                <div class="label">Transport</div>
+                <div class="value" id="current_device_transport"></div>
+              <div style="clear: both;"></div>
+            </div>
+            <h4 class="ui-helper-reset ui-state-default ui-corner-all">Camera Tools</h4>
+            <button id="disconnect" class="control-button">Disconnect</button>
+            <h4 class="ui-helper-reset ui-state-default ui-corner-all">Camera Settings</h4>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="footer" class="ui-layout-south">
+      <p>Powered by <a href="http://www.aircable.net" target="_blank">AIRcable.net</a> Copyright (c) 2011</p>
+    </div>
+  </body>
+</html>

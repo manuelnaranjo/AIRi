@@ -1,0 +1,8 @@
+This is the place were we are hosting AIRcable AIRi software.
+
+Under AS3 you will find the Flash components that make up the video player.
+
+Under Python you will find the Python components that make up the Python Service
+and the Web server
+
+License: Apache V2

@@ -1,0 +1,7 @@
+mxmlc \
+    -use-network \
+    -compiler.verbose-stacktraces \
+    -static-link-runtime-shared-libraries \
+    -compiler.debug \
+    -output airi.swf \
+    Main.as
