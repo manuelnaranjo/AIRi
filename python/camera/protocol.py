@@ -179,13 +179,10 @@ class CameraFactory(ClientFactory):
   @classmethod
   def connect(klass, address, channel, method="RFCOMM"):
     if klass.isConnected(address):
-      raise RuntimeException("All ready connected to %s" % address)
+      raise Exception("All ready connected to %s" % address)
 
     settings = klass.getCamera(address, True)
-    dbg(str(settings))
-    dbg(method)
-    method=settings.get("transport", method)
-    dbg(method)
+    method=getattr(settings,"transport", method)
     c = getattr(twisted_bluetooth, "connect%s" % method)
 
     if klass.FACTORY == None:
@@ -230,13 +227,20 @@ class CameraFactory(ClientFactory):
   @classmethod
   def getCamera(klass, address, silent=False):
     out = settings.getCamera(address)
-    if "type" not in out:
+    if not out:
       if not silent:
         raise Exception("Not known camera")
       return out
     out["status"]=klass.isConnected(address)
     out["capabilities"]=TYPES[out["type"]]["class"].Capabilities
     return out
+  
+  @classmethod
+  def getCameras(klass):
+    for camera in settings.getCameras():
+      camera["status"]=klass.isConnected(camera["address"])
+      camera["capabilities"]=TYPES[camera["type"]]["class"].Capabilities
+      yield camera
 
 if __name__=='__main__':
   import sys

@@ -39,11 +39,15 @@ class Settings():
         return self._getboolean("dongles", op)
     return self._getboolean("dongles", "default")
 
-  def getCameraSection(self, address, create=False):
-    root.debug("getCameraSection(%s)", address)
+  def getCameraSections(self):
     cameras = self._sections()
     if "dongles" in cameras:
       cameras.remove("dongles")
+    return cameras
+
+  def getCameraSection(self, address, create=False):
+    root.debug("getCameraSection(%s)", address)
+    cameras = self.getCameraSections()
     for cam in cameras:
       if address.lower().startswith(self._get(cam, "address").lower()):
         return cam
@@ -58,22 +62,33 @@ class Settings():
     return None
   
   def __cameraDict(self, items):
-    out = {}
+    # defaults
+    out = {
+      "reconnect_timeout": 10,
+      "reconnect": False,
+      "voice": False,
+      "flash": False,
+      "exposure": 15,
+    }
     for key, val in items:
-      if items in ['reconnect_timeout', 'exposure']:
+      if key in ['reconnect_timeout', 'exposure']:
         out[key] = int(val)
-      elif items in ['reconnect', 'enable', 'voice', 'flash']:
+      elif key in ['reconnect', 'enable', 'voice', 'flash']:
         out[key] = val.lower() == "true"
       else:
         out[key] = val
     return out
+
+  def getCameras(self):
+    for camera in self.getCameraSections():
+      yield self.__cameraDict(self._items(camera))
 
   def getCamera(self, address):
     root.debug("getCamera(%s)", address)
     cam = self.getCameraSection(address)
     if cam:
       return self.__cameraDict(self._items(cam))
-    return {}
+    return None
 
   def save(self):
     self._write(open(self.name, "wb"))
@@ -95,6 +110,7 @@ class Settings():
       self._set(section, key, self.__sanitizeSetting(key, value))
 
   def setCamera(self, configuration):
+    root.debug("setCamera %s", str(configuration))
     if "address" not in configuration:
       raise Exception("You need to set address")
 

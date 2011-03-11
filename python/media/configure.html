@@ -9,35 +9,11 @@
     <script type="text/javascript" src="/media/js/jquery-1.4.4.min.js"></script>
     <script type="text/javascript" src="/media/js/jquery-ui-1.8.10.custom.min.js"></script>
     <script type="text/javascript" src="/media/js/jquery.createdomnodes.js"></script>
+    <script type="text/javascript" src="/media/js/shared.js"></script>
     <script type="text/javascript">
 var address;
 var address_;
 var slider;
-
-function createDropDown(name, list){
-  var output = $._select_();
-  var item;
-  $.each(list, function(index, val){
-    item = $._option_({value: val}).text(val);
-    if (name == val)
-      item.attr("selected", "selected")
-    item.appendTo(output);
-  })
-  return output
-}
-
-function createSelectable(name, value, capable){
-  //not used function, shame on me MN
-  value = eval(value.toLowerCase())
-  $._input_({ name: name, type: 'hidden', value: "false"}).appendTo("#"+name)
-  $._input_({ name: name, type: 'checkbox', checked: value==true, disabled: capable==false, value: "true"}).appendTo("#"+name)
-}
-
-function updateExposure(event, ui){
-      var seconds = (ui.value)*1/15.
-      $("#exposure_text").text(seconds.toPrecision(4)+" secs");
-      $("#exposure_form").attr("value", ui.value);
-    }
 
 function postChanges(){
   $("#main").hide()
@@ -46,109 +22,29 @@ function postChanges(){
   $.post("/api/configure/", 
     $("#main").serialize(), 
     function(){
-      window.location.reload(true);
+      updateConfiguration();
+      $("#loading").hide()
+      $("#main").show()
+      //window.location.reload(true);
     }
   );
 }
 
 function load(){
-  address_= window.location.search.substr(1);
-  address = address_.replace(/_/g, ":")
-  $("#address_form").attr("value", address);
-
-  slider=$("#exposure").slider({
-    min: 0,
-    max: 31,
-    slide: updateExposure,
-    change: updateExposure,
-  })
-  slider.slider('value',0)
-  slider.css({width: "15%"})
-
-  $.ajax({
-    url: "/api/connected/"+address_+"?test=true",
-    datatype: 'json',
-    error: function(jqXHR, textStatus, errorThrown){
-      $("#loading").hide()
-      $("#main").show()
-      update({'status': false})
-    },
-    success: function(data, textStatus){
-      var item;
-      if ('error' in data){
-        alert("Something went wrong, cause: " + data['error']);
-        return
-      }
-
-      $.each(data, function(name, value){
-        switch (name){
-          case "capabilities":
-            return;
-          case "transport":
-          case "size":
-            item=$("#"+name)
-            item.attr('id', "_"+name)
-            createDropDown(value, data['capabilities'][name]).
-              attr('id', name).
-              attr('name', name).
-              appendTo("#_"+name)
-            return;
-          case "exposure":
-            if (data['capabilities'][name] == false){
-              slider.slider('disable', false)
-              $("#exposure_text").addClass("disabled")
-            }
-            return;
-          case "pan":
-          case "zoom":
-          case "battery":
-            if (data['capabilities'][name]==false){
-              $("#"+name).addClass("disabled").text("Not Supported");
-              return;
-            }
-          case "voice":
-          case "flash":
-            $._input_({ 
-              name: name, 
-              type: 'hidden', 
-              value: "false",
-            }).appendTo("#"+name)
-
-            $._input_({ 
-              name: name, 
-              type: 'checkbox', 
-              checked: value.toLowerCase()=='true', 
-              disabled: data['capabilities'][name]==false,
-              value: "true",
-            }).appendTo("#"+name)
-            return;
-          case "status":
-            $("#"+name).text(value==true?"Online":"Offline");
-            return;
-          case "reconnect":
-            $("#reconnect_ .out").attr("checked", value.toLowerCase()=='true');
-            return
-          case "reconnect_timeout":
-            $("#reconnect_timeout").attr("value", value);
-            return
-          default:
-            $("#"+name).text(value);
-          }
-      })
-      $("#loading").hide()
-      $("#main").show()
-    }
-  })
+  prepareConfiguration("#main")
 }
 
 $(document).ready(load)
-    </script>
-  </head>
+</script>
+</head>
 
   <body>
     <div id="header" style="height: 58px !important; position: relative; left: 0px !important; right: 0px !important;">
       <a href="http://www.aircable.net" target="_blank">
           <img style="height: 56px;" src="/media/images/aircable-logo.png" alt="AIRcable.net"/>
+      </a>
+      <a class="airi_logo" href="/">
+        <h1>AIR<i>i</i></h1>
       </a>
     </div>
     <div class="table-reset"></div>
@@ -176,10 +72,7 @@ $(document).ready(load)
           <div class="value" id="last"></div>
             <div class="table-reset"></div>
         <div class="label">Reconnect</div>
-          <div class="value" id="reconnect_">
-            <input type="hidden"   name="reconnect" value="false"/>
-            <input type="checkbox" name="reconnect" value="true" class="out"/>
-          </div>
+          <div class="value" id="reconnect"></div>
             <div class="table-reset"></div>
         <div class="label">Reconnect Timeout</div>
           <div class="value">
@@ -214,7 +107,7 @@ $(document).ready(load)
         </form>
         <div>
           <button name="save" value="Save Settings" onclick="postChanges()">Save Settings</button>
-          <button name="cancel" value="Discard Changed" onclick="window.location.reload(true)">Discard Changed</button>
+          <button name="cancel" value="Discard Changed" onclick="updateConfiguration()">Discard Changed</button>
         </div>
     </div>
 

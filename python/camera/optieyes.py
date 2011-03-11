@@ -75,10 +75,14 @@ class OptiEye(CameraProtocol):
     self.callLater = reactor.callLater(1, self.doSetSize)
 
   def doSetSize(self):
-    dbg("doSetSize")
     self.state = ECHO
     self.callLater = None
-    self.__doCommand(SIZES[settings.getCamera(self.address).get('size', 'QVGA')])
+    camera=settings.getCamera(self.address)
+    size = "QVGA" #default
+    if camera:
+      size = camera.get("size", size)
+    dbg("doSetSize(%s)", size)
+    self.__doCommand(SIZES[size])
     self.callLater = reactor.callLater(1, self.doPreview)
 
   def doPreview(self):

@@ -42,18 +42,28 @@ class ConnectionTest():
   def cleanup(self, address):
     CameraFactory.disconnect(address)
     CameraFactory.removeListener(address, self)
-    cli = CameraFactory.getCamera(address)
-    self.request.write(json.dumps(cli))
     self.request.finish()
 
   def lostConnection(self, reason, failed, address):
     print "ConnectionTest.lostConnection", address
+    self.request.write("<html><h1>ERROR:</h1>\n<pre>%s</pre></html>" % reason)
+    self.request.setResponseCode(500, str(failed))
     self.cleanup(address)
 
   def gotFrame(self, frame, address):
     print "ConnectionTest.gotFrame", address
-
+    cli = CameraFactory.getCamera(address)
+    self.request.write(json.dumps(cli))
     self.cleanup(address)
+
+class DevicesManager(Resource):
+  isLeaf = True
+  
+  def render_GET(self, request):
+    request.setHeader('Content-Type', 'application/json')
+    request.setHeader('Cache-Control', 'no-cache')
+    request.setHeader('Connection', 'close')
+    return json.dumps(list(CameraFactory.getCameras()))
 
 class ConfigurationManager(Resource):
   isLeaf = True
@@ -63,10 +73,23 @@ class ConfigurationManager(Resource):
       request.setHeader('Content-Type', 'application/json')
       request.setHeader('Cache-Control', 'no-cache')
       request.setHeader('Connection', 'close')
-      address=request.postpath[0].replace("_", ":")
-      return json.dumps(CameraFactory.getCamera(address))
+      if len(request.postpath) > 0 and len(request.postpath[0])>0:
+        address=request.postpath[0].replace("_", ":")
+        if len(request.args) == 0:
+          return json.dumps(CameraFactory.getCamera(address))
+        camera = settings.getCamera(address)
+        for key in request.args:
+            settings.setCameraSetting(address, key, request.args[key][-1])
+        settings.save()
+        cli = CameraFactory.getConnected(address)
+        if cli:
+          cli.updateSettings()
+        return json.dumps(CameraFactory.getCamera(address))
+      request.setResponseCode(500, "invalid address")
+      return "Invalid address"
 
     except Exception, err:
+      print err
       CameraFactory.connect(address, 1, "RFCOMM")
       CameraFactory.registerListener(address, ConnectionTest(request))
       return server.NOT_DONE_YET
@@ -105,7 +128,7 @@ class ConnectionManager(Resource):
       if len(request.postpath) > 0 and len(request.postpath[0])>0:
         address=request.postpath[0].replace("_", ":")
         cli = CameraFactory.getCamera(address, silent=True)
-        if cli is not None or not request.args.get("test", None):
+        if cli or not request.args.get("test", None):
           return json.dumps(CameraFactory.getCamera(address))
         CameraFactory.connect(address, 1, "RFCOMM")
         CameraFactory.registerListener(address, ConnectionTest(request))
@@ -213,7 +236,8 @@ class API(Resource):
     log.msg("API()")
     Resource.__init__(self, *a, **kw)
     self.putChild("", API_Root())
-    self.putChild("devices", ScanManager())
+    self.putChild("scan", ScanManager())
+    self.putChild("devices", DevicesManager())
     self.putChild("connected", ConnectionManager())
     self.putChild("configure", ConfigurationManager())
 

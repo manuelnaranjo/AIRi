@@ -19,7 +19,7 @@ function updateRemoteDevices(){
   $._p_({"class": "loading"}).text("Scanning please wait...").appendTo("#results")
 
   $.ajax({
-    url: "/api/devices/",
+    url: "/api/scan/",
     datatype: 'json',
     error: function(jqXHR, textStatus, errorThrown){
       $(".loading").remove()
@@ -64,6 +64,9 @@ function updateRemoteDevices(){
     <div id="header" style="height: 58px !important; position: relative; left: 0px !important; right: 0px !important;">
       <a href="http://www.aircable.net" target="_blank">
           <img style="height: 56px;" src="/media/images/aircable-logo.png" alt="AIRcable.net"/>
+      </a>
+      <a class="airi_logo" href="/">
+        <h1>AIR<i>i</i></h1>
       </a>
     </div>
     <div class="table-reset"></div>
