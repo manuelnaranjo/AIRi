@@ -13,28 +13,6 @@ settings = getSettings()
 
 SCAN_TIMEOUT=60 # scan is started once each 60 seconds
 
-def makeDictForClient(client, address):
-  if client is None:
-    return { 'error': 'Not Connected' }
-
-  return { 
-    'type':         client.getType(),
-    'capabilities': client.getCapabilities(),
-    'size':         client.getSize(),
-    'flash':        client.getFlash(),
-    'name':         client.getName(),
-    'battery':      client.getBattery(),
-    'transport':    client.getTransport(),
-    'exposure':     client.getExposure(),
-    'zoom':         client.getZoom(),
-    'voice':        client.getVoice(),
-    'pan':          client.getPan(),
-    'reconnect':    client.getReconnect(),
-    'reconnect_timeout': client.getReconnectTimeout(),
-    'status':       CameraFactory.isConnected(address),
-    'address':      address,
-  }
-
 class ConnectionTest():
   def __init__(self, req):
     self.request = req
