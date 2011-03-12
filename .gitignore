@@ -4,3 +4,6 @@ AS3/*.swf
 *.ini
 *.js
 cupertino*
+airi.egg-info*
+build*
+dist*
