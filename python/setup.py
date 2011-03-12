@@ -34,5 +34,5 @@ setup(
     package_data = {
       'airi': ['airi/media/*.*'],
     },
-    scripts=["AIRi.py"],
+    scripts=["AIRi"],
 )
