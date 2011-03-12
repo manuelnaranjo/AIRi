@@ -40,6 +40,7 @@ function updateRemoteDevices(){
 
           $._div({class:'configure'})._a_({
             href: '/configure?'+val['address'].replace(/:/g, "_"),
+            onClick:"window.open(this.href, this.target, 'width=450,height=600'); return false;",
           }).text("Configure").div_().appendTo("#results")
 
           $._div_({class: 'address'}).text(val["address"]).appendTo("#results")

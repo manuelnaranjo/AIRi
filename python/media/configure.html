@@ -25,7 +25,14 @@ function postChanges(){
       updateConfiguration();
       $("#loading").hide()
       $("#main").show()
-      //window.location.reload(true);
+      if (opener){
+        var target = opener;
+        if (opener.opener)
+          target = opener.opener;
+        target.location.href="/video?"+address_;
+        target.window.close()
+        window.close()
+      }
     }
   );
 }

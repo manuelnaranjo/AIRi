@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
   <head>
-    <title>AIRi | Seen Devices</title>
+    <title>AIRi | Configured Devices</title>
     <meta http-equiv="Content-type" content="text/html; charset=iso-8859-1"/>
 
     <link type="text/css" href="/media/css/cupertino/jquery-ui-1.8.10.custom.css" rel="stylesheet" />
@@ -44,8 +44,10 @@ function updateDevices(){
                 .div_().appendTo("#devices")
 
           $._div({class:'configure'})
-            ._a_({href:"/configure?"+val["address"].replace(/:/g, "_")})
-              .text("Configure")
+            ._a_({
+              href:"/configure?"+val["address"].replace(/:/g, "_"),
+              onClick:"window.open(this.href, this.target, 'width=450,height=600'); return false;"
+            }).text("Configure")
                 .div_().appendTo("#devices")
 
           addMarker("status", val["status"])
@@ -96,7 +98,8 @@ function updateDevices(){
 
     <br/>
     <a id="reload" href="#" onClick="window.location.reload(true);">Reload</a>
-    <a id="scan" href="/scan">Scan</a>
+    <a id="scan" href="/scan" target="_blank" 
+        onClick="window.open(this.href, this.target, 'width=500,height=250'); return false;">Scan</a>
 
     <div id="footer">
       <p>Powered by <a href="http://www.aircable.net" target="_blank">AIRcable.net</a> Copyright (c) 2011</p>
