@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from twisted.internet.protocol import Protocol, ClientFactory
-import airi.twisted_bluetooth
+import airi.twisted_bluetooth as twisted_bluetooth
 from twisted.python import log
 from airi.camera import dbg, Listener
 from twisted.internet import reactor
