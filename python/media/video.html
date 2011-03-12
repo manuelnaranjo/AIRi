@@ -84,6 +84,9 @@ $(document).ready(load)
       <div class="label">Status</div>
         <div class="value" id="status"></div>
           <div class="table-reset"></div>
+      <div class="label">Battery</div>
+        <div class="value" id="battery"></div>
+          <div class="table-reset"></div>
       <div class="label">Resolution</div>
         <div class="value" id="size"></div>
           <div class="table-reset"></div>
@@ -93,19 +96,25 @@ $(document).ready(load)
       <div class="label">Flash</div>
         <div class="value" id="flash"></div>
           <div class="table-reset"></div>
-      <div class="label">Exposure Time</div>
+      <div class="label">Exposure</div>
         <div class="value" style="width: 8em; font-family: monospace;" id="exposure_text"></div>
           <div class="value" id="exposure"></div>
             <div class="table-reset"></div>
-      <div class="label">PAN</div>
-        <div class="value" id="pan"></div>
-          <div class="table-reset"></div>
-      <div class="label">Zoom</div>
-        <div class="value" id="zoom"></div>
-          <div class="table-reset"></div>
-      <div class="label">Battery</div>
-        <div class="value" id="battery"></div>
-          <div class="table-reset"></div>
+      <div id="panholder">
+        <div class="ui-icon panbutton panbutton-clear"></div>
+          <div class="ui-icon ui-icon-arrowthick-1-n panbutton"></div>
+            <div class="ui-icon panbutton panbutton-clear"></div>
+        <div class="table-reset"></div>
+          <div class="ui-icon ui-icon-arrowthick-1-w panbutton"></div>
+            <div class="ui-icon ui-icon-bullet panbutton"></div>
+              <div class="ui-icon ui-icon-arrowthick-1-e panbutton"></div>
+        <div class="table-reset"></div>
+        <div class="ui-icon panbutton panbutton-clear"></div>
+          <div class="ui-icon ui-icon-arrowthick-1-s panbutton"></div>
+            <div class="ui-icon panbutton panbutton-clear"></div>
+        <div class="table-reset"></div>
+      </div>
+      
     </div>
     <div class="table-reset">
 

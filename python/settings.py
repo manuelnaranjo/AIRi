@@ -69,6 +69,7 @@ class Settings():
       "voice": False,
       "flash": False,
       "exposure": 15,
+      "pan": "none"
     }
     for key, val in items:
       if key in ['reconnect_timeout', 'exposure']:

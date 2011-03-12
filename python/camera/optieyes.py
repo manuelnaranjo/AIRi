@@ -16,9 +16,8 @@ SIZES={
 
 CAPABILITIES={ 
   'size':       SIZES.keys(),
+  'pan':        [],
   'flash':      False,
-  'pan':        False,
-  'zoom':       False,
   'voice':      False,
   'exposure':   False,
   'transport':  ['RFCOMM',],
@@ -125,4 +124,4 @@ class OptiEye(CameraProtocol):
 
 OptiEye.Capabilities = CAPABILITIES
 OptiEye.Sizes = SIZES
-
+OptiEye.Panning = None

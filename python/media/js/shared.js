@@ -2,6 +2,10 @@ var address;
 var address_;
 var slider;
 
+String.prototype.capitalize = function() {
+  return this.charAt(0).toUpperCase() + this.slice(1);
+}
+
 function createIconText(text, icon, id){
   return $._div({
     'class': 'ui-state-highlight ui-corner-all',
@@ -22,7 +26,7 @@ function createDropDown(name, list){
   var output = $._select_({name:name});
   var item;
   $.each(list[name], function(index, val){
-    item = $._option_({value: val, id:val}).text(val);
+    item = $._option_({value: val, id:val}).text(val.capitalize());
     item.appendTo(output);
   })
   output.appendTo("#"+name);
@@ -83,14 +87,13 @@ function updateConfiguration(){
             return;
           case "transport":
           case "size":
+          case "pan":
             $("#"+name+" #"+value).attr("selected", "selected")
             return
           case "exposure":
             if (data['capabilities'][name])
               slider.slider('value', value)
             return;
-          case "pan":
-          case "zoom":
           case "battery":
             if (data['capabilities'][name]){
               $("#"+name).addClass("disabled").text(value);
@@ -149,6 +152,7 @@ function prepareConfiguration(holder, callback){
         switch(name){
           case "transport":
           case "size":
+          case "pan":
             createDropDown(name, data['capabilities'])
             return;
           case "exposure":
@@ -161,8 +165,6 @@ function prepareConfiguration(holder, callback){
           case "flash":
             createCheckBox(name, value)
             return;
-          case "pan":
-          case "zoom":
           case "battery":
             if (value==false){
               $("#"+name).addClass("disabled").text("Not Supported");
@@ -170,6 +172,9 @@ function prepareConfiguration(holder, callback){
             }
         }
       })
+      if (data['capabilities']['pan']=[]){
+        $("#panholder").hide()
+      }
       $("#loading").hide()
       $(holder).show()
 

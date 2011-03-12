@@ -19,58 +19,59 @@ SIZES={
   "QVGA Zoom 3": 13,
 }
 
+PANS = [ "none", "right", "left", "up", "down" ]
+
 CAPABILITIES={ 
   'size':       SIZES.keys(),
   'flash':      True,
-  'pan':        True,
+  'pan':        PANS,
   'voice':      False, # by now ;)
   'exposure':   True,
   'transport':  ['RFCOMM', 'L2CAP'],
   'battery':    True,
 }
 
-IDLE=0
-ECHO=1
-PREVIEW=2
-COMMAND_MODE=3
-
-class OptiEye(CameraProtocol):
+class AIRi(CameraProtocol):
   client = None
-  state = IDLE
   callLater = None
   size = "QVGA"
+  defaults = {
+    "size": "QVGA",
+    "flash": 0,
+    "voice": False,
+    "exposure": 0,
+    "pan": "none",
+  }
 
   def getType(self):
-    return 'OptiEye'
-
-  def getCapabilities(self):
-    return CAPABILITIES
-
-  def getTransport(self):
-    return "RFCOMM"
+    return 'AIRi'
 
   def __init__(self, client):
     self.client = client
     self.address = client.address
     self.transport = client.transport
-    self.doCommandMode()
+    self.doSetup()
+  
+  def __doCommand(self, command, value):
+    dbg("doCommand %s %s" % (command, value))
+    self.transport.write("$%s%s\n" % (command, value))
 
-  def setSize(self, size):
-    if size not in SIZES:
-      raise RuntimeException("Size not valid")
-    self.size = size
-
-  def getSize(self):
-    return self.size
-
-  def getSizes(self):
-    return SIZES
-
-  def __doCommand(self, command):
-    self.transport.write("$GENIESYS%04X\r\n" % command)
+  def doSetup(self):
+    dbg("doSetup")
+    nsets = settings.getCamera(self.address)
+    sets = self.defaults
+    size = self.size
+    if nsets:
+      sets.update(nsets)
+    dbg(sets)
+    self.doCommand("S", SIZES[sets["size"]])
+    self.doCommand("F", "0" if not sets["flash"] else "1")
+    if sets["pan"]!="none":
+      self.doCommand("P", sets["pan"])
+    self.doCommand("E", sets["exposure"])
 
   def updateSettings(self):
-    self.doCommandMode()
+    self.doSetup()
 
   def doCommandMode(self):
     dbg("doCommandMode")
@@ -78,28 +79,9 @@ class OptiEye(CameraProtocol):
     self.__doCommand(1)
     self.callLater = reactor.callLater(1, self.doSetSize)
 
-  def doSetSize(self):
-    self.state = ECHO
-    self.callLater = None
-    camera=settings.getCamera(self.address)
-    size = "QVGA" #default
-    if camera:
-      size = camera.get("size", size)
-    dbg("doSetSize(%s)", size)
-    self.__doCommand(SIZES[size])
-    self.callLater = reactor.callLater(1, self.doPreview)
-
-  def doPreview(self):
-    dbg("doPreview")
-    self.state = PREVIEW
-    self.callLater = None
-    self.__doCommand(2)
-
   def previewData(self):
-    #dbg("previewData")
     start = self.client.buffer.find("\xff\xd8")
     end = self.client.buffer.find("\xff\xd9")
-    #dbg("start: %s, end: %s" % ( start, end ))
     if start == -1 or end == -1:
       return
 
@@ -108,25 +90,11 @@ class OptiEye(CameraProtocol):
     self.client.gotFrame(frame)
 
   def dataReceived(self):
-    #dbg("OptiEye.dataReceived, have %s bytes" % len(self.client.buffer))
-    #dbg("state = %s" % self.state)
-
-    if self.state == COMMAND_MODE:
-      self.callLater.reset(1) # wait another second
-      #dbg("Dropping %s" % self.client.buffer)
-      self.client.buffer = ""
-      return
-
-    if self.state == PREVIEW:
-      return self.previewData()
-
-  def set(self, option, value):
-    dbg("set %s->%s", option, value)
+    return self.previewData()
 
   def disconnect(self):
-    dbg("OptiEyes.disconnect")
-    self.__doCommand(1)
+    dbg("AIRi.disconnect")
 
-OptiEye.Capabilities = CAPABILITIES
-OptiEye.Sizes = SIZES
-
+AIRi.Capabilities = CAPABILITIES
+AIRi.Sizes = SIZES
+AIRi.Panning = PAN
