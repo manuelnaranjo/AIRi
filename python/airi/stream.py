@@ -11,8 +11,8 @@ from twisted.internet import task
 from twisted.web.resource import Resource
 from twisted.python import log
 from logging import DEBUG
-from camera.protocol import CameraFactory
-from camera import Listener
+from airi.camera.protocol import CameraFactory
+from airi.camera import Listener
 
 MULTIPARTRESPONSE= "--%s\r\nContent-Type: %s\r\nContent-Size: %s\r\n\r\n%s\r\n\r\n"
 

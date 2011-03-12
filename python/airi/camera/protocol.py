@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from twisted.internet.protocol import Protocol, ClientFactory
-import twisted_bluetooth
+import airi.twisted_bluetooth
 from twisted.python import log
-from camera import dbg, Listener
+from airi.camera import dbg, Listener
 from twisted.internet import reactor
-import optieyes
+import optieyes, airicamera
 from functools import partial
 import bluetooth
-from settings import getSettings
+from airi.settings import getSettings
 from time import localtime, strftime
 settings = getSettings()
 
@@ -18,6 +18,7 @@ TYPES = {
   },
   'AIRI': {
       "welcome": "$airi",
+      "class": airicamera.AIRi
   }
 }
 

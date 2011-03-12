@@ -6,8 +6,8 @@ from time import time
 import json
 import bluetooth
 import traceback
-from camera.protocol import CameraFactory
-from settings import getSettings
+from airi.camera.protocol import CameraFactory
+from airi.settings import getSettings
 
 settings = getSettings()
 

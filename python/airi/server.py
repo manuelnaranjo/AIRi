@@ -7,8 +7,8 @@ from twisted.web.static import File
 from twisted.internet import reactor
 from twisted.python import log
 from twisted.web.util import Redirect
-from api import API
-from stream import StreamResource, MultiPartStream
+from airi.api import API
+from airi.stream import StreamResource, MultiPartStream
 from functools import partial
 
 __all__=['root', 'site']

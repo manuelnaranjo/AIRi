@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from twisted.python import log
 from twisted.internet import reactor
-from camera import dbg, CameraProtocol
-from settings import getSettings
+from airi.camera import dbg, CameraProtocol
+from airi.settings import getSettings
 
 settings=getSettings()
 
