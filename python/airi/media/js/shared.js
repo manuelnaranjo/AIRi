@@ -174,6 +174,8 @@ function prepareConfiguration(holder, callback){
       })
       if (data['capabilities']['pan']=[]){
         $("#panholder").hide()
+        $("#pan >select").addClass("disabled")
+        $._option_().text("Not Supported").appendTo("#pan >select");
       }
       $("#loading").hide()
       $(holder).show()

@@ -272,10 +272,6 @@ ul.NoBulletNoIdent {
   font-weight: bold;
 }
 
-#body .label {
-  width: 15%;
-}
-
 .value {
   width: auto;
   float: left;
