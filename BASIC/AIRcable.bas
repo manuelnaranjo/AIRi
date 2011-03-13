@@ -104,11 +104,11 @@
 183 NEXT E
 184 RETURN
 
-0 REM we have a connection
+0 REM check if we have a connection
 190 A = status;
 191 IF A>=1 THEN 400;
-192 ALARM 0
-193 RETURN
+0 REM no we don't
+192 GOTO 300;
 
 300 A = slave 15
 301 A = pioset 20;
@@ -140,7 +140,11 @@
 403 IF $0[1]=70 THEN 420;
 404 IF $0[1]=80 THEN 430;
 405 IF $0[1]=69 THEN 440;
-406 GOTO 400;
+406 A = status;
+407 IF A >= 1 THEN 400;
+0 REM lost connection
+0 REM out of loop
+408 GOTO 300;
 
 0 REM set size
 410 B = atoi $0[2];
