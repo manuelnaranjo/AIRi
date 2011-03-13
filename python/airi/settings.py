@@ -1,6 +1,5 @@
 import ConfigParser
-from os import path
-from logging import root
+from os import path, access, W_OK, environ
 
 DEFAULTS={
   "dongles": {
@@ -13,8 +12,16 @@ class Settings():
 
   def __init__(self, name=None):
     if not name:
-      name = path.join(path.dirname(path.realpath(__file__)), "settings.ini") 
-    root.info("configuration file %s", name)
+      parent = ""
+      if access(path.dirname(path.realpath(__file__)), W_OK):
+        parent = path.dirname(path.realpath(__file__))
+      else:
+        if "HOME" in environ:
+          parent = environ["HOME"]
+        elif "HOMEPATH" in environ:
+          parent = environ["HOMEPATH"]
+      name=path.join(parent, ".AIRi")
+    print "configuration file", name
     self.name = name
 
     self.config = ConfigParser.SafeConfigParser()
@@ -27,9 +34,8 @@ class Settings():
         self._set(section, key, str(value))
 
     if path.exists(name) and path.isfile(name):
-      root.info("loading from %s" % name)
+      print "loading from", name
       self._read(name)
-    root.debug(self.config.sections())
 
   def getDongle(self, address):
     address = address.replace(":", "_")
@@ -46,7 +52,6 @@ class Settings():
     return cameras
 
   def getCameraSection(self, address, create=False):
-    root.debug("getCameraSection(%s)", address)
     cameras = self.getCameraSections()
     for cam in cameras:
       if address.lower().startswith(self._get(cam, "address").lower()):
@@ -85,7 +90,6 @@ class Settings():
       yield self.__cameraDict(self._items(camera))
 
   def getCamera(self, address):
-    root.debug("getCamera(%s)", address)
     cam = self.getCameraSection(address)
     if cam:
       return self.__cameraDict(self._items(cam))
@@ -111,7 +115,6 @@ class Settings():
       self._set(section, key, self.__sanitizeSetting(key, value))
 
   def setCamera(self, configuration):
-    root.debug("setCamera %s", str(configuration))
     if "address" not in configuration:
       raise Exception("You need to set address")
 
@@ -128,11 +131,8 @@ class Settings():
     return getattr(self.config, name[1:])
 
 def getSettings(name=None):
-  root.debug("getSettings")
   if Settings.instance:
-    root.debug("has instance")
     return Settings.instance
-  root.debug("creating")
   Settings.instance = Settings(name)
   return Settings.instance
 

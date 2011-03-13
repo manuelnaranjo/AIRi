@@ -35,4 +35,5 @@ setup(
       'airi': ['airi/media/*.*'],
     },
     scripts=["AIRi"],
+    zip_safe=False,
 )
