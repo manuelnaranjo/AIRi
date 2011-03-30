@@ -11,9 +11,6 @@
 0 REM uniq
 3 NONE
 
-0 REM latest PIO input
-4 RESERVED
-
 
 @INIT 10
 0 REM PIN code
@@ -32,16 +29,18 @@
 19 PRINTV " "
 20 PRINTV $3
 21 A = name $0
+0 REM let VM set name before interrupts enable
+22 WAIT 1
 
 0 REM keep FTP going
-22 G = 0
-23 K = 1
+23 G = 0
+24 K = 1
 0 REM button state variable
-24 W = 0
+25 W = 0
 
 0 REM check for button, virtual PIO17
-25 A=pioirq"P00000000000000001"
-26 RETURN
+26 A=pioirq"P00000000000000001"
+27 RETURN
 
 @SLAVE 40
 40 PRINTS "$AIRi v"
@@ -51,7 +50,7 @@
 0 REM connect CAMERA port, only 3-DH5
 44 A = edr 2
 0 REM mode 4, QVGA
-45 A = camera 12
+45 A = camera 1
 46 C = link 9
 47 ALARM 1
 48 RETURN
@@ -73,7 +72,7 @@
 103 RETURN
 
 0 REM button press, save state, start ALARM
-110 $4 = $0;
+110 $2 = $0;
 111 W = 1;
 112 ALARM 3
 113 RETURN
@@ -99,7 +98,7 @@
 176 A = pioset 20
 177 IF B = 1 THEN 173;
 178 W = 3;
-179 A = pioclr 117;
+179 A = pioclr 17;
 180 A = reboot;
 
 181 FOR E = 0 TO 10
@@ -109,11 +108,16 @@
 
 0 REM check if we have a connection
 190 A = status;
-191 IF A>=1 THEN 400;
+191 IF A>0 THEN 400;
 0 REM no we don't
-192 GOTO 300;
+192 GOTO 297;
 
-300 A = slave 15
+0 REM make undiscoverable after FTP off
+297 IF G = 0 THEN 300
+298 A = slave 15
+299 GOTO 301
+300 A = slave -15
+
 301 A = pioset 20;
 302 A = pioclr 20
 303 A = delayms 100
@@ -124,7 +128,7 @@
 308 RETURN
 
 310 A = readcnt
-311 IF A < 10000 THEN 307
+311 IF A < 30 THEN 307
 312 WAIT 3
 313 A = disable 3
 314 G = 0
@@ -137,40 +141,45 @@
 
 0 REM protocol checking
 0 REM $<LETTER><VALUE><newline>
-400 INPUTS $0;
-401 IF $0[0]!=36 THEN 400;
-402 IF $0[1]=83 THEN 410;
-403 IF $0[1]=70 THEN 420;
-404 IF $0[1]=80 THEN 430;
-405 IF $0[1]=69 THEN 440;
-406 A = status;
-407 IF A >= 1 THEN 400;
-0 REM lost connection
-0 REM out of loop
-408 GOTO 300;
+400 TIMEOUTS 5
+401 INPUTS $0
+401 A = status
+0 REM lost slave connection, back to slave
+402 IF A <> 1 THEN 300
+
+403 IF $0[0]<>36 THEN 400;
+404 IF $0[1]=83 THEN 410;
+405 IF $0[1]=70 THEN 420;
+406 IF $0[1]=80 THEN 430;
+407 IF $0[1]=69 THEN 440;
+408 ALARM 1
+409 RETURN
 
 0 REM set size
 410 B = atoi $0[2];
-411 A = camera B;
-412 GOTO 400;
+411 A = camera B
+412 ALARM 1
+413 RETURN
 
 0 REM set flash
-420 IF $0[1]=49 THEN 423;
-421 A = camflash 0;
-422 GOTO 400;
-423 A = camflash 1;
-424 GOTO 400;
+420 IF $0[1]=49 THEN 424;
+421 A = camflash 0
+422 ALARM 1
+423 RETURN
+
+424 A = camflash 1
+425 ALARM 1
+426 RETURN
 
 0 REM do PAN
-430 A = campan $0[1];
-431 GOTO 400;
+430 A = campan $0[1]
+431 ALARM 1
+432 RETURN
 
 0 REM exposure
 440 B = atoi $0[2];
-441 A = camexpo B;
-442 GOTO 400;
+441 A = camexpo B
+442 ALARM 1
+443 RETURN
 
-450 blabla
-
-
-
+450 END
