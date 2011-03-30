@@ -200,6 +200,29 @@ class ScanManager(Resource):
     threads.deferToThread(self.do_work)
     return server.NOT_DONE_YET
 
+class DisconnectManager(Resource):
+  isLeaf = True
+
+  def render_GET(self, request):
+    try:
+      request.setHeader('Content-Type', 'application/json')
+      request.setHeader('Cache-Control', 'no-cache')
+      request.setHeader('Connection', 'close')
+      if len(request.postpath) > 0 and len(request.postpath[0])>0:
+        address=request.postpath[0].replace("_", ":")
+        if not CameraFactory.isConnected(address):
+          return json.dumps({"result": "Not Connected"})
+        CameraFactory.disconnect(address)
+        return json.dumps({"result": "Disconnected"})
+      return json.dumps({"result": "No Address"})
+    except Exception, err:
+      request.setHeader('Content-Type', 'text/html')
+      request.setHeader('Cache-Control', 'no-cache')
+      request.setHeader('Connection', 'close')
+      request.setResponseCode(500, str(err))
+      return "<html><h1>ERROR:</h1>\n<pre>%s</pre></html>" % (traceback.format_exc())
+
+
 class API_Root(Resource):
   isLeaf = True
 
@@ -218,6 +241,7 @@ class API(Resource):
     self.putChild("devices", DevicesManager())
     self.putChild("connected", ConnectionManager())
     self.putChild("configure", ConfigurationManager())
+    self.putChild("disconnect", DisconnectManager())
 
 if __name__=='__main__':
   from twisted.application.service import Application
