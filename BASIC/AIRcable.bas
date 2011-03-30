@@ -11,6 +11,9 @@
 0 REM uniq
 3 NONE
 
+0 REM PIO inout
+4 RESERVED
+
 
 @INIT 10
 0 REM PIN code
@@ -72,7 +75,7 @@
 103 RETURN
 
 0 REM button press, save state, start ALARM
-110 $2 = $0;
+110 $4 = $0;
 111 W = 1;
 112 ALARM 3
 113 RETURN
