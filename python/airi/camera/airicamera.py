@@ -53,8 +53,8 @@ class AIRi(CameraProtocol):
     self.doSetup()
   
   def __doCommand(self, command, value):
-    dbg("doCommand %s %s" % (command, value))
-    self.transport.write("$%s%s\n" % (command, value))
+    dbg("doCommand $%s%s" % (command, value))
+    self.transport.write("$%s%s\n\r" % (command, value))
 
   def doSetup(self):
     dbg("doSetup")
@@ -64,20 +64,14 @@ class AIRi(CameraProtocol):
     if nsets:
       sets.update(nsets)
     dbg(sets)
-    self.doCommand("S", SIZES[sets["size"]])
-    self.doCommand("F", "0" if not sets["flash"] else "1")
+    self.__doCommand("S", SIZES[sets["size"]])
+    self.__doCommand("F", "0" if not sets["flash"] else "1")
     if sets["pan"]!="none":
-      self.doCommand("P", sets["pan"])
-    self.doCommand("E", sets["exposure"])
+      self.__doCommand("P", sets["pan"])
+    self.__doCommand("E", sets["exposure"])
 
   def updateSettings(self):
     self.doSetup()
-
-  def doCommandMode(self):
-    dbg("doCommandMode")
-    self.state = COMMAND_MODE
-    self.__doCommand(1)
-    self.callLater = reactor.callLater(1, self.doSetSize)
 
   def previewData(self):
     start = self.client.buffer.find("\xff\xd8")
