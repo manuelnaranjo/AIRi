@@ -148,7 +148,8 @@ class CameraFactory(ClientFactory):
     if addr in klass.listeners:
       del klass.listeners[addr]
     if addr in klass.clients:
-      del klass.clients[addr].client
+      if getattr(klass.clients[addr], "client", None):
+        del klass.clients[addr].client
       del klass.clients[addr]
 
   def __lostConnection(self, addr, reason, failed):
@@ -199,11 +200,13 @@ class CameraFactory(ClientFactory):
         klass.clients[address].transport.loseConnection()
       except Exception, err:
         log.err(err)
-
-    for listener in klass.listeners[address]:
-      if getattr(listener, 'forcedDisconnect', None):
-        listener.forcedDisconnect(address=address)
-
+    if address in klass.listeners:
+      for listener in klass.listeners[address]:
+        if getattr(listener, 'forcedDisconnect', None):
+          try:
+            listener.forcedDisconnect(address=address)
+          except:
+            pass
     klass.__cleanup(address)
 
   @classmethod
