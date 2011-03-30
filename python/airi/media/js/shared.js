@@ -118,6 +118,17 @@ function updateConfiguration(){
   })
 }
 
+function disconnect(){
+    var url = '/api/disconnect/'+address_;
+    $.get(url,{}, function(data){alert(data.result)});
+    return false;
+}
+
+function connect(){
+    window.location.reload();
+    return false;
+}
+
 function prepareConfiguration(holder, callback){
   address_= window.location.search.substr(1);
   address = address_.replace(/_/g, ":")
@@ -133,7 +144,12 @@ function prepareConfiguration(holder, callback){
   slider.slider('value',0)
   slider.css({width: "100px"})
   createCheckBox("reconnect", true)
-
+  
+  $("#disconnect").attr("onClick", "disconnect();");
+  $("#connect").attr("onClick", "connect();");
+//  $("#connect").attr("href", "/video?"+address_);
+//  $("#disconnect").attr("href", "/video?"+address_);
+  
   $.ajax({
     url: "/api/connected/"+address_+"?test=true",
     datatype: 'json',
