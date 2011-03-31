@@ -5,6 +5,9 @@ from twisted.python import log
 
 if __name__=='__main__':
   import sys
+  if sys.platform == "linux2":
+    import subprocess
+    subprocess.Popen([sys.executable, "airi/pair.py"])
   log.startLogging(sys.stdout)
   reactor.listenTCP(8000, site, interface="0.0.0.0")
   reactor.run()

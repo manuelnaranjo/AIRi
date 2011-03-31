@@ -5,6 +5,9 @@ DEFAULTS={
   "dongles": {
     "default": True,
   },
+  "pin": {
+    "default": 1234,
+  }
 }
 
 class Settings():
@@ -49,6 +52,8 @@ class Settings():
     cameras = self._sections()
     if "dongles" in cameras:
       cameras.remove("dongles")
+    if "pin" in cameras:
+      cameras.remove("pin")
     return cameras
 
   def getCameraSection(self, address, create=False):
@@ -126,6 +131,19 @@ class Settings():
 
   def setDongle(self, block, enable=False):
     self._set("dongles", block.replace(":", "_"), str(enable))
+
+  def setPIN(self, npin, block="default"):
+    self._set("pin", block.replace(":", "_"), str(npin))
+
+  def getPIN(self, address=None):
+    pins = getattr(self.config, "pin", {"default": "1234"})
+    if not address:
+      return pins.get("default", "1234")
+    address=address.replace(":", "_")
+    for block in pins:
+      if address.startswith(block):
+        return pins[block]
+    return pins.get("default", "1234")
 
   def __getattr__(self, name):
     return getattr(self.config, name[1:])
