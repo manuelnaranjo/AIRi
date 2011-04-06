@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>AIRi | {% block title %} {% endblock %}</title>
+	<meta charset="utf-8" />
+    <link rel="stylesheet" href="/media/css/jquery.mobile-1.0a4.css" />
+    <script type="text/javascript" src="/media/js/jquery-1.5.2.min.js"></script>
+	<script type="text/javascript" src="/media/js/custom.js"></script>
+    <script type="text/javascript" src="/media/js/jquery.mobile-1.0a4.js"></script>
+    {% block extrahead %}{% endblock %}
+</head>
+{# general use macros #}
+{% macro button(href, text, icon='', iconpos='right', class="", theme=None, extra="") -%}
+  <a href="{{ href }}" 
+    class="{{ class }}" 
+    data-role="button" 
+    data-icon="{{ icon }}" 
+    data-iconpos="{{ iconpos }}"
+    {% if theme %}
+      data-theme="{{ theme }}"
+    {% endif %}
+    {{ extra }}>{{ text }}</a>
+{%- endmacro %}
+
+{# now the scheleton itself #}
+<body>
+  <div data-role="page" id="{% block id %}home{% endblock %}">
+    <div data-role="header">
+      {{ button (  "#" , "Back" , "arrow-l", "", "ui-btn-left", extra='id="back_button"') }}
+      <h1>{% block header_title %}{% endblock %}</h1>
+      {{ button (  "#" , "" , "home", "notext", "ui-btn-right", extra='id="home_button"') }}
+    </div>
+
+    <div data-role="content">
+      {% block content %}{% endblock %}
+    </div>
+
+    <div data-role="header" data-position="inline">
+      <h4>Powered by {{ button("http://www.aircable.net","AIRcable.net", "star") }}</h4>
+      {{ button ( "javascript: doReload()", "Reload", "refresh", class="ui-btn-right") }}
+    </div>
+  </div>
+</body>
+</html>

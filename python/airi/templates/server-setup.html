@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Server Setup{% endblock %}
+{% block id %}server-setup{%endblock %}
+{% block header_title %}AIRi Server Configuration{% endblock %}
+
+{% macro fieldcontain(id, label, type, value, readonly=False) -%}
+  <div data-role="fieldcontain">
+    <label for="{{ id }}">{{ label }}:</label>
+    <input id="{{ id }}" name="{{ id }}" type="{{ type }}"  value="{{value}}"
+      {% if readonly %} readonly="readonly" {% endif %} 
+    />
+  </div>
+{%- endmacro %}
+
+{% macro selectfieldcontain(id, label, options, selected, readonly=False) -%}
+  <div data-role="fieldcontain">
+    <label for="{{ id }}">{{ label }}</label>
+    <select id="{{ id }}" name="{{ id }}" {% if readonly %}readonly="readonly"{% endif %}>
+    {% for option in options %}
+      <option value="{{ option }}"
+        {% if selected==option %}
+          selected
+        {% endif %}
+        >{{ option }}</option>
+    {% else %}
+      <option>Not supported</option>
+    {% endfor %}
+    </select>
+  </div>
+{%- endmacro %}
+
+{% macro checkfieldcontain(id, label, legend, value, readonly=False) -%}
+  <div data-role="fieldcontain">
+    <fieldset data-role="controlgroup">
+      <legend>{{ legend }}</legend>
+      <label for="{{ id }}">{{ label }}</label>
+      <input name="{{ id }}" id="{{ id }}" type="hidden" value="false" >
+      <input name="{{ id }}" id="{{ id }}" type="checkbox" class="custom" value="true"
+        {% if readonly %} readonly="readonly" {% endif %} 
+        {% if value==True %} checked {% endif %}
+      />
+    </fieldset>
+  </div>
+{%- endmacro %}
+
+{% block content %}
+<form method="post" action="/server-setup.html">
+
+<div data-role="collapsible-set">
+  <div data-role="collapsible" data-collapsed="false">
+    <h3>Pairing configuration</h3>
+    <p>
+    <i>If your system allows it AIRi server can handle pairing. Only supported on some systems like Linux.</i>
+    <br/>
+    <br/>
+    Each option is composed of a block address (or a perfect match) and a PIN number. <br/>
+    There's a default option which you can edit, but can't delete.
+    <br/>
+    </p>
+
+    <div class="ui-grid-b">
+      <div class="ui-block-a" style="width: 50%;">Block Address</div>
+      <div class="ui-block-b" style="width: 50%;">PIN</div>
+    {% if not pins %}
+      {% set pins=() %}
+    {% endif %}
+    {% for b,p in pins.iteritems() %}
+      <div class="ui-block-a" style="width: 50%;">
+        <input name="block_{{ loop.index0 }}" value="{{ b }}"  style="width: 95%"/>
+      </div>
+      <div class="ui-block-b" style="width: 47%;">
+        <input name="value_{{ loop.index0 }}" value="{{ p }}"  style="width: 95%"/>
+      </div>
+      <div class="ui-block-c" style="width: 3%;">
+        <button type="submit" name="delete" data-icon="delete" value="{{ b }}" data-iconpos="notext"></button>
+      </div>
+    {% endfor %}
+      <div class="ui-block-a" style="width: 50%;">
+        <input name="block" value="" style="width: 95%"/>
+      </div>
+      <div class="ui-block-b" style="width: 47%;">
+        <input name="value" value="" style="width: 95%" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ui-grid-a">
+  <div class="ui-block-a">
+    <button type="submit" data-theme="b" name="save" data-icon="check" data-iconpos="right">Save</button>
+  </div>
+  <div class="ui-block-b">
+    <button type="submit" data-theme="a" name="cancel" data-icon="delete" data-iconpos="right">Cancel</button>
+  </div>
+</form>
+
+{% endblock %}

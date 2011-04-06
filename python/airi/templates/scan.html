@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Found Devices{% endblock %}
+{% block header_title %}Scan Results{% endblock %}
+{% block id %}scan{% endblock %}
+
+{% block content %}
+  {% for camera in devices %}
+    {% if camera.state %}
+      {% set theme='data-theme="e"' %}
+    {% else %}
+      {% set theme="" %}
+    {% endif %}
+    {{ button("/setup.html?address="+camera.address, camera.address +"<br/>"+ camera.name, "gear", theme="b") }}
+  {% else %}
+    <span style="text-align: center; display: block;">
+    {% if error %}
+        <div data-theme="e">
+          <strong>Something went wrong while scanning</strong>
+          <br/>
+          <strong>Reason:</strong> {{ error }}
+        </div>
+    {% else %}
+      <strong>No devices where found</strong>
+    {% endif %}
+    </span>
+  {% endfor %}
+{{ button( "javascript: doReload();", "Scan again", "refresh") }}
+{% endblock %}

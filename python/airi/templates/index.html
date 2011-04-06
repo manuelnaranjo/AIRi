@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Devices{% endblock %}
+{% block header_title %}AIRi{% endblock %}
+
+{% block content %}
+<div data-role="header" data-position="inline">
+  <h1>Registered Cameras</h1>
+</div>
+<div class="ui-body ui-body-c">
+  <div class="ui-grid-a">
+  {% for camera in devices %}
+    <div class="ui-block-a">
+      {% if camera.status %} 
+        {% set theme="b" %}
+      {% else %}
+        {% set theme="c" %} 
+      {% endif %}
+  
+      {{ button("/stream.html?address="+camera.address,
+        camera.address+": "+camera.name,
+        "arrow-r",
+        theme=theme) }}
+    </div>
+    <div class="ui-block-b">
+      {{ button("/setup.html?address="+camera.address, "Configure", "gear", theme="b") }}
+    </div>
+  {% endfor %}
+  </div>
+</div>
+
+</p></p>
+
+<div data-role="header" data-position="inline">
+  <h1>Server Tools</h1>
+</div>
+<div class="ui-body ui-body-e">
+  <div class="ui-grid-a">
+    <div class="ui-block-a">
+      {{ button("/scan.html", "Scan for new devices", "search", theme="e") }}
+    </div>
+    <div class="ui-block-b">
+      {{ button("/server-setup.html", "Server Setup", "gear") }}
+    </div>
+  </div>
+</div>
+{% endblock %}
