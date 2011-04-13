@@ -1,0 +1,41 @@
+.video-holder {
+  float: none;
+}
+
+.min-width-480px .video-holder{
+  float: left;
+}
+
+.video-player {
+}
+
+.min-width-480px .video-player {
+  margin-right: 20px;
+  margin-bottom: 20px;
+}
+
+.video-controls {
+  padding: 2px;
+  margin: 0px;
+}
+
+.min-width-480px .video-controls {
+  clear: none;
+/*  width: 200px; */
+}
+
+.min-width-480px .video-controls h4 {
+  font-size: 12px;
+}
+
+.information-label {
+  width: 30%;
+  clear: left;
+  float: left;
+  display: block;
+}
+
+.information-value {
+  font-weight: bold;
+  display: block;
+}
