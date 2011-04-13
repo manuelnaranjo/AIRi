@@ -25,20 +25,33 @@ package net.aircable {
     private var type: String;
     private var browser: String;
     private var headers: Object = {};
+    
+    private function trc(content: Object): void {
+      var a: Date = new Date();
+      trace(a.getTime()+" " + content);
+    }
 
-    private function connect(): void {
+    public function connect(uri: String = null): void {
+      if (stream != null)
+        disconnect();
+
+      if (uri == null){
+        uri = this.uri;
+      }
+      this.uri = uri;
+
       stream = new URLStream();
-      trace("connect")
+      trc("connect " + uri)
       var request:URLRequest = new URLRequest(uri);
       request.method = URLRequestMethod.POST;
       request.contentType = "multipart/x-mixed-replace";
       configureListeners();
       try {
-        trace("connecting");
+        trc("connecting");
         stream.load(request);
-        trace("connected")
+        trc("connected")
       } catch (error:Error){
-	    trace("Unable to load requested resource");
+	    trc("Unable to load requested resource");
       }
       this.pending = 0;
       this.flag = false;
@@ -50,9 +63,10 @@ package net.aircable {
           uri: String = null, 
           username: String = null, 
           password: String = null){
-      trace("XHRMultipart()");
+      trc("XHRMultipart()");
+      trc(ExternalInterface.available);
       var v : String = root.loaderInfo.parameters.browser;
-      trace(v);
+      trc(v);
       if (v){
         v=v.toLowerCase();
         if (v.indexOf("chrome") > -1){
@@ -65,21 +79,10 @@ package net.aircable {
         }
       }
 
-      trace(browser);
+      trc(browser);
 
-      if (uri == null){
-        if (root.loaderInfo.parameters.target)
-          uri = "/stream/"+root.loaderInfo.parameters.target;
-        else if (root.loaderInfo.parameters.uri)
-          uri = root.loaderInfo.parameters.uri
-        else
-          uri = "/stream/";
-      }
-      this.uri = uri;
       ExternalInterface.addCallback("xhrConnect", connect);
       ExternalInterface.addCallback("xhrDisconnect", disconnect);
-      connect();
-      
     }
 
 
@@ -91,9 +94,21 @@ package net.aircable {
       stream.addEventListener(ProgressEvent.PROGRESS, progressHandler, false, 0, true);
       stream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler, false, 0, true);
     }
+    
+    private function removeListeners(): void{
+      stream.removeEventListener(Event.COMPLETE, completeHandler);
+      stream.removeEventListener(HTTPStatusEvent.HTTP_STATUS, httpStatusHandler);
+      stream.removeEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+      stream.removeEventListener(Event.OPEN, openHandler);
+      stream.removeEventListener(ProgressEvent.PROGRESS, progressHandler);
+      stream.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
+    }
+    
+    
+
 
     private function propagatePart(out: ByteArray, type: String): void{
-	  trace("found " + out.length + " mime: " + type);
+	  trc("found " + out.length + " mime: " + type);
 	  dispatchEvent(new XHRMultipartEvent(XHRMultipartEvent.GOT_DATA, true, false, out, type));
     }
 
@@ -105,7 +120,7 @@ package net.aircable {
       while (true){
         if (stream.bytesAvailable == 0)
     	  break;
-	    
+
         temp = stream.readUTFBytes(1);
         if (temp == "\r")
           continue;
@@ -127,7 +142,7 @@ package net.aircable {
       var head: Array;
       
       while ( (line=readLine()) != "" ){
-        trace(line);
+        trc(line);
         if ( stream.bytesAvailable == 0)
           return;
         if (line.indexOf('--') > -1)
@@ -142,33 +157,33 @@ package net.aircable {
       type = headers["content-type"];
       if ( pending > 0 && type != null)
         flag = true;
-      trace("pending: " + pending + " type: " + type);
+      trc("pending: " + pending + " type: " + type);
     }
 
     private function firefoxExtract(): void {
-      trace("firefoxPrepareToExtract");
+      trc("firefoxPrepareToExtract");
       if (stream.bytesAvailable == 0){
-        trace("No more bytes, aborting")
+        trc("No more bytes, aborting")
         return;
       }
-      
+
       while ( flag == false ) {
         if (stream.bytesAvailable == 0){
-          trace("No more bytes, aborting - can't extract headers");
+          trc("No more bytes, aborting - can't extract headers");
           return;
         }
         extractHeader();
       }
 
-      trace("so far have: " + stream.bytesAvailable);
-      trace("we need: " + pending);
+      trc("so far have: " + stream.bytesAvailable);
+      trc("we need: " + pending);
       if (stream.bytesAvailable < pending)
         return;
 
       var output: ByteArray = new ByteArray();
       stream.readBytes(output, 0, pending);
-      trace("pushing " + output.bytesAvailable);
-      
+      trc("pushing " + output.bytesAvailable);
+
       readLine();
       propagatePart(output, type);
       headers["content-size"] = "";
@@ -208,7 +223,7 @@ package net.aircable {
         }
       }
 
-      trace("findImageInBuffer, start: " + start + " end: " + end);
+      trc("findImageInBuffer, start: " + start + " end: " + end);
       if (start >-1 && end > -1){
         var output: ByteArray = new ByteArray();
         buffer.position=start;
@@ -220,19 +235,19 @@ package net.aircable {
     }
 
     private function safariExtract(): void {
-      trace("safariExtract()");
+      trc("safariExtract()");
       stream.readBytes(buffer, buffer.length);
       findImageInBuffer();
     }
 
     private function chromeExtract(): void {
-      trace("chromeExtract()");
+      trc("chromeExtract()");
       stream.readBytes(buffer, buffer.length);
       findImageInBuffer();
     }
 
     private function extractImage(): void {
-      trace("extractImage");
+      trc("extractImage");
 
       if (browser == null) firefoxExtract();
       else if (browser == "safari") safariExtract();
@@ -240,43 +255,55 @@ package net.aircable {
     }
 
     private function completeHandler(event:Event):void {
-      trace("completeHandler: " + event);
+      trc("completeHandler: " + event);
+      stream = null;
+      connect();
     }
 
     private function openHandler(event:Event):void {
-      trace("openHandler: " + event);
+      trc("openHandler: " + event);
       sbuffer = "";
     }
-    
-    private function disconnect(): void{
-      trace("disconnect()");
-      stream.close();
+
+    public function disconnect(): void{
+      trc("disconnect()");
+      if ( stream != null){
+        try {
+          stream.close();
+        } catch ( error : Error ){
+          trc(error);
+        }
+        removeListeners();
+        stream = null;
+      }
     }
 
     private function progressHandler(event:ProgressEvent):void {
-      trace("progressHandler: " + event)
-      trace("available: " + stream.bytesAvailable);
+      trc("progressHandler: " + event)
+      trc("available: " + stream.bytesAvailable);
       extractImage();
       if (event.type == ProgressEvent.PROGRESS)
         if (event.bytesLoaded > 1048576) { //1*1024*1024 bytes = 1MB
-          trace("transfered " + event.bytesLoaded +" closing")
+          trc("transfered " + event.bytesLoaded +" closing")
           disconnect();
           connect();
 	    }
     }
 
     private function securityErrorHandler(event:SecurityErrorEvent):void {
-      trace("securityErrorHandler: " + event);
+      trc("securityErrorHandler: " + event);
+      disconnect();
     }
 
     private function httpStatusHandler(event:HTTPStatusEvent):void {
-      trace("httpStatusHandler: " + event);
-      trace("available: " + stream.bytesAvailable);
+      trc("httpStatusHandler: " + event);
+      trc("available: " + stream.bytesAvailable);
       extractImage();
     }
 
     private function ioErrorHandler(event:IOErrorEvent):void {
-      trace("ioErrorHandler: " + event);
+      trc("ioErrorHandler: " + event);
+      disconnect();
     }
   }
 };
