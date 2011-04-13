@@ -49,25 +49,14 @@
 
 {% block content %}
 <div id="video" class="video-holder">
-{# {% if not isChrome %} #}
   <div id="flash_container" style="display: none"></div>
   <div id="video-content" class="video-player">
-    You don't have Flash installed, sorry you can't use this service
+    You don't have Flash installed, you can't use this viewer.
+    <a href="/stream/{{ camera.address.replace(':', '_')}}">But you can watch the stream here</a>
   </div>
-{# {% else %}
-  <div class="ui-body ui-body-e video-warning">
-    Warning you're using Chrome as browser, you will not get Audio
-  </div>
-  <embed id="video-content" class="video-player" style="width: 100%; height: 100%;"
-    src="/stream/{{ address.replace(":","_") }}" />
-{% endif %} #}
 </div>
 
-
-
-
 <div id="controls" class="video-controls ui-body ui-body-b">
-  <!--h4>Controls</h4-->
   <form>
   <div data-role="collapsible-set">
     <div data-role="collapsible" data-collapsed="false">
@@ -99,16 +88,6 @@
         </div>
       </div>
     </div>
-    {#
-    <div data-role="collapsible" data-collapsed="true">
-      <h4>Connection Management</h4>
-        {{ button( "javascript: switchState()", "Connect", extra='id="stream-connect"' ) }}
-      {{ checkbox("Automatically Reconnect", "stream-reconnect",  camera.reconnect ) }}
-      {{ inputbox("Reconnect Timeout", "stream-reconnect-timeout",  camera.reconnect_timeout ) }}
-      {{ checkbox("Use device specific PIN", "stream-enable_pincode",  camera.enable_pincode ) }}
-      {{ inputbox("Device PIN", "stream-pin",  camera.pin ) }}
-    </div>
-    #}
     <div data-role="collapsible" data-collapsed="true">
       <h4>Camera Management</h4>
 
@@ -125,19 +104,21 @@
 
       <div data-role="fieldcontain">
       {% if camera.capabilities.flash %}
-        {{ button( "javascript: switchFlash()", "Flash", extra='id="stream-flash"' ) }}
+        <a href="javascript: switchFlash()" data-role="button" id="stream-flash"
+          data-state="{{camera.flash}}">Flash</a>
       {% else %}
         <label for="stream-flash">Flash:</label>
-        <input type="text" id="stream-flash" readonly="readonly" class="ui-body-e" value="Not Supported" />
+        <input type="text" id="stream-flash" data-notsupported="true" readonly="readonly" class="ui-body-e" value="Not Supported" />
       {% endif %}
       </div>
 
       <div data-role="fieldcontain">
       {% if camera.capabilities.voice %}
-        {{ button( "javascript: switchVoice()", "Voice", extra='id="stream-voice"' ) }}
+        <a href="javascript: switchVoice()" data-role="button" id="stream-voice"
+          data-state="{{camera.voice}}">Voice</a>
       {% else %}
         <label for="stream-voice">Voice:</label>
-        <input type="text" id="stream-voice" readonly="readonly" class="ui-body-e" value="Not Supported" />
+        <input type="text" id="stream-voice" data-notsupported="true" readonly="readonly" class="ui-body-e" value="Not Supported" />
       {% endif %}
       </div>
 
@@ -149,13 +130,12 @@
           <input type="hidden" id="stream-exposure" value="{{ camera.exposure }}" />
           <div id="stream-exposure-slider" style="display: inline-block"></div>
       {% else %}
-        <input type="text" id="stream-exposure" readonly="readonly" class="ui-body-e" value="Not Supported" />
+        <input type="text" id="stream-exposure" data-notsupported="true" readonly="readonly" class="ui-body-e" value="Not Supported" />
       {% endif %}
       </div>
     </div>
   </div>
   </form>
 </div>
-
 
 {% endblock %}
