@@ -55,6 +55,7 @@ class AIRi(CameraProtocol):
   def __doCommand(self, command, value):
     dbg("doCommand $%s%s" % (command, value))
     self.transport.write("$%s%s\n\r" % (command, value))
+    self.transport.flush()
 
   def doSetup(self):
     dbg("doSetup")
@@ -88,6 +89,17 @@ class AIRi(CameraProtocol):
 
   def disconnect(self):
     dbg("AIRi.disconnect")
+
+  def set(self, option, value):
+    dbg("set %s-> %s" % (option, value))
+    if option == "size":
+      self.__doCommand("S", SIZES[value])
+    elif option == "flash":
+      self.__doCommand("F", "0" if not value else "1")
+    elif option == "pan":
+      self.__doCommand("P", value)
+    elif option == "exposure":
+      self.__doCommand("E", value)
 
 AIRi.Capabilities = CAPABILITIES
 AIRi.Sizes = SIZES

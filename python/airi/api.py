@@ -1,13 +1,14 @@
 from twisted.web.resource import Resource
 from twisted.web import http, server
 from twisted.python import log
-from twisted.internet import threads
+from twisted.internet import threads, reactor
 from time import time
 import json
 import bluetooth
 import traceback
 from airi.camera.protocol import CameraFactory
 from airi.settings import getSettings
+from airi import report
 
 settings = getSettings()
 
@@ -88,6 +89,21 @@ class ConfigurationManager(Resource):
       cli.updateSettings()
     return "saved"
 
+class doConfiguration(Resource):
+  isLeaf = True
+
+  def render_POST(self, request):
+    address = request.args["address"][0]
+    option = request.args["option"][0]
+    value = request.args["value"][0]
+    print address, option, value
+    try:
+      cli = CameraFactory.getConnected(address)
+      if cli:
+        cli.client.set(option, value)
+      return "updated"
+    except Exception, err:
+      return "failed: %s" % err
 
 class ConnectionManager(Resource):
   isLeaf = True
@@ -222,13 +238,94 @@ class DisconnectManager(Resource):
       request.setResponseCode(500, str(err))
       return "<html><h1>ERROR:</h1>\n<pre>%s</pre></html>" % (traceback.format_exc())
 
+class StateManager(Resource):
+  isLeaf = True
+
+  def render_POST(self, request):
+    try:
+      request.setHeader('Content-Type', 'application/json')
+      request.setHeader('Cache-Control', 'no-cache')
+      request.setHeader('Connection', 'close')
+      address = request.args["address"][0]
+      if CameraFactory.isConnected(address):
+        CameraFactory.disconnect(address)
+        return json.dumps({"result": "disconnected"})
+      else:
+        CameraFactory.connect(address)
+        return json.dumps({"result": "connecting"})
+    except Exception, err:
+      request.setHeader('Content-Type', 'text/html')
+      request.setHeader('Cache-Control', 'no-cache')
+      request.setHeader('Connection', 'close')
+      request.setResponseCode(500, str(err))
+      return "<html><h1>ERROR:</h1>\n<pre>%s</pre></html>" % (traceback.format_exc())
+
+class UpdateManager(Resource):
+  isLeaf = True
+  clients = {}
+  reference = None
+
+  @report(category="UpdateManager")
+  def __init__(self):
+    UpdateManager.reference=self
+
+  @report("UpdateManager")
+  def timeout(self, connection, address):
+    log.msg("UpdateManager.timeout (%s, %s)" % ( connection, address ))
+    connection.write(json.dumps({"result": "timeout"}))
+    connection.finish()
+    if address in UpdateManager.reference.clients:
+      if connection in UpdateManager.reference.clients[address]:
+        UpdateManager.reference.clients[address].remove(connection)
+
+  @classmethod
+  @report(category="UpdateManager")
+  def propagate(klass, address, args):
+    if not klass.reference:
+      return
+
+    if not address in klass.reference.clients:
+      return
+
+    if "address" not in args:
+      args["address"] = address
+
+    for r in klass.reference.clients[address]:
+      try:
+        r.write(json.dumps(args))
+        r.finish()
+        r.delayed.cancel()
+      except Exception, err:
+        log.err(err)
+    klass.reference.clients.pop(address)
+
+  @report(category="UpdateManager")
+  def lost_connection(self, err, address, request):
+    log.msg("updateManager.lost_connection(%s, %s)" % (address, request))
+    request.delayed.cancel()
+    if address in self.clients:
+      if request in self.clients[address]:
+        self.clients[address].remove(request)
+
+  @report(category="UpdateManager")
+  def render_POST(self, request):
+    address = request.args["address"][0]
+    if address not in self.clients:
+      self.clients[address] = []
+    self.clients[address].append(request)
+    request.delayed = reactor.callLater(60, self.timeout, connection=request, address=address)
+#    request.delayed.addErrback(log.err)
+    request.notifyFinish().addErrback(self.lost_connection, address=address, request=request)
+    request.setHeader('Content-Type', 'application/json')
+    request.setHeader('Cache-Control', 'no-cache')
+    request.setHeader('Connection', 'close')
+    return server.NOT_DONE_YET
 
 class API_Root(Resource):
   isLeaf = True
 
   def render_GET(self, request):
     return "Invalid"
-    
 
 class API(Resource):
   isLeaf = False
@@ -241,7 +338,10 @@ class API(Resource):
     self.putChild("devices", DevicesManager())
     self.putChild("connected", ConnectionManager())
     self.putChild("configure", ConfigurationManager())
+    self.putChild("doconfigure", doConfiguration())
     self.putChild("disconnect", DisconnectManager())
+    self.putChild("updates", UpdateManager())
+    self.putChild("switchstate", StateManager())
 
 if __name__=='__main__':
   from twisted.application.service import Application

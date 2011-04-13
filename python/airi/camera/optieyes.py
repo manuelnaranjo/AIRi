@@ -4,6 +4,7 @@ from twisted.internet import reactor
 from airi.camera import dbg, CameraProtocol
 from airi.settings import getSettings
 
+
 settings=getSettings()
 
 SIZES={
@@ -66,35 +67,48 @@ class OptiEye(CameraProtocol):
 
   def updateSettings(self):
     self.doCommandMode()
+    
+  def __cancelLater(self):
+    if not self.callLater:
+      return
+    if self.callLater.active():
+      self.callLater.cancel()
+    self.callLater = None
 
   def doCommandMode(self):
     dbg("doCommandMode")
     self.state = COMMAND_MODE
     self.__doCommand(1)
+    self.__cancelLater()
     self.callLater = reactor.callLater(1, self.doSetSize)
+    #self.callLater.addErrback(log.err)
 
-  def doSetSize(self):
+  def doSetSize(self, size=None):
     self.state = ECHO
-    self.callLater = None
-    camera=settings.getCamera(self.address)
-    size = "QVGA" #default
-    if camera:
-      size = camera.get("size", size)
+    self.__cancelLater()
+    if not size:
+      camera=settings.getCamera(self.address)
+      size = "QVGA" #default
+      if camera:
+        size = camera.get("size", size)
     dbg("doSetSize(%s)", size)
     self.__doCommand(SIZES[size])
-    self.callLater = reactor.callLater(1, self.doPreview)
+    self.callLater = reactor.callLater(2, self.doPreview)
+    #self.callLater.addErrback(log.err)
 
   def doPreview(self):
     dbg("doPreview")
     self.state = PREVIEW
-    self.callLater = None
+    self.__cancelLater()
+    self.callLater = reactor.callLater(20, self.transport.loseConnection)
+    #self.callLater.addErrback(log.err)
     self.__doCommand(2)
 
   def previewData(self):
     #dbg("previewData")
+    self.callLater.reset(20)
     start = self.client.buffer.find("\xff\xd8")
     end = self.client.buffer.find("\xff\xd9")
-    #dbg("start: %s, end: %s" % ( start, end ))
     if start == -1 or end == -1:
       return
 
@@ -116,7 +130,11 @@ class OptiEye(CameraProtocol):
       return self.previewData()
 
   def set(self, option, value):
-    dbg("set %s->%s", option, value)
+    dbg("set %s->%s" % (option, value) )
+    if option=="size":
+      self.doSetSize(value)
+      from airi.api import UpdateManager
+      UpdateManager.propagate(self.address, {"size": value})
 
   def disconnect(self):
     dbg("OptiEyes.disconnect")

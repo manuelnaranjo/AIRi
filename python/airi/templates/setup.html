@@ -16,17 +16,19 @@
 {% macro selectfieldcontain(id, label, options, selected, readonly=False) -%}
   <div data-role="fieldcontain">
     <label for="{{ id }}">{{ label }}</label>
-    <select id="{{ id }}" name="{{ id }}" {% if readonly %}readonly="readonly"{% endif %}>
-    {% for option in options %}
-      <option value="{{ option }}"
-        {% if selected==option %}
-          selected
-        {% endif %}
-        >{{ option }}</option>
+    {% if options|length > 0 %}
+      <select id="{{ id }}" name="{{ id }}" {% if readonly %}readonly="readonly"{% endif %}>
+      {% for option in options %}
+        <option value="{{ option }}"
+          {% if selected==option %}
+            selected
+          {% endif %}
+          >{{ option }}</option>
+      {% endfor %}
+      </select>
     {% else %}
-      <option>Not supported</option>
-    {% endfor %}
-    </select>
+    <input type="text" id="{{ id }}" readonly="readonly" class="ui-body-e" value="Not supported feature" />
+    {% endif %}
   </div>
 {%- endmacro %}
 
@@ -46,7 +48,7 @@
 
 
 {% block content %}
-<form method="post" action="/setup.html?address={{address}}">
+<form id="setup-form" method="post" action="/setup.html?address={{address}}">
 
 <div data-role="collapsible-set">
   <div data-role="collapsible" data-collapsed="false">
@@ -87,30 +89,35 @@
   <div data-role="fieldcontain">
     <fieldset data-role="controlgroup" data-role="fieldcontain">
       <legend>Extras</legend>
+        <label for="voice">Voice</label>
         {% if capabilities.voice %}
           <input name="voice" id="voice_" type="hidden" value="false" />
           <input name="voice" id="voice" type="checkbox" value="true" {% if voice %}checked{% endif %}/>
         {% else %}
-          <input id="voice" type="checkbox" readonly="readonly" />
+          <input type="text" id="voice" readonly="readonly" class="ui-body-e" value="Not supported feature" />
         {% endif %}
-        <label for="voice">Voice{% if capabilities.voice==false %} Not Supported {% endif %}</label>
 
+        <label for="flash">Flash</label>
         {% if capabilities.flash %}
           <input name="flash" name="flash" id="flash_" type="hidden" value="false" />
           <input name="flash" name="flash" id="flash" type="checkbox" {% if flash %}checked{% endif %}/>
+          
         {% else %}
-          <input id="flash" type="checkbox" readonly="readonly" />
+          <input type="text" id="flash" readonly="readonly" class="ui-body-e" value="Not supported feature" />
         {% endif %}
-          <label for="flash">Flash{% if capabilities.flash==false %} Not Supported {% endif %}</label>
     </fieldset>
   </div>
 
-  {% if capabilities.exposure %}
-    <div data-role="fieldcontain">
-      <label for="exposure">Exposure Time (x/15 seconds):</label>
-      <input type="range" name="exposure" id="exposure" value= exposure  min="1" max="32" />
-    </div>
-  {% endif %}
+  <div data-role="fieldcontain">
+    <label for="exposure">Exposure Time (milliseconds):</label>
+    {% if capabilities.exposure %}
+      <input type="number" id="exposure-display" value="{{ exposure }}" style="width: 4em;" readonly="readonly"/>
+      <input type="hidden" name="exposure" id="exposure" value="{{ exposure }}" style="width: 4em;"/>
+      <div id="exposure-slider" style="display: inline-block; height: 1.2em;"></div>
+    {% else %}
+      <input type="text" id="exposure" readonly="readonly" class="ui-body-e" value="Not supported feature" />
+    {% endif %}
+  </div>
 
   {{ selectfieldcontain("pan", "Initial Panning",  capabilities.pan ,  pan ) }}
   </div>

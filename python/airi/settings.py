@@ -1,5 +1,9 @@
+# -*- coding: utf-8 -*-
 import ConfigParser
 from os import path, access, W_OK, environ
+from twisted.python import log
+import logging
+from airi import report
 
 DEFAULTS={
   "dongles": {
@@ -26,7 +30,10 @@ class Settings():
       name=path.join(parent, ".AIRi")
     print "configuration file", name
     self.name = name
+    self.reload()
 
+
+  def reload(self):
     self.config = ConfigParser.SafeConfigParser()
     for section in DEFAULTS:
       if self._has_section(section):
@@ -36,11 +43,13 @@ class Settings():
       for key, value in DEFAULTS[section].iteritems():
         self._set(section, key, str(value))
 
-    if path.exists(name) and path.isfile(name):
-      print "loading from", name
-      self._read(name)
+    if path.exists(self.name) and path.isfile(self.name):
+      print "loading from", self.name
+      self._read(self.name)
 
+  # @report(debug=True)
   def getDongle(self, address):
+    self.reload()
     address = address.replace(":", "_")
     dongles = self._options("dongles")
     for op in dongles:
@@ -48,7 +57,9 @@ class Settings():
         return self._getboolean("dongles", op)
     return self._getboolean("dongles", "default")
 
+  # @report(debug=True)
   def getCameraSections(self):
+    self.reload()
     cameras = self._sections()
     if "dongles" in cameras:
       cameras.remove("dongles")
@@ -56,7 +67,9 @@ class Settings():
       cameras.remove("pin")
     return cameras
 
+  # @report(debug=True)
   def getCameraSection(self, address, create=False):
+    self.reload()
     cameras = self.getCameraSections()
     for cam in cameras:
       if address.lower().startswith(self._get(cam, "address").lower()):
@@ -71,6 +84,7 @@ class Settings():
       return section
     return None
   
+  # @report(debug=True)
   def __cameraDict(self, items):
     # defaults
     out = {
@@ -84,33 +98,46 @@ class Settings():
     for key, val in items:
       if key in ['reconnect_timeout', 'exposure']:
         out[key] = int(val)
-      elif key in ['reconnect', 'enable', 'voice', 'flash']:
+      elif key in ['reconnect', 'enable', 'voice', 'flash', "enable_pincode"]:
         out[key] = val.lower() == "true"
       else:
         out[key] = val
+    try:
+      out["pincode"] = self.getPIN(out["address"], perfect=True, silent=False)
+      out["enable_pincode"] = True
+    except Exception, err:
+      log.err(err)
+      out["enable_pincode"] = False
     return out
 
+  # @report(debug=True)
   def getCameras(self):
+    self.reload()
     for camera in self.getCameraSections():
       yield self.__cameraDict(self._items(camera))
 
+  # @report(debug=True)
   def getCamera(self, address):
+    self.reload()
     cam = self.getCameraSection(address)
     if cam:
       return self.__cameraDict(self._items(cam))
     return None
 
+  # @report(debug=True)
   def save(self):
     self._write(open(self.name, "wb"))
 
+  # @report(debug=True)
   def __sanitizeSetting(self, key, val):
     if key in ['reconnect_timeout', 'exposure']:
       val = int(val)
-    elif key in ['reconnect', 'enable', 'voice', 'flash']:
+    elif key in ['reconnect', 'enable', 'voice', 'flash', "enable_pincode"]:
       if type(val) != bool:
         val = val.lower() in ["true", "ok"]
     return str(val)
 
+  # @report(debug=True)
   def setCameraSetting(self, address, key, value, section=None):
     if not section:
       section = self.getCameraSection(address, True)
@@ -119,6 +146,7 @@ class Settings():
     else:
       self._set(section, key, self.__sanitizeSetting(key, value))
 
+  # @report(debug=True)
   def setCamera(self, configuration):
     if "address" not in configuration:
       raise Exception("You need to set address")
@@ -128,22 +156,56 @@ class Settings():
     for key, value in configuration.iteritems():
       self.setCameraSetting(configuration["address"], key, value)
     self.save()
+    from airi.api import UpdateManager
+    UpdateManager.propagate(configuration["address"], configuration)
 
+  # @report(debug=True)
   def setDongle(self, block, enable=False):
     self._set("dongles", block.replace(":", "_"), str(enable))
 
+  # @report(debug=True)
   def setPIN(self, npin, block="default"):
     self._set("pin", block.replace(":", "_"), str(npin))
+    from airi.api import UpdateManager
+    UpdateManager.propagate(block.replace(":", "_"), {"pin": npin})
 
-  def getPIN(self, address=None):
-    pins = getattr(self.config, "pin", {"default": "1234"})
+  # @report(debug=True)
+  def delPIN(self, block):
+    self._remove_option("pin", block.replace(":", "_"))
+    from airi.api import UpdateManager
+    UpdateManager.propagate(block.replace(":", "_"), {"pin": None})
+
+  # @report(debug=True)
+  def getPINs(self):
+    self.reload()
+    if not self.config.has_section("pin"):
+      pins = {"default": default}
+    else:
+      pins = dict((b[0].replace("_", ":"), b[1]) for b in self.config.items("pin"))
+    return pins
+
+  # @report(debug=True)
+  def getPIN(self, address=None, perfect=False, default="1234", silent=True):
+    self.reload()
+    if not self.config.has_section("pin"):
+      pins = {"default": default}
+    else:
+      pins = dict((b[0].lower(), b[1]) for b in self.config.items("pin"))
     if not address:
-      return pins.get("default", "1234")
-    address=address.replace(":", "_")
+      log.msg("No address falling back to default", level=logging.DEBUG)
+      return pins.get("default", default)
+    address=address.replace(":", "_").lower()
+
     for block in pins:
-      if address.startswith(block):
-        return pins[block]
-    return pins.get("default", "1234")
+      if not perfect:
+        if address.startswith(block):
+          return pins[block]
+      else:
+        if address == block:
+          return pins[block]
+    if not silent:
+      raise Exception("PIN not provided")
+    return pins.get("default", default)
 
   def __getattr__(self, name):
     return getattr(self.config, name[1:])

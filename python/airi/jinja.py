@@ -75,7 +75,7 @@ class Main(Resource):
     except Exception, err:
       log.err(err)
       return {"error": str(err)}
-      
+
   def server_setup(request):
     if request.method == "POST":
       if "delete" in request.args:
@@ -96,11 +96,21 @@ class Main(Resource):
     out["pins"]=settings.getPINs()
     return out
 
+  def stream(request):
+    if "address" not in request.args:
+      raise Exception("You need to provide with an address")
+    return {
+      "isChrome": "chrome" in request.requestHeaders.getRawHeaders("user-agent")[0].lower(),
+      "address": request.args["address"][0],
+      "camera": CameraFactory.getCamera(request.args["address"][0], True)
+    }
+
   contexts = {
     "index.html": index,
     "setup.html": setup,
     "scan.html": scan,
-    "server-setup.html": server_setup
+    "server-setup.html": server_setup,
+    "stream.html": stream
   }
 
   def getChild(self, path, request):
@@ -118,13 +128,17 @@ def main():
   from twisted.application.internet import TCPServer
   from twisted.web.server import Site
   from twisted.internet import reactor
+  from airi.stream import StreamResource
+  from airi.api import API
   import sys
   log.startLogging(sys.stdout)
 
   root = Main()
   path = os.path.dirname(os.path.realpath(__file__))
+  root.putChild("api",        API())
   root.putChild("media", File(os.path.join(path, "media/")))
-  reactor.listenTCP(8800, Site(root), interface="0.0.0.0")
+  root.putChild("stream", StreamResource())
+  reactor.listenTCP(8000, Site(root), interface="0.0.0.0", backlog=5)
   reactor.run()#!/usr/bin/env python
 
 

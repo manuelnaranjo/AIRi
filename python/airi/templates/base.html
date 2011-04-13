@@ -3,14 +3,22 @@
 <head>
 	<title>AIRi | {% block title %} {% endblock %}</title>
 	<meta charset="utf-8" />
-    <link rel="stylesheet" href="/media/css/jquery.mobile-1.0a4.css" />
+
+    <link rel="stylesheet" href="/media/css/cupertino/jquery-ui-1.8.10.custom.css" />
+    <link rel="stylesheet" href="/media/css/airi-jquery.mobile.css" />
+    <!--link rel="stylesheet" href="/media/css/jquery.mobile-1.0a4.css" /-->
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a4.1/jquery.mobile-1.0a4.1.min.css" />
     <script type="text/javascript" src="/media/js/jquery-1.5.2.min.js"></script>
 	<script type="text/javascript" src="/media/js/custom.js"></script>
-    <script type="text/javascript" src="/media/js/jquery.mobile-1.0a4.js"></script>
+    <!--script type="text/javascript" src="/media/js/jquery.mobile-1.0a4.js"></script-->
+    <script type="text/javascript" src="http://code.jquery.com/mobile/1.0a4.1/jquery.mobile-1.0a4.1.js"></script>
+    <script type="text/javascript" src="/media/js/jquery-ui-1.8.11.custom.min.js"></script>
+    <script type="text/javascript" src="/media/js/jquery.tools.min.js"></script>
+    <!--script type="text/javascript" src="/media/js/jquery.swfobject.1-1-1.min.js"></script-->
     {% block extrahead %}{% endblock %}
 </head>
 {# general use macros #}
-{% macro button(href, text, icon='', iconpos='right', class="", theme=None, extra="") -%}
+{% macro button(href, text, icon='', iconpos='right', class="", theme=None, extra="", enable=True) -%}
   <a href="{{ href }}" 
     class="{{ class }}" 
     data-role="button" 
@@ -18,6 +26,9 @@
     data-iconpos="{{ iconpos }}"
     {% if theme %}
       data-theme="{{ theme }}"
+    {% endif %}
+    {% if not enable %}
+      style="display: none;"
     {% endif %}
     {{ extra }}>{{ text }}</a>
 {%- endmacro %}
