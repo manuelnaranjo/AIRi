@@ -1,13 +1,13 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from airi.server import site
+from airi.jinja import main
 from twisted.internet import reactor
 from twisted.python import log
 
 if __name__=='__main__':
   import sys
-  if sys.platform == "linux2":
+  if sys.platform == "linux2" and "-nopairing" not in sys.argv:
     import subprocess
-    subprocess.Popen([sys.executable, "airi/pair.py"])
+    subprocess.Popen([sys.executable, "-m" "airi.pair"])
   log.startLogging(sys.stdout)
-  reactor.listenTCP(8000, site, interface="0.0.0.0")
-  reactor.run()
+  main()

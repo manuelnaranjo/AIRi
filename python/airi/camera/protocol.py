@@ -2,7 +2,7 @@
 from twisted.internet.protocol import Protocol, ClientFactory
 import airi.twisted_bluetooth as twisted_bluetooth
 from twisted.python import log
-from airi.camera import dbg, Listener
+from airi.camera import dbg, Listener, UnknownDevice
 from twisted.internet import reactor
 import optieyes, airicamera
 from functools import partial
@@ -290,9 +290,13 @@ class CameraFactory(ClientFactory):
     out = settings.getCamera(address)
     if not out:
       if not silent:
-        raise Exception("Not known camera")
+        raise UnknownDevice(address)
       return out
     out["status"]=klass.isConnected(address)
+    if klass.isConnected(address):
+      out["name"] = twisted_bluetooth.resolve_name(address)
+      settings.setCamera(out)
+      settings.save()
     out["capabilities"]=TYPES[out["type"]]["class"].Capabilities
     return out
 
@@ -303,6 +307,10 @@ class CameraFactory(ClientFactory):
       camera["status"]=klass.isConnected(camera["address"])
       camera["capabilities"]=TYPES[camera["type"]]["class"].Capabilities
       yield camera
+
+  @classmethod
+  def getTypes(klass):
+    return TYPES.keys()
 
 if __name__=='__main__':
   import sys

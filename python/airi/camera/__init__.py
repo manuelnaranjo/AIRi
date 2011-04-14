@@ -28,3 +28,11 @@ class Listener():
 
   def forcedDisconnect(self, *a, **kw):
     dbg("Listener.forcedDisconnect not implemented")
+
+class UnknownDevice(Exception):
+
+  def __init__(self, address):
+    self.address = address
+
+  def __str__(self):
+    return "Device unknown %s" % self.address

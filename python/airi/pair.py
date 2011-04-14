@@ -145,7 +145,13 @@ if __name__ == '__main__':
 
   dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
-  bus = dbus.SystemBus()
+  try:
+    bus = dbus.SessionBus()
+    log.msg("Using session bus")
+  except:
+    bus = dbus.SystemBus()
+    log.msg("Using system bus")
+
   registerControlSignals(bus)
   mainloop = gobject.MainLoop()
   agent = Agent(bus, PATH)

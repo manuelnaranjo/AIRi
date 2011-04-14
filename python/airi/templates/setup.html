@@ -50,15 +50,35 @@
 {% block content %}
 <form id="setup-form" method="post" action="/setup.html?address={{address}}">
 
+{% if new_device %}
+  <h3>New device configuration</h3>
+  {{ fieldcontain("address", "Address", "text", address, True) }}
+  {% if not name %}
+    {% set name="Unkown Device" %}
+  {% endif %}
+  {{ fieldcontain("name", "Name", "text", name) }}
+  {{ selectfieldcontain("type", "Type",  types, "AIRI") }}
+  {{ checkfieldcontain("enable_pincode", "Use device PIN code", " ",  False )}}
+  {{ fieldcontain ("pincode", "PIN code", "text",  "" ) }}
+
+  <div class="ui-grid-a">
+  <div class="ui-block-a">
+    <button type="submit" data-theme="b" name="save" data-icon="check" data-iconpos="right">Save</button>
+  </div>
+  <div class="ui-block-b">
+    {{ button (  "#" , "Cancel" , "arrow-l", "", "ui-btn-left", theme="a", extra='id="back_button"') }}
+  </div>
+{% else %}
 <div data-role="collapsible-set">
   <div data-role="collapsible" data-collapsed="false">
   <h3>Device Information</h3>
 
   {{ fieldcontain("address", "Address", "text", address, True) }}
-  {{ fieldcontain("name", "Name", "text", name, True) }}
+  {{ fieldcontain("name", "Name", "text", name) }}
   {{ fieldcontain("type", "Type", "text", type , True) }}
   {{ fieldcontain("status", "Status", "text",  status , True) }}
   {{ fieldcontain("last", "Last Connection", "text",  last , True) }}
+  <input name="new-device" value="true" type="hidden"/>
 
   {% if capabilities.battery %}
   {% else %}
@@ -133,5 +153,7 @@
     <a data-theme="e" href="/stream.html?address={{address}}" data-role="button" data-icon="arrow-r" data-iconpos="right">Live Camera</a>
   </div>
 </div>
+{% endif %}
+
 </form>
 {% endblock %}

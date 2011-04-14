@@ -47,7 +47,7 @@ class Settings():
       print "loading from", self.name
       self._read(self.name)
 
-  # @report(debug=True)
+  # @report()
   def getDongle(self, address):
     self.reload()
     address = address.replace(":", "_")
@@ -57,7 +57,7 @@ class Settings():
         return self._getboolean("dongles", op)
     return self._getboolean("dongles", "default")
 
-  # @report(debug=True)
+  # @report()
   def getCameraSections(self):
     self.reload()
     cameras = self._sections()
@@ -67,7 +67,7 @@ class Settings():
       cameras.remove("pin")
     return cameras
 
-  # @report(debug=True)
+  # @report()
   def getCameraSection(self, address, create=False):
     self.reload()
     cameras = self.getCameraSections()
@@ -84,7 +84,7 @@ class Settings():
       return section
     return None
   
-  # @report(debug=True)
+  #@report(level=20)
   def __cameraDict(self, items):
     # defaults
     out = {
@@ -110,13 +110,13 @@ class Settings():
       out["enable_pincode"] = False
     return out
 
-  # @report(debug=True)
+  #@report(debug=True)
   def getCameras(self):
     self.reload()
     for camera in self.getCameraSections():
       yield self.__cameraDict(self._items(camera))
 
-  # @report(debug=True)
+  #@report(debug=True)
   def getCamera(self, address):
     self.reload()
     cam = self.getCameraSection(address)
@@ -124,11 +124,11 @@ class Settings():
       return self.__cameraDict(self._items(cam))
     return None
 
-  # @report(debug=True)
+  #@report(debug=True)
   def save(self):
     self._write(open(self.name, "wb"))
 
-  # @report(debug=True)
+  #@report(level=30)
   def __sanitizeSetting(self, key, val):
     if key in ['reconnect_timeout', 'exposure']:
       val = int(val)
@@ -137,7 +137,7 @@ class Settings():
         val = val.lower() in ["true", "ok"]
     return str(val)
 
-  # @report(debug=True)
+  #@report(level=20)
   def setCameraSetting(self, address, key, value, section=None):
     if not section:
       section = self.getCameraSection(address, True)
@@ -146,7 +146,7 @@ class Settings():
     else:
       self._set(section, key, self.__sanitizeSetting(key, value))
 
-  # @report(debug=True)
+  #@report(level=20)
   def setCamera(self, configuration):
     if "address" not in configuration:
       raise Exception("You need to set address")
@@ -154,7 +154,7 @@ class Settings():
     section = self.getCameraSection(configuration["address"], True)
 
     for key, value in configuration.iteritems():
-      self.setCameraSetting(configuration["address"], key, value)
+      self.setCameraSetting(configuration["address"], key, value, section=section)
     self.save()
     from airi.api import UpdateManager
     UpdateManager.propagate(configuration["address"], configuration)

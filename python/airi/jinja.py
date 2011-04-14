@@ -4,7 +4,9 @@ from twisted.python import log
 from twisted.web.static import File
 from jinja2 import Environment, PackageLoader
 from airi.camera.protocol import CameraFactory
+from airi.camera import UnknownDevice
 from airi.settings import getSettings
+from airi.twisted_bluetooth import resolve_name
 import os
 import bluetooth
 
@@ -26,37 +28,46 @@ class Main(Resource):
     self.env = Environment(loader=PackageLoader("airi", "templates"))
     self.env.globals["home"]=home
 
-  def index(request):
+  def index(self, request):
     return {
       "devices": CameraFactory.getCameras()
     }
 
-  def setup(request):
+  def setup(self, request):
     if request.method == "POST" and "save" in request.args:
       args = request.args.copy()
+      new_device = "new-device" in args
       if args["enable_pincode"][0].lower()=="true":
         settings.setPIN(block=args["address"][0], npin=args["pincode"][0])
       else:
         settings.delPIN(args["address"][0])
-      for k in ["save", "name", "type", "last", "battery", "status", "enable_pincode", "pincode"]:
-        try:
+      settings.save()
+
+      for k in ["save", "last", "battery", "status", 
+                                  "enable_pincode", "pincode", "new-device"]:
+        if k in args:
           args.pop(k)
-        except:
-          pass
       for k in args.keys():
         args[k]=args[k][0]
-      print args
+      print "saving camera", args
       settings.setCamera(args)
       settings.save()
 
     out = {}
     if "address" not in request.args:
       raise Exception("Invalid address")
-    out.update(CameraFactory.getCamera(request.args["address"][-1]))
+    address = request.args["address"][-1]
+    try:
+      out.update(CameraFactory.getCamera(address))
+    except UnknownDevice, err:
+      out["address"] = address
+      out["name"] = resolve_name(address)
+      out["new_device"] = True
+      out["types"] = CameraFactory.getTypes()
     print out
     return out
 
-  def scan(request):
+  def scan(self, request):
     try:
       log.msg("Doing scan")
       cache = bluetooth.discover_devices(lookup_names=True)
@@ -76,7 +87,7 @@ class Main(Resource):
       log.err(err)
       return {"error": str(err)}
 
-  def server_setup(request):
+  def server_setup(self, request):
     if request.method == "POST":
       if "delete" in request.args:
         settings.delPIN(request.args["delete"][0])
@@ -96,7 +107,7 @@ class Main(Resource):
     out["pins"]=settings.getPINs()
     return out
 
-  def stream(request):
+  def stream(self, request):
     if "address" not in request.args:
       raise Exception("You need to provide with an address")
     return {
@@ -120,7 +131,7 @@ class Main(Resource):
     if len(path) == 0:
       path = "index.html"
     template = self.env.get_template(path)
-    return TemplateResource(template, self.contexts.get(path, lambda x: {})(request))
+    return TemplateResource(template, self.contexts.get(path, lambda x: {})(self, request))
 
 
 def main():

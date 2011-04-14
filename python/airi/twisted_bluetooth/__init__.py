@@ -234,3 +234,13 @@ def connectL2CAP(reactor, *a, **kw):
 
 def connectSCO(reactor, *a, **kw):
     return __connectGeneric(reactor, bluetooth.SCO, *a, **kw)
+
+def resolve_name(address):
+  sock = bluetooth.bluez._gethcisock()
+  out = None
+  try:
+    out = bluetooth.bluez._bt.hci_read_remote_name(sock, address)
+  except:
+    pass
+  sock.close()
+  return out

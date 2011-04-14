@@ -11,7 +11,7 @@ def read(fname):
 
 setup(
     name = "airi",
-    version = "0.0.1",
+    version = "0.1.1",
     author = "Naranjo Manuel Francisco",
     author_email = "manuel@aircable.net",
     description = ("AIRi software package"),
@@ -32,7 +32,7 @@ setup(
     ],
     include_package_data=True,
     package_data = {
-      'airi': ['airi/media/*.*'],
+      'airi': ['airi/media/*.*', 'airi/templates/*.*'],
     },
     scripts=["AIRi"],
     zip_safe=False,

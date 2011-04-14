@@ -55,7 +55,12 @@ class AIRi(CameraProtocol):
   def __doCommand(self, command, value):
     dbg("doCommand $%s%s" % (command, value))
     self.transport.write("$%s%s\n\r" % (command, value))
-    self.transport.flush()
+
+  def pushPendingCommands(self):
+    command, value, timeout = self.pending.pop(0)
+    self.__doCommand(command, value)
+    if len(self.pending) > 0:
+      self.callLater = reactor.callLater( timeout, self.pushPendingCommands )
 
   def doSetup(self):
     dbg("doSetup")
@@ -65,11 +70,13 @@ class AIRi(CameraProtocol):
     if nsets:
       sets.update(nsets)
     dbg(sets)
-    self.__doCommand("S", SIZES[sets["size"]])
-    self.__doCommand("F", "0" if not sets["flash"] else "1")
+    self.pending = [ ("S", SIZES[sets["size"]], 6),
+      ("F", "0" if not sets["flash"] else "1", 2),
+    ]
     if sets["pan"]!="none":
-      self.__doCommand("P", sets["pan"])
-    self.__doCommand("E", sets["exposure"])
+      self.pending.append( ("P", sets["pan"].upper()[0]), 2 )
+    #self.pending.append( ("E", sets["exposure"]) )
+    self.callLater = reactor.callLater( 5, self.pushPendingCommands )
 
   def updateSettings(self):
     self.doSetup()
@@ -97,7 +104,7 @@ class AIRi(CameraProtocol):
     elif option == "flash":
       self.__doCommand("F", "0" if not value else "1")
     elif option == "pan":
-      self.__doCommand("P", value)
+      self.__doCommand("P", value.upper()[0])
     elif option == "exposure":
       self.__doCommand("E", value)
 
