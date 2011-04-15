@@ -4,10 +4,11 @@ from airi.jinja import main
 from twisted.internet import reactor
 from twisted.python import log
 
-if __name__=='__main__':
-  import sys
-  if sys.platform == "linux2" and "-nopairing" not in sys.argv:
-    import subprocess
-    subprocess.Popen([sys.executable, "-m" "airi.pair"])
-  log.startLogging(sys.stdout)
-  main()
+
+if __name__ == '__main__':
+    import sys
+    if sys.platform == "linux2" and "-nopairing" not in sys.argv:
+        import subprocess
+        subprocess.Popen([sys.executable, "-m" "airi.pair"])
+    log.startLogging(sys.stdout)
+    main()

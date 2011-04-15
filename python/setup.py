@@ -2,22 +2,24 @@
 import os
 from setuptools import setup, find_packages
 
-# Utility function to read the README file.
-# Used for the long_description.  It's nice, because now 1) we have a top level
-# README file and 2) it's easier to type in the README file than to put a raw
-# string in below ...
+
 def read(fname):
+    '''
+    Utility function to read the README file.
+    Used for the long_description.  It's nice, because now 1) we have a top
+    level README file and 2) it's easier to type in the README file than to put
+    a raw string in below
+    '''
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-setup(
-    name = "airi",
-    version = "0.1.1",
-    author = "Naranjo Manuel Francisco",
-    author_email = "manuel@aircable.net",
-    description = ("AIRi software package"),
-    license = "Apache V2",
-    keywords = "airi bluetooth twisted",
-    url = "https://github.com/manuelnaranjo/AIRi",
+setup(name="airi",
+    version="0.1.2",
+    author="Naranjo Manuel Francisco",
+    author_email="manuel@aircable.net",
+    description=("AIRi software package"),
+    license="Apache V2",
+    keywords="airi bluetooth twisted",
+    url="https://github.com/manuelnaranjo/AIRi",
     packages=find_packages("."),
     long_description=read('README'),
     classifiers=[
@@ -31,7 +33,7 @@ setup(
         "Natural Language :: English",
     ],
     include_package_data=True,
-    package_data = {
+    package_data={
       'airi': ['airi/media/*.*', 'airi/templates/*.*'],
     },
     scripts=["AIRi"],
