@@ -6,7 +6,7 @@
 1 1234
 
 0 REM VERSION
-2 0001
+2 0002
 
 0 REM uniq
 3 NONE
@@ -146,43 +146,48 @@
 0 REM $<LETTER><VALUE><newline>
 400 TIMEOUTS 5
 401 INPUTS $0
-401 A = status
+402 A = status
 0 REM lost slave connection, back to slave
-402 IF A <> 1 THEN 300
+403 IF A <> 1 THEN 300
 
-403 IF $0[0]<>36 THEN 400;
-404 IF $0[1]=83 THEN 410;
-405 IF $0[1]=70 THEN 420;
-406 IF $0[1]=80 THEN 430;
-407 IF $0[1]=69 THEN 440;
-408 ALARM 1
-409 RETURN
+404 IF $0[0]<>36 THEN 400;
+405 IF $0[1]=83 THEN 420;
+406 IF $0[1]=70 THEN 430;
+407 IF $0[1]=80 THEN 440;
+408 IF $0[1]=69 THEN 450;
+409 IF $0[1]=68 THEN 460;
+409 ALARM 1
+410 RETURN
 
 0 REM set size
-410 B = atoi $0[2];
-411 A = camera B
-412 ALARM 1
-413 RETURN
-
-0 REM set flash
-420 IF $0[1]=49 THEN 424;
-421 A = camflash 0
+420 B = atoi $0[2];
+421 A = camera B
 422 ALARM 1
 423 RETURN
 
-424 A = camflash 1
-425 ALARM 1
-426 RETURN
+0 REM set flash
+430 IF $0[1]=49 THEN 434;
+431 A = camflash 0
+432 ALARM 1
+433 RETURN
+
+434 A = camflash 1
+435 ALARM 1
+436 RETURN
 
 0 REM do PAN
-430 A = campan $0[1]
-431 ALARM 1
-432 RETURN
+440 A = campan $0[1]
+441 ALARM 1
+442 RETURN
 
 0 REM exposure
-440 B = atoi $0[2];
-441 A = camexpo B
-442 ALARM 1
-443 RETURN
+450 B = atoi $0[2];
+451 A = camexpo B
+452 ALARM 1
+453 RETURN
 
-450 END
+0 REM date
+460 A = setdate $0[2];
+461 RETURN
+
+500 END
