@@ -7,3 +7,10 @@ cupertino*
 airi.egg-info*
 build*
 dist*
+snapshot*
+AIRi.py
+python/airi/media/css/jquery.mobile-1.0a4.css
+python/airi/media/css/images/*
+*.tar.gz
+*~
+.*
