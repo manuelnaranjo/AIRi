@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="app_name">AIRcam</string>
+
+    <!--  DeviceListActivity strings -->
+    <string name="scanning">scanning for devices...</string>
+    <string name="select_device">select a device to connect</string>
+    <string name="none_paired">No devices have been paired</string>
+    <string name="none_found">No devices found</string>
+    <string name="title_paired_devices">Paired Devices</string>
+    <string name="title_other_devices">Other Available Devices</string>
+    <string name="button_scan">Scan for devices</string>
+
+<string name="disconnect">Disconnect</string>
+<string name="connect">Connect</string>
+<string name="pause">Pause</string>
+<string name="play">Play</string>
+<string name="exit">Exit</string>
+
+<string name="version_number">1.0.9</string>
+
+
+
+<string name="about">About</string>
+<string name="copyright">Wireless Cables Inc (C) 2010</string>
+<string name="webpage">http://www.aircable.net</string>
+<string name="menu_record_start">Record</string>
+<string name="menu_record_stop">Stop recording</string>
+</resources>

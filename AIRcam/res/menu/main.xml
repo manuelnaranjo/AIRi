@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item 
+	    android:id="@+id/menu_connect"     
+	    android:title="@string/connect" android:icon="@drawable/view">
+    </item>
+    <item 
+	    android:id="@+id/menu_disconnect" 
+	    android:title="@string/disconnect" android:icon="@drawable/disconnect">
+    </item>
+    <item 
+	    android:id="@+id/menu_play" 
+	    android:title="@string/play" android:icon="@drawable/play">
+    </item>
+    <item 
+	    android:id="@+id/menu_pause" 
+	    android:title="@string/pause" android:icon="@drawable/pause">    
+	</item>
+    <item android:id="@+id/menu_record" android:enabled="true" android:visible="true" android:title="@string/menu_record_start"></item><item android:id="@+id/menu_about" android:title="@string/about" android:icon="@drawable/info"></item><item 
+	    android:id="@+id/menu_exit" 
+	    android:title="@string/exit" android:icon="@drawable/cancel">
+    </item>
+
+</menu>
