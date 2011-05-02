@@ -153,7 +153,7 @@ package net.aircable {
           headers[head[0].toLowerCase()]=head[1];
 	  }
 
-      pending=int(headers["content-size"]);
+      pending=int(headers["content-length"]);
       type = headers["content-type"];
       if ( pending > 0 && type != null)
         flag = true;
@@ -186,7 +186,7 @@ package net.aircable {
 
       readLine();
       propagatePart(output, type);
-      headers["content-size"] = "";
+      headers["content-length"] = "";
       headers["content-type"] = "";
       flag = false;
       pending = 0;
