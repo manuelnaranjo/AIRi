@@ -16,7 +16,7 @@ from airi.camera import Listener
 from airi import report, RESULT
 from functools import partial
 
-MULTIPARTRESPONSE= "--%s\r\nContent-Type: %s\r\nContent-Size: %s\r\n\r\n%s\r\n\r\n"
+MULTIPARTRESPONSE= "--%s\r\nContent-Type: %s\r\nContent-Length: %s\r\n\r\n%s\r\n\r\n"
 
 CATEGORY = "AIRi-Stream"
 

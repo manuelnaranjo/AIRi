@@ -112,7 +112,7 @@ class OptiEye(CameraProtocol):
     if start == -1 or end == -1:
       return
 
-    frame = self.client.buffer[start:end+1]
+    frame = self.client.buffer[start:end+2]
     self.client.buffer = self.client.buffer[end+2:]
     self.client.gotFrame(frame)
 
