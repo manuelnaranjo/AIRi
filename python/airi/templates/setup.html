@@ -8,7 +8,7 @@
   <div data-role="fieldcontain">
     <label for="{{ id }}">{{ label }}:</label>
     <input id="{{ id }}" name="{{ id }}" type="{{ type }}"  value="{{value}}"
-      {% if readonly %} readonly="readonly" {% endif %} 
+      {% if readonly %} readonly="readonly" {% endif %}
     />
   </div>
 {%- endmacro %}
@@ -39,7 +39,7 @@
       <label for="{{ id }}">{{ label }}</label>
       <input name="{{ id }}" id="{{ id }}" type="hidden" value="false" >
       <input name="{{ id }}" id="{{ id }}" type="checkbox" class="custom" value="true"
-        {% if readonly %} readonly="readonly" {% endif %} 
+        {% if readonly %} readonly="readonly" {% endif %}
         {% if value==True %} checked {% endif %}
       />
     </fieldset>
@@ -121,7 +121,7 @@
         {% if capabilities.flash %}
           <input name="flash" name="flash" id="flash_" type="hidden" value="false" />
           <input name="flash" name="flash" id="flash" type="checkbox" {% if flash %}checked{% endif %}/>
-          
+
         {% else %}
           <input type="text" id="flash" readonly="readonly" class="ui-body-e" value="Not supported feature" />
         {% endif %}
@@ -142,7 +142,7 @@
   {{ selectfieldcontain("pan", "Initial Panning",  capabilities.pan ,  pan ) }}
   </div>
 </div>
-<div class="ui-grid-b">
+<div class="ui-grid-c">
   <div class="ui-block-a">
     <button type="submit" data-theme="b" name="save" data-icon="check" data-iconpos="right">Save</button>
   </div>
@@ -150,6 +150,9 @@
     <button type="submit" data-theme="a" name="cancel" data-icon="delete" data-iconpos="right">Cancel</button>
   </div>
   <div class="ui-block-c">
+    <button onclick="javascript: return confirm('Are you sure you want to delete this camera?')" type="submit" data-theme="a" name="delete" data-icon="minus" data-iconpos="right">Delete Camera</button>
+  </div>
+    <div class="ui-block-d">
     <a data-theme="e" href="/stream.html?address={{address}}" data-role="button" data-icon="arrow-r" data-iconpos="right">Live Camera</a>
   </div>
 </div>

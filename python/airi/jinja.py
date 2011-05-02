@@ -7,8 +7,7 @@ from airi.camera.protocol import CameraFactory
 from airi.camera import UnknownDevice
 from airi.settings import getSettings
 from airi.twisted_bluetooth import resolve_name
-import os
-import bluetooth
+import pkg_resources, os, bluetooth, time
 
 settings = getSettings()
 
@@ -34,45 +33,57 @@ class Main(Resource):
     }
 
   def setup(self, request):
-    if request.method == "POST" and "save" in request.args:
-      args = request.args.copy()
-      new_device = "new-device" in args
-      if args["enable_pincode"][0].lower()=="true":
-        settings.setPIN(block=args["address"][0], npin=args["pincode"][0])
-      else:
-        settings.delPIN(args["address"][0])
-      settings.save()
+      def saveCamera(args):
+          if args["enable_pincode"][0].lower()=="true":
+              settings.setPIN(block=args["address"][0],
+                          npin=args["pincode"][0])
+          else:
+              settings.delPIN(args["address"][0])
+          settings.save()
+          for k in ["save", "last", "battery", "status",
+                            "enable_pincode", "pincode", "new-device"]:
+              if k in args:
+                  args.pop(k)
+          for k in args.keys():
+              args[k]=args[k][0]
+          print "saving camera", args
+          settings.setCamera(args)
+          settings.save()
 
-      for k in ["save", "last", "battery", "status", 
-                                  "enable_pincode", "pincode", "new-device"]:
-        if k in args:
-          args.pop(k)
-      for k in args.keys():
-        args[k]=args[k][0]
-      print "saving camera", args
-      settings.setCamera(args)
-      settings.save()
+      def deleteCamera(address):
+          settings.deleteCamera(address)
+          settings.save()
 
-    out = {}
-    if "address" not in request.args:
-      raise Exception("Invalid address")
-    address = request.args["address"][-1]
-    try:
-      out.update(CameraFactory.getCamera(address))
-    except UnknownDevice, err:
-      out["address"] = address
-      out["name"] = resolve_name(address)
-      out["new_device"] = True
-      out["types"] = CameraFactory.getTypes()
-    print out
-    return out
+      def getCamera(address):
+          out = {}
+          try:
+              out.update(CameraFactory.getCamera(address))
+          except UnknownDevice, err:
+              out["address"] = address
+              out["name"] = resolve_name(address)
+              out["new_device"] = True
+              out["types"] = CameraFactory.getTypes()
+          print out
+          return out
+
+      if "address" not in request.args:
+          raise Exception("Invalid address")
+
+      address = request.args["address"][-1]
+
+      if request.method == "POST":
+          if "save" in request.args:
+              saveCamera(request.args)
+          if "delete" in request.args:
+              deleteCamera(address)
+      return getCamera(address)
 
   def scan(self, request):
     try:
       log.msg("Doing scan")
       cache = bluetooth.discover_devices(lookup_names=True)
       log.msg(cache)
-      out = {"devices": 
+      out = {"devices":
                 [{
                   'address':x[0],
                   'name':x[1],
@@ -133,6 +144,57 @@ class Main(Resource):
     template = self.env.get_template(path)
     return TemplateResource(template, self.contexts.get(path, lambda x: {})(self, request))
 
+class PkgFile(File):
+    def __init__(self, path, *args, **kwargs):
+        File.__init__(self, path, *args, **kwargs)
+        self.path = path
+        print "PkgFile", path
+
+    def isdir(self):
+        out = pkg_resources.resource_isdir("airi", self.path)
+        print "isdir", self.path, out
+        return out
+
+    def exists(self):
+        out = pkg_resources.resource_exists("airi", self.path)
+        print "exists", self.path, out
+        return out
+
+    def isfile(self):
+        out = not self.isdir() and self.exists()
+        print "isfile", self.path, out
+        return out
+
+    def child(self, path):
+        print "child", self.path
+        path_ = os.path.join(self.path, path)
+        def exists():
+            return pkg_resources.resource_exists("airi", path_)
+        o = self.clonePath(path_)
+        o.exists = exists
+        o.path = path_
+        return o
+
+    def __getresource(self):
+        if not self.__resource:
+            self.__resource = pkg_resources.resource_stream("airi", self.path)
+        return self.__resource
+
+    def getmtime(self):
+        print "getmtime", self.path
+        return time.time()
+
+    def openForReading(self): 
+        print "openForReading", self.path
+        return pkg_resources.resource_stream("airi", self.path)
+
+    def getsize(self):
+        print "getsize", self.path
+        return len(pkg_resources.resource_stream("airi", self.path).read())
+
+    def getChild(self, path, request):
+        print "getChild", path
+        return File.getChild(self, path, request)
 
 def main():
   from twisted.application.service import Application
@@ -143,15 +205,15 @@ def main():
   from airi.api import API
   import sys
   log.startLogging(sys.stdout)
-
+  
   root = Main()
   path = os.path.dirname(os.path.realpath(__file__))
   root.putChild("api",        API())
-  root.putChild("media", File(os.path.join(path, "media/")))
+  root.putChild("media", PkgFile("/media"))#os.path.join(path, "media/")))
   root.putChild("stream", StreamResource())
   reactor.listenTCP(8000, Site(root), interface="0.0.0.0", backlog=5)
-  reactor.run()#!/usr/bin/env python
-
+  reactor.run()
 
 if __name__=='__main__':
   main()
+

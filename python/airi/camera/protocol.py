@@ -290,7 +290,7 @@ class CameraFactory(ClientFactory):
         if not out:
             if not silent:
                 raise UnknownDevice(address)
-        return None
+            return None
 
         out["status"] = klass.isConnected(address)
         if klass.isConnected(address):

@@ -24,9 +24,11 @@ class Settings():
         parent = path.dirname(path.realpath(__file__))
       else:
         if "HOME" in environ:
-          parent = environ["HOME"]
+            parent = environ["HOME"]
         elif "HOMEPATH" in environ:
-          parent = environ["HOMEPATH"]
+            parent = environ["HOMEPATH"]
+        elif "DATA_PATH" in environ:
+            parent = environ["DATA_PATH"]
       name=path.join(parent, ".AIRi")
     print "configuration file", name
     self.name = name
@@ -83,7 +85,7 @@ class Settings():
       self._set(section, "address", address)
       return section
     return None
-  
+
   #@report(level=20)
   def __cameraDict(self, items):
     # defaults
@@ -115,6 +117,13 @@ class Settings():
     self.reload()
     for camera in self.getCameraSections():
       yield self.__cameraDict(self._items(camera))
+
+  def deleteCamera(self, address):
+      self.reload()
+      cam = self.getCameraSection(address)
+      if not cam:
+          return
+      self._remove_section(cam)
 
   #@report(debug=True)
   def getCamera(self, address):

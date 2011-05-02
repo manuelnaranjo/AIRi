@@ -69,9 +69,9 @@ class AIRi(CameraProtocol):
         self.client = client
         self.address = client.address
         self.transport = client.transport
-        self.doSetup()
         self.pending = []
         self.callLater = None
+        self.doSetup()
 
     def internalDoCommand(self):
         if len(self.pending) == 0:
@@ -81,7 +81,7 @@ class AIRi(CameraProtocol):
             value = value()
         dbg("doCommand $%s%s" % (command, value))
         self.transport.write("$%s%s\n\r" % (command, value))
-        self.callLater = (timeout, self.internalDoCommand)
+        self.callLater = reactor.callLater(timeout, self.internalDoCommand)
 
     def doCommand(self, command, value):
         if type(command) != Command:
