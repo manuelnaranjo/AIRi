@@ -12,3 +12,5 @@ if __name__ == '__main__':
         subprocess.Popen([sys.executable, "-m" "airi.pair"])
     log.startLogging(sys.stdout)
     main()
+    reactor.run()
+
