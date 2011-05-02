@@ -196,24 +196,26 @@ class PkgFile(File):
         print "getChild", path
         return File.getChild(self, path, request)
 
-def main():
-  from twisted.application.service import Application
-  from twisted.application.internet import TCPServer
-  from twisted.web.server import Site
-  from twisted.internet import reactor
-  from airi.stream import StreamResource
-  from airi.api import API
-  import sys
-  log.startLogging(sys.stdout)
-  
-  root = Main()
-  path = os.path.dirname(os.path.realpath(__file__))
-  root.putChild("api",        API())
-  root.putChild("media", PkgFile("/media"))#os.path.join(path, "media/")))
-  root.putChild("stream", StreamResource())
-  reactor.listenTCP(8000, Site(root), interface="0.0.0.0", backlog=5)
-  reactor.run()
+def main(port=8000):
+    from twisted.application.service import Application
+    from twisted.application.internet import TCPServer
+    from twisted.web.server import Site
+    from twisted.internet import reactor
+    from airi.stream import StreamResource
+    from airi.api import API
+    import sys
+    log.startLogging(sys.stdout)
+
+    root = Main()
+    path = os.path.dirname(os.path.realpath(__file__))
+    root.putChild("api",        API())
+    root.putChild("media", PkgFile("/media"))#os.path.join(path, "media/")))
+    root.putChild("stream", StreamResource())
+    p=reactor.listenTCP(port, Site(root), interface="0.0.0.0", backlog=5)
+    return p
 
 if __name__=='__main__':
-  main()
+    from twisted.internet import reactor
+    main()
+    reactor.run()
 
