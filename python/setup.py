@@ -13,7 +13,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(name="airi",
-    version="0.1.2",
+    version="0.1.3",
     author="Naranjo Manuel Francisco",
     author_email="manuel@aircable.net",
     description=("AIRi software package"),
@@ -36,6 +36,11 @@ setup(name="airi",
     package_data={
       'airi': ['airi/media/*.*', 'airi/templates/*.*'],
     },
-    scripts=["AIRi"],
+    #scripts=["AIRi"],
+    entry_points = {
+      'console_scripts': [
+        'AIRi = airi.main:main', 
+      ]
+    },
     zip_safe=False,
 )
