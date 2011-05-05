@@ -4,7 +4,7 @@ from twisted.python import log
 from twisted.internet import threads, reactor
 from time import time
 import json
-import bluetooth
+import twisted_bluetooth as bluetooth
 import traceback
 from airi.camera.protocol import CameraFactory
 from airi.settings import getSettings

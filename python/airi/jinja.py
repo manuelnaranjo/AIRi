@@ -7,7 +7,8 @@ from airi.camera.protocol import CameraFactory
 from airi.camera import UnknownDevice
 from airi.settings import getSettings
 from airi.twisted_bluetooth import resolve_name
-import pkg_resources, os, bluetooth, time
+import airi.twisted_bluetooth as bluetooth
+import pkg_resources, os, time
 
 settings = getSettings()
 

@@ -7,7 +7,6 @@ from twisted.internet import reactor
 import optieyes
 import airicamera
 from functools import partial
-import bluetooth
 from airi.settings import getSettings
 from airi import report
 from time import localtime, strftime
@@ -101,9 +100,6 @@ class Camera(Protocol):
             return self.doINIT()
         elif self.client:
             return self.client.dataReceived()
-
-    def getName(self):
-        return bluetooth.lookup_name(self.address)
 
     def __getattr__(self, val):
         if val in [
