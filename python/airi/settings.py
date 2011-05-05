@@ -2,7 +2,7 @@
 import ConfigParser
 from os import path, access, W_OK, environ
 from twisted.python import log
-import logging
+import logging, sys
 from airi import report
 
 DEFAULTS={
@@ -19,17 +19,20 @@ class Settings():
 
   def __init__(self, name=None):
     if not name:
-      parent = ""
-      if access(path.dirname(path.realpath(__file__)), W_OK):
-        parent = path.dirname(path.realpath(__file__))
-      else:
-        if "HOME" in environ:
-            parent = environ["HOME"]
-        elif "HOMEPATH" in environ:
-            parent = environ["HOMEPATH"]
-        elif "DATA_PATH" in environ:
-            parent = environ["DATA_PATH"]
-      name=path.join(parent, ".AIRi")
+        parent = ""
+        if access(path.dirname(path.realpath(__file__)), W_OK):
+            parent = path.dirname(path.realpath(__file__))
+        else:
+            if "HOME" in environ:
+                parent = environ["HOME"]
+            elif "HOMEPATH" in environ:
+                parent = environ["HOMEPATH"]
+            elif "DATA_PATH" in environ:
+                parent = environ["DATA_PATH"]
+        if not sys.platform.startswith("win"):
+            name=path.join(parent, ".AIRi")
+        else:
+            name=path.join(parent, "AIRi.cfg")
     print "configuration file", name
     self.name = name
     self.reload()
