@@ -10,7 +10,10 @@ def main():
       import subprocess
       subprocess.Popen([sys.executable, "-m" "airi.pair"])
   log.startLogging(sys.stdout)
-  jmain()
+  if len(sys.argv) > 1:
+    jmain(int(sys.argv[1]))
+  else:
+    jmain()
   reactor.run()
 
 if __name__ == '__main__':
