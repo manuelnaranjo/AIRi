@@ -25,22 +25,7 @@ from airi import report
 
 CATEGORY="darwin"
 
-import multiprocessing
-
-def handle_connection(proto, target):
-    try:
-      s = bluetooth.socket(proto)
-      s.setblocking(0)
-      s.connect(target)
-
-      pipe.send(None)
-      while True:
-        while pipe.poll(0):
-          s.send(pipe.recv())
-        pipe.send(s.recv(4096))
-    except Exception, err:
-      print err
-      pipe.send(err)
+from multiprocessing.connection import Listener
 
 @report(category=CATEGORY)
 def discover_devices (duration=8, flush_cache=True, lookup_names=False):
@@ -60,6 +45,32 @@ class BluetoothConnection(tcp.Connection):
 
     """
 
+class ConnectionWrapper():
+    def __init__(self, connection):
+        self.__conn = connection
+        for attr in dir(connection):
+            if not attr.startswith("__"):
+                if not getattr(self, attr, None):
+                    setattr(self, attr, getattr(connection, attr))
+
+    def send(self, what):
+        if type(what) == buffer:
+            what = str(buffer)
+        self.__conn.send(what)
+        return len(what)
+
+    @report(category=CATEGORY)
+    def bind(self, *args, **kwargs):
+        pass
+
+    @report(category=CATEGORY)
+    def shutdown(self, *args, **kwargs):
+        self.__conn.close()
+
+    @report(category=CATEGORY)
+    def setblocking(self, *args, **kwargs):
+        pass
+
 class BluetoothBaseClient(tcp.Connection):
     """A base class for client Bluetooth (and similiar) sockets.
     """
@@ -74,9 +85,20 @@ class BluetoothBaseClient(tcp.Connection):
         if self.proto not in [ None, bluetooth.RFCOMM, bluetooth.L2CAP ]:
             raise RuntimeException("I only handle bluetooth sockets")
 
-        s = bluetooth.socket(self.proto)
-        s.setblocking(0)
-        return s
+        self.listener = Listener()
+        pid = os.fork()
+        if pid == 0:
+            # I'm the child
+            print "Child running"
+            os.execvp(sys.executable, [sys.executable, "-m", "airi.twisted_bluetooth.darwin.helper",
+                self.listener.address])
+            # and we lost it
+            print "OOOOOOOOOOOOOOOOOPPPPPPSSSSSSSS!!!!!!!!!"
+
+        print "Luke I'm your father"
+        self.childpid = pid
+        s = self.listener.accept()
+        return ConnectionWrapper(s)
 
     @report(category=CATEGORY)
     def resolveAddress(self):
@@ -95,20 +117,14 @@ class BluetoothBaseClient(tcp.Connection):
             # was scheduled via a callLater in self._finishInit
             return
 
-        # doConnect gets called twice.  The first time we actually need to
-        # start the connection attempt.  The second time we don't really
-        # want to (SO_ERROR above will have taken care of any errors, and if
-        # it reported none, the mere fact that doConnect was called again is
-        # sufficient to indicate that the connection has succeeded), but it
-        # is not /particularly/ detrimental to do so.  This should get
-        # cleaned up some day, though.
-        self.conn, self.child_conn = multiprocessing.Pipe()
-        self.process = multiprocessing.Process(target=handle_connection, 
-            args=(self.proto, self.realAddress, self.child_conn))
-        self.process.start()
-        res = self.conn.recv()
-        if not res:
-          raise res
+        self.socket.send([self.proto, self.realAddress])
+        err = self.socket.recv()
+        if err:
+            self.socket.close()
+            self.listener.close()
+            os.waitpid(self.childpid, 0)
+            self.failIfNotConnected(err)
+            return
 
         # If I have reached this point without raising or returning, that means
         # that the socket is connected.
@@ -121,9 +137,8 @@ class BluetoothBaseClient(tcp.Connection):
 
     @report(category=CATEGORY)
     def fileno(self):
-        return self.conn.fileno()
+        return self.socket.fileno()
 
-    @report(category=CATEGORY)
     def doRead(self):
         """Calls self.protocol.dataReceived with all available data.
 
@@ -132,18 +147,10 @@ class BluetoothBaseClient(tcp.Connection):
         lost through an error in the physical recv(), this function will return
         the result of the dataReceived call.
         """
-        try:
-            data = self.socket.recv(self.bufferSize)
-        except (bluetooth.btcommon.BluetoothError, socket.error), se:
-            if se.args[0] == EWOULDBLOCK:
-                return
-            else:
-                return main.CONNECTION_LOST
-        if not data:
-            return main.CONNECTION_DONE
+        data = self.socket.recv()
+        if type(data) != str:
+            return main.CONNECTION_LOST
         return self.protocol.dataReceived(data)
-
-
 
 class Client(BluetoothBaseClient, tcp.Client):
     """A Bluetooth client."""
@@ -273,5 +280,3 @@ def resolve_name(address):
     return None
 
 
-if __name__=='__main__':
-  
