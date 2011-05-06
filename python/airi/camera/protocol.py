@@ -85,7 +85,7 @@ class Camera(Protocol):
         self.state = IDLE
         settings.setCameraSetting(self.address, "address", self.address)
         settings.setCameraSetting(self.address, "type", self.kind)
-        settings.setCameraSetting(self.address, "name", self.getName())
+        settings.setCameraSetting(self.address, "name", "NN")
         settings.setCameraSetting(self.address, "last",
                                     strftime("%m/%d/%Y %H:%M:%S", localtime()))
         settings.save()
