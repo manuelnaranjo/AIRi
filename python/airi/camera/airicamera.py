@@ -99,7 +99,7 @@ class AIRi(CameraProtocol):
         if nsets:
             sets.update(nsets)
         dbg(sets)
-        self.callLater = reactor.callLater(4, internalDoCommand)
+        self.callLater = reactor.callLater(4, self.internalDoCommand)
         self.doCommand("date",
                         lambda: datetime.utcnow().strftime("%Y%m%dT%H%M%SZ"))
         self.doCommand("size", SIZES[sets["size"]])
