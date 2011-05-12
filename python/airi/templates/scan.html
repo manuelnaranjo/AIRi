@@ -5,25 +5,29 @@
 {% block id %}scan{% endblock %}
 
 {% block content %}
-  {% for camera in devices %}
-    {% if camera.state %}
-      {% set theme='data-theme="e"' %}
-    {% else %}
-      {% set theme="" %}
-    {% endif %}
-    {{ button("/setup.html?address="+camera.address, camera.address +"<br/>"+ camera.name, "gear", theme="b") }}
-  {% else %}
-    <span style="text-align: center; display: block;">
-    {% if error %}
-        <div data-theme="e">
-          <strong>Something went wrong while scanning</strong>
-          <br/>
-          <strong>Reason:</strong> {{ error }}
-        </div>
-    {% else %}
-      <strong>No devices where found</strong>
-    {% endif %}
-    </span>
-  {% endfor %}
-{{ button( "javascript: doReload();", "Scan again", "refresh") }}
+    <ul data-role="listview">
+        {% for camera in devices %}
+            {% if camera.state %}
+                {% set theme='data-theme="e"' %}
+            {% else %}
+                {% set theme="" %}
+            {% endif %}
+            <li data-icon="gear" {{ theme }} >
+                <a href="/setup.html?address={{camera.address}}">
+                    <h3>{{ camera.name }}</h3>
+                    <p>{{ camera.address }}</p>
+        {% else %}
+        <li data-icon="refresh">
+            <a href="javascript: doReload();">
+                {% if error %}
+                    <h3>Something went wrong while scanning</h3>
+                    <p><strong>Reason:</strong>{{ error }}
+                {% else %}
+                    <h3>No devices where found</h3>
+                {% endif %}
+                <p>Scan Again</p>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
 {% endblock %}

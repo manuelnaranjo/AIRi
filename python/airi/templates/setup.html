@@ -46,6 +46,10 @@
   </div>
 {%- endmacro %}
 
+{% if not new_device %}
+{% block extra_header %}
+{% endblock %}
+{% endif %}
 
 {% block content %}
 <form id="setup-form" method="post" action="/setup.html?address={{address}}">
@@ -69,94 +73,90 @@
     {{ button (  "#" , "Cancel" , "arrow-l", "", "ui-btn-left", theme="a", extra='id="back_button"') }}
   </div>
 {% else %}
-<div data-role="collapsible-set">
-  <div data-role="collapsible" data-collapsed="false">
-  <h3>Device Information</h3>
+    <div id="info">
+        {{ fieldcontain("address", "Address", "text", address, True) }}
+        {{ fieldcontain("name", "Name", "text", name) }}
+        {{ fieldcontain("type", "Type", "text", type , True) }}
+        {{ fieldcontain("status", "Status", "text",  status , True) }}
+        {{ fieldcontain("last", "Last Connection", "text",  last , True) }}
+        <input name="new-device" value="true" type="hidden"/>
 
-  {{ fieldcontain("address", "Address", "text", address, True) }}
-  {{ fieldcontain("name", "Name", "text", name) }}
-  {{ fieldcontain("type", "Type", "text", type , True) }}
-  {{ fieldcontain("status", "Status", "text",  status , True) }}
-  {{ fieldcontain("last", "Last Connection", "text",  last , True) }}
-  <input name="new-device" value="true" type="hidden"/>
-
-  {% if capabilities.battery %}
-  {% else %}
-    {% set battery="Not supported feature" %}
-  {% endif %}
-  {{ fieldcontain("battery", "Battery Status (mV)", "text", battery, True) }}
-  </div>
-
-  <div data-role="collapsible" data-collapsed="true">
-  <h3>Connection Setup</h3>
-  {{ checkfieldcontain("reconnect", "Reconnect Automatically", "Reconnect",  reconnect ) }}
-  {{ fieldcontain("reconnect_timeout", "Reconnect After (seconds)", "text",  reconnect_timeout ) }}
-  {{ selectfieldcontain("transport", "Transport",  capabilities.transport ,  transport  ) }}
-
-  {{ checkfieldcontain("enable_pincode", "Use device PIN code", " ",  enable_pincode )}}
-  {% if pincode %}
-  {% else %}
-    {% set pincode="" %}
-  {% endif %}
-
-  {{ fieldcontain ("pincode", "PIN code", "text",  pincode ) }}
-  </div>
-
-  <div data-role="collapsible" data-collapsed="true">
-  <h3>Camera Initial Settings</h3>
-  {{ selectfieldcontain("size", "Resolution",  capabilities.size ,  size  ) }}
-
-  <div data-role="fieldcontain">
-    <fieldset data-role="controlgroup" data-role="fieldcontain">
-      <legend>Extras</legend>
-        <label for="voice">Voice</label>
-        {% if capabilities.voice %}
-          <input name="voice" id="voice_" type="hidden" value="false" />
-          <input name="voice" id="voice" type="checkbox" value="true" {% if voice %}checked{% endif %}/>
+        {% if capabilities.battery %}
         {% else %}
-          <input type="text" id="voice" readonly="readonly" class="ui-body-e" value="Not supported feature" />
+        {% set battery="Not supported feature" %}
+        {% endif %}
+        {{ fieldcontain("battery", "Battery Status (mV)", "text", battery, True) }}
+    </div>
+
+    <div id="connection">
+        {{ checkfieldcontain("reconnect", "Reconnect Automatically", "Reconnect",  reconnect ) }}
+        {{ fieldcontain("reconnect_timeout", "Reconnect After (seconds)", "text",  reconnect_timeout ) }}
+        {{ selectfieldcontain("transport", "Transport",  capabilities.transport ,  transport  ) }}
+
+        {{ checkfieldcontain("enable_pincode", "Use device PIN code", " ",  enable_pincode )}}
+        {% if pincode %}
+        {% else %}
+            {% set pincode="" %}
         {% endif %}
 
-        <label for="flash">Flash</label>
-        {% if capabilities.flash %}
-          <input name="flash" name="flash" id="flash_" type="hidden" value="false" />
-          <input name="flash" name="flash" id="flash" type="checkbox" {% if flash %}checked{% endif %}/>
+        {{ fieldcontain ("pincode", "PIN code", "text",  pincode ) }}
+        <button type="submit" data-theme="b" name="save" data-icon="check"
+                data-iconpos="right">Save</button>
+        <button type="submit" data-theme="a" name="cancel" data-icon="delete" 
+                data-iconpos="right">Cancel</button>
+    </div>
 
-        {% else %}
-          <input type="text" id="flash" readonly="readonly" class="ui-body-e" value="Not supported feature" />
-        {% endif %}
-    </fieldset>
-  </div>
+    <div id="camera_setup">
+        {{ selectfieldcontain("size", "Resolution",  capabilities.size ,  size  ) }}
 
-  <div data-role="fieldcontain">
-    <label for="exposure">Exposure Time (milliseconds):</label>
-    {% if capabilities.exposure %}
-      <input type="number" id="exposure-display" value="{{ exposure }}" style="width: 4em;" readonly="readonly"/>
-      <input type="hidden" name="exposure" id="exposure" value="{{ exposure }}" style="width: 4em;"/>
-      <div id="exposure-slider" style="display: inline-block; height: 1.2em;"></div>
-    {% else %}
-      <input type="text" id="exposure" readonly="readonly" class="ui-body-e" value="Not supported feature" />
-    {% endif %}
-  </div>
+        <div data-role="fieldcontain">
+            <fieldset data-role="controlgroup" data-role="fieldcontain">
+                <legend>Extras</legend>
+                <label for="voice">Voice</label>
+                {% if capabilities.voice %}
+                    <input name="voice" id="voice_" type="hidden" value="false" />
+                    <input name="voice" id="voice" type="checkbox" value="true" {% if voice %}checked{% endif %}/>
+                {% else %}
+                    <input type="text" id="voice" readonly="readonly" class="ui-body-e" value="Not supported feature" />
+                {% endif %}
 
-  {{ selectfieldcontain("pan", "Initial Panning",  capabilities.pan ,  pan ) }}
-  </div>
-</div>
-<div class="ui-grid-c">
-  <div class="ui-block-a">
-    <button type="submit" data-theme="b" name="save" data-icon="check" data-iconpos="right">Save</button>
-  </div>
-  <div class="ui-block-b">
-    <button type="submit" data-theme="a" name="cancel" data-icon="delete" data-iconpos="right">Cancel</button>
-  </div>
-  <div class="ui-block-c">
-    <button onclick="javascript: return confirm('Are you sure you want to delete this camera?')" type="submit" data-theme="a" name="delete" data-icon="minus" data-iconpos="right">Delete Camera</button>
-  </div>
-    <div class="ui-block-d">
-    <a data-theme="e" href="/stream.html?address={{address}}" data-role="button" data-icon="arrow-r" data-iconpos="right">Live Camera</a>
-  </div>
-</div>
+                <label for="flash">Flash</label>
+                {% if capabilities.flash %}
+                    <input name="flash" name="flash" id="flash_" type="hidden" value="false" />
+                    <input name="flash" name="flash" id="flash" type="checkbox" {% if flash %}checked{% endif %}/>
+                {% else %}
+                    <input type="text" id="flash" readonly="readonly" class="ui-body-e" value="Not supported feature" />
+                {% endif %}
+            </fieldset>
+        </div>
+
+        <div data-role="fieldcontain">
+            <label for="exposure">Exposure Time (milliseconds):</label>
+            {% if capabilities.exposure %}
+                <input type="number" id="exposure-display" value="{{ exposure }}" style="width: 4em;" readonly="readonly"/>
+                <input type="hidden" name="exposure" id="exposure" value="{{ exposure }}" style="width: 4em;"/>
+                <div id="exposure-slider" style="display: inline-block; height: 1.2em;"></div>
+            {% else %}
+                <input type="text" id="exposure" readonly="readonly" class="ui-body-e" value="Not supported feature" />
+            {% endif %}
+        </div>
+
+        {{ selectfieldcontain("pan", "Initial Panning",  capabilities.pan ,  pan ) }}
+        <button type="submit" data-theme="b" name="save" data-icon="check"
+                data-iconpos="right">Save</button>
+        <button type="submit" data-theme="a" name="cancel" data-icon="delete"
+                data-iconpos="right">Cancel</button>
+    </div>
+
+    <div id="manage">
+        <button onclick="javascript: return confirm('Are you sure you want to delete this camera?')"
+                type="submit" data-theme="a" name="delete" data-icon="minus"
+                data-iconpos="right">Delete Camera</button>
+        <a data-role="button" data-theme="e" href="/stream.html?address={{address}}"
+                data-icon="arrow-r" data-iconpos="right">Stream</a>
+    </div>
 {% endif %}
 
 </form>
 {% endblock %}
+

@@ -141,9 +141,9 @@ class Main(Resource):
       return Resource.getChild(self, path, request)
 
     if len(path) == 0:
-      path = "index.html"
+        path = "redirect.html"
     template = self.env.get_template(path)
-    return TemplateResource(template, self.contexts.get(path, lambda x: {})(self, request))
+    return TemplateResource(template, self.contexts.get(path, lambda x,y: {})(self, request))
 
 class PkgFile(File):
     def __init__(self, path, *args, **kwargs):

@@ -32,6 +32,7 @@ class MultiPartStream():
     self.request.connectionLost = self.connectionLost
     self.request.multipart=self
     self.oneshot = self.request.args.get('oneshot', ['false',])[0].lower() == 'true'
+    self.thumbnail = self.request.args.get('thumbnail', ['false',])[0].lower() == 'true'
     MultiPartStream.clients.append(self)
 
   @classmethod
@@ -46,7 +47,7 @@ class MultiPartStream():
 
   @report(category=CATEGORY)
   def process(self):
-    if not self.oneshot:
+    if not (self.oneshot or self.thumbnail):
       self.request.setHeader('Connection', 'Keep-Alive')
       if "flash" in self.request.args:
         self.request.setHeader('Content-Type', 
@@ -72,7 +73,7 @@ class MultiPartStream():
       log.err(err)
 
   def sendPart(self, content, mime="text/html", MULTIPART=None):
-    if self.oneshot:
+    if self.oneshot or self.thumbnail:
       try:
         self.request.setHeader("Content-Type", mime)
         self.request.setHeader("Content-Size", len(content))
@@ -140,14 +141,17 @@ class StreamResource(Resource, Listener):
     multipart.process()
     multipart.target = address
     if len(address) == 17:
-      ready = CameraFactory.isConnected(address) or CameraFactory.isPending(address)
-      if not ready:
-        method = request.args.get("method", ["RFCOMM",])[-1]
-        try:
-          CameraFactory.connect(address, 1, method)
-        except Exception, err:
-          log.msg("Failed while trying to connect")
-          log.err(err)
+        ready = CameraFactory.isConnected(address) or CameraFactory.isPending(address)
+        if multipart.thumbnail and not ready:
+            multipart.sendPart("")
+            return
+        if not ready:
+            method = request.args.get("method", ["RFCOMM",])[-1]
+            try:
+                CameraFactory.connect(address, 1, method)
+            except Exception, err:
+                log.msg("Failed while trying to connect")
+                log.err(err)
     CameraFactory.registerListener(address, self)
     return server.NOT_DONE_YET
 

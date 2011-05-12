@@ -2,21 +2,24 @@
 <html>
 <head>
 	<title>AIRi | {% block title %} {% endblock %}</title>
-	<meta charset="utf-8" />
+    <meta charset="utf-8" />
+    <!--meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=1;" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta names="apple-mobile-web-app-status-bar-style" content="black-translucent" /-->
 
     <link rel="stylesheet" href="/media/css/cupertino/jquery-ui-1.8.10.custom.css" />
     <link rel="stylesheet" href="/media/css/airi-jquery.mobile.css" />
-    <!--link rel="stylesheet" href="/media/css/jquery.mobile-1.0a4.css" /-->
-    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a4.1/jquery.mobile-1.0a4.1.min.css" />
+    <link rel="stylesheet" href="/media/css/jquery.mobile-1.0a4.1.css">
+    <link rel="stylesheet" href="/media/css/jquery.mobile.tabs.css">
     <script type="text/javascript" src="/media/js/jquery-1.5.2.min.js"></script>
-	<script type="text/javascript" src="/media/js/custom.js"></script>
-    <!--script type="text/javascript" src="/media/js/jquery.mobile-1.0a4.js"></script-->
-    <script type="text/javascript" src="http://code.jquery.com/mobile/1.0a4.1/jquery.mobile-1.0a4.1.js"></script>
+    <script type="text/javascript" src="/media/js/custom.js"></script>
+    <script type="text/javascript" src="/media/js/jquery.mobile-1.0a4.1.js"></script>
+    <script type="text/javascript" src="/media/js/jquery.mobile.tabs.js"></script>
     <script type="text/javascript" src="/media/js/jquery-ui-1.8.11.custom.min.js"></script>
     <script type="text/javascript" src="/media/js/jquery.tools.min.js"></script>
-    <!--script type="text/javascript" src="/media/js/jquery.swfobject.1-1-1.min.js"></script-->
     {% block extrahead %}{% endblock %}
 </head>
+
 {# general use macros #}
 {% macro button(href, text, icon='', iconpos='right', class="", theme=None, extra="", enable=True) -%}
   <a href="{{ href }}" 
@@ -40,16 +43,19 @@
       {{ button (  "#" , "Back" , "arrow-l", "", "ui-btn-left", extra='id="back_button"') }}
       <h1>{% block header_title %}{% endblock %}</h1>
       {{ button (  "#" , "" , "home", "notext", "ui-btn-right", extra='id="home_button"') }}
+      {% block extra_header %}{% endblock %}
     </div>
 
-    <div data-role="content">
+    <div data-role="content"> {# style="padding-top: 0px;"> #}
       {% block content %}{% endblock %}
     </div>
 
     <div data-role="header" data-position="inline">
       <h4>Powered by {{ button("http://www.aircable.net","AIRcable.net", "star") }}</h4>
-      {{ button ( "javascript: doReload()", "Reload", "refresh", class="ui-btn-right") }}
+      {{ button ( "javascript: doReload()", "Reload", "refresh", class="ui-btn-right optional",
+        extra='id="reload_button"') }}
     </div>
   </div>
 </body>
 </html>
+

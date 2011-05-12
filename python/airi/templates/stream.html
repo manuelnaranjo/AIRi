@@ -46,8 +46,101 @@
   <input id="{{ id }}" type="text" {% if disabled %}readonly="readonly" {% endif %} value="{{ value }}" />
 {% endmacro %}
 
+{% block extra_header %}
+    <div id="tab" data-role="tabs"> {# style="display: none">#}
+        <ul>
+            <li><a href="#tab-video" id="video-link">Video</a></li>
+            <li><a href="#tab-controls" id="video-controls">Controls</a></li>
+            <li><a href="#tab-information" id="information-link">Information</a></li>
+        </ul>
+    </div>
+{% endblock %}
 
 {% block content %}
+<div data-airi="mobile">
+    <div id="tab-video" class="video-holder">
+        <div id="video-content" class="video-player">
+            You don't have Flash installed, you can't use this viewer.
+            <a href="/stream/{{ camera.address.replace(':', '_')}}">But you can watch the stream here</a>
+        </div>
+    </div>
+    <div id="tab-controls">
+        <div class="inline ui-grid-a">
+            <div class="ui-block-a">
+                {{ button( "javascript: switchState()", "Connect", extra='id="stream-connect"', theme="b", enable=not camera.status) }}
+                {{ button( "javascript: switchState()", "Disconnect", extra='id="stream-disconnect"', theme="e", enable = camera.status ) }}
+            </div>
+            <div class="ui-block-b">
+                {{ button( "/setup.html?address="+camera.address, "Setup" ) }}
+            </div>
+        </div>
+
+        {{ select("stream-size", "Resolution", camera.capabilities.size, camera.size ) }}
+
+        {% if camera.capabilities.pan|length > 0 %}
+            {{ select("stream-pan", "Pan", camera.capabilities.pan, camera.pan ) }}
+        {% else %}
+            <div data-role="fieldcontain">
+              <label for="stream-pan">Pan:</label>
+              <input type="text" id="stream-pan" readonly="readonly" class="ui-body-e" value="Not Supported" />
+            </div>
+        {% endif %}
+
+        <div data-role="fieldcontain">
+            {% if camera.capabilities.flash %}
+                <a href="javascript: switchFlash()" data-role="button" id="stream-flash"
+                  data-state="{{camera.flash}}">Flash</a>
+            {% else %}
+                <label for="stream-flash">Flash:</label>
+                <input type="text" id="stream-flash" data-notsupported="true" readonly="readonly" class="ui-body-e" value="Not Supported" />
+            {% endif %}
+        </div>
+
+        <div data-role="fieldcontain">
+            {% if camera.capabilities.voice %}
+                <a href="javascript: switchVoice()" data-role="button" id="stream-voice"
+                    data-state="{{camera.voice}}">Voice</a>
+            {% else %}
+                <label for="stream-voice">Voice:</label>
+                <input type="text" id="stream-voice" data-notsupported="true" readonly="readonly" class="ui-body-e" value="Not Supported" />
+            {% endif %}
+        </div>
+
+        <div data-role="fieldcontain">
+            <label for="stream-exposure">Exposure Time (ms):</label>
+            {% if camera.capabilities.exposure %}
+                <input type="number" id="stream-exposure-display" value="{{ camera.exposure }}"
+                    style="width: 4em;" readonly="readonly" />
+                <input type="hidden" id="stream-exposure" value="{{ camera.exposure }}" />
+                <div id="stream-exposure-slider" style="display: inline-block"></div>
+            {% else %}
+                <input type="text" id="stream-exposure" data-notsupported="true" readonly="readonly" class="ui-body-e" value="Not Supported" />
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="tab-information">
+          {{ information("Address", camera.address, "stream-address") }}
+          {{ information("Name", camera.name, "stream-name") }}
+          {{ information("Type", camera.type, "stream-type") }}
+          {{ information("Status", camera.status, "stream-status") }}
+          {{ information("Stream URL", "/stream/"+camera.address, "stream-url") }}
+          {{ information("Last Connection", camera.last, "stream-last") }}
+          {{ information("Transport", camera.transport, "stream-transport") }}
+          {{ information("Automatically Reconnect", camera.reconnect, "stream-reconnect") }}
+          {{ information("Reconnect Timeout", camera.reconnect_timeout, "stream-reconnect_timeout") }}
+          {{ information("Use Device PIN", camera.enable_pincode, "stream-enable_pincode") }}
+          {{ information("PIN Code", camera.pin, "stream-pin") }}
+
+          {% if camera.capabilities.battery %}
+            {{ information("Battery (mv)", camera.battery, "stream-battery") }}
+          {% else %}
+            {{ information("Battery (mv)", "Not supported", "stream-battery", class="ui-body-e") }}
+          {% endif %}
+    </div>
+</div>
+
+<div data-airi="desktop">
 <div id="video" class="video-holder">
   <div id="flash_container" style="display: none"></div>
   <div id="video-content" class="video-player">
@@ -138,4 +231,6 @@
   </form>
 </div>
 
+</div>
 {% endblock %}
+

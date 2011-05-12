@@ -5,20 +5,27 @@ True = true;
 // shared variables
 previous_post = null;
 player = null;
+startup = True;
 
 function goBack(){
-  if ($.mobile.urlHistory.stack.length == 1)
-    return;
+    if ($.mobile.urlHistory.stack.length == 1)
+        return True;
 
-  if ($.mobile.urlHistory.activeIndex == 0)
-    window.history.forward()
-  else
-    window.history.back()
+    if ($.mobile.urlHistory.activeIndex == 0)
+        window.history.forward()
+    else
+        window.history.back()
+    return True;
 }
 
 function goHome(){
-  if ($.mobile.activePage != $.mobile.firstPage)
-    $.mobile.path.set($.mobile.firstPage.attr("data-url"));
+    if ($.mobile.activePage.attr("id")!="home"){
+        if ( $("#home").length > 0 )
+            $.mobile.path.set($("#home").attr("data-url"))
+        else
+            $.mobile.path.set("/index.html")
+    }
+    return True;
 }
 
 function doReload(){
@@ -32,21 +39,21 @@ function doReload(){
 }
 
 function update_home(){
-  console.log("home")
-  if ( $.mobile.firstPage.attr("data-url") == "home" ){
-    $.mobile.firstPage.attr("data-url", window.location.pathname);
-    $("#back_button").live("vclick", goBack);
-    $("#home_button").live("vclick", goHome);
-  }
+    console.log("home")
+    if ( $.mobile.firstPage.attr("data-url") == "home" ){
+        //$.mobile.firstPage.attr("data-url", window.location.pathname);
+        //$("#back_button").live("vclick", goBack);
+        //$("#home_button").live("vclick", goHome);
+    }
 }
 
 function update_setup(){
   console.log("setup");
-  create_exposure_slider("exposure-display", "exposure-slider", "exposure");
+  create_exposure_slider("#exposure-display", "#exposure-slider", "#exposure");
 }
 
 function getPlayerApi(){
-  var a = $("#video-content").data("flashembed");
+  var a = $(".active-mode #video-content").data("flashembed");
   if ( a == null){
     console.log("no player found");
     return null
@@ -57,7 +64,7 @@ function getPlayerApi(){
 function doConfigure(option, value){
   $.post("/api/doconfigure/",
     {
-      "address": $("#stream-address").val(),
+      "address": $(".active-mode #stream-address").val(),
       "option": option,
       "value": value
     }
@@ -68,11 +75,11 @@ function select_changed(){
   var option = this.id.split("-", 2)[1];
   var value = $("option:selected", this).attr("value");
   doConfigure(option, value)
-  $("#"+this.id).selectmenu("refresh");
+  $(this).selectmenu("refresh");
 }
 
 function switchGeneric(option){
-  doConfigure(option, ! eval($("#stream-"+option).attr("data-state")));
+  doConfigure(option, ! eval($(".active-mode #stream-"+option).attr("data-state")));
 }
 
 function switchFlash(){
@@ -84,14 +91,14 @@ function switchVoice(){
 }
 
 function updateGeneric(option){
-  if ( eval($("#stream-"+option).attr("data-notsupported")) == true)
+  if ( eval($(".active-mode #stream-"+option).attr("data-notsupported")) == true)
     return;
 
-  if ( eval($("#stream-"+option).attr("data-state"))==true )
-    $("#stream-"+option).attr("data-theme", "e")
+  if ( eval($(".active-mode #stream-"+option).attr("data-state"))==true )
+    $(".active-mode #stream-"+option).attr("data-theme", "e")
   else
-    $("#stream-"+option).attr("data-theme", "a")
-  $("#stream-"+option).button()
+    $(".active-mode #stream-"+option).attr("data-theme", "a")
+  $(".active-mode #stream-"+option).button()
 }
 
 function watch_device(){
@@ -150,22 +157,20 @@ function watch_device(){
 
 function update_viewer(){
   console.log("view");
-  create_exposure_slider("stream-exposure-display", "stream-exposure-slider", "exposure");
+  create_exposure_slider(".active-mode #stream-exposure-display", ".active-mode #stream-exposure-slider", ".active-mode #exposure");
 
-  $("#stream-exposure-slider", $(".ui-page-active")).unbind("slidechange")
-  $("#stream-exposure-slider", $(".ui-page-active")).bind("slidechange", function(event, ui){
+  $(".active-mode #stream-exposure-slider", $(".ui-page-active")).unbind("slidechange")
+  $(".active-mode #stream-exposure-slider", $(".ui-page-active")).bind("slidechange", function(event, ui){
     doConfigure("exposure", ui.value);
   })
 
-  $("#stream-size", $(".ui-page-active")).unbind("change")
-  $("#stream-size", $(".ui-page-active")).change(select_changed, {"origin": "stream-size"})
-  $("#stream-pan", $(".ui-page-active")).unbind("change")
-  $("#stream-pan", $(".ui-page-active")).change(select_changed, {"origin": "stream-pan"})
+  $(".active-mode #stream-size", $(".ui-page-active")).unbind("change")
+  $(".active-mode #stream-size", $(".ui-page-active")).change(select_changed, {"origin": "stream-size"})
+  $(".active-mode #stream-pan", $(".ui-page-active")).unbind("change")
+  $(".active-mode #stream-pan", $(".ui-page-active")).change(select_changed, {"origin": "stream-pan"})
   watch_device();
-  if ( $("#flash_container").length == 0 )
-    return;
 
-  player = $("#video-content").flashembed(
+  player = $(".active-mode #video-content").flashembed(
       {
         src: "/media/airi.swf",
         quality: "low"
@@ -180,19 +185,25 @@ function currentId(){
 }
 
 function pageshow(event, ui){
-  var id = currentId();
-  console.log("show " + id);
-  $("[data-rel=back]").remove()
+    var id = currentId();
+    console.log("show " + id);
+    $("[data-rel=back]").remove()
+    window.scrollTo(0, 1);
 
-  switch (id){
-    case "home":
-      return update_home();
-    case "setup":
-      return update_setup();
-    case "viewer":
-      return update_viewer();
-  }
-  console.log("show not known id " + id);
+    if (startup){
+        $.mobile.firstPage.attr("data-url", window.location.pathname+window.location.search);
+        startup = False;
+    }
+
+    switch (id){
+        case "home":
+            return update_home();
+        case "setup":
+            return update_setup();
+        case "viewer":
+            return update_viewer();
+    }
+    console.log("show not known id " + id);
 }
 
 function pagehide(event, ui){
@@ -207,11 +218,10 @@ function pagehide(event, ui){
 
 }
 
-
 function create_exposure_slider(label, holder, real){
-  holder=$("#"+holder, $(".ui-page-active"));
-  label=$("#"+label, $(".ui-page-active"));
-  real=$("#"+real, $(".ui-page-active"));
+  holder=$(holder, $(".ui-page-active"));
+  label=$(label, $(".ui-page-active"));
+  real=$(real, $(".ui-page-active"));
   var slide=holder.slider({
     min: 1,
     max: 30,
@@ -229,23 +239,106 @@ function create_exposure_slider(label, holder, real){
   a.css("margin-top","0px");
 }
 
+function viewer_resize(event){
+    var current = $("#viewer .active-mode").attr("data-airi")
+    if ( current!=null ) {
+        if ( $(window).width() > 768 && current == "desktop" ){
+            return false;
+        }
+    }
+    if ( $(window).width() > 768 ){
+        $('#viewer [data-role="tabs"]').addClass("hide");
+        $('#viewer [data-airi="mobile"]').addClass("hide").removeClass("active-mode");
+        $('#viewer [data-airi="desktop"]').removeClass("hide").addClass("active-mode");
+    } else {
+        $('#viewer [data-role="tabs"]').removeClass("hide");
+        $('#viewer [data-airi="mobile"]').removeClass("hide").addClass("active-mode");
+        $('#viewer [data-airi="desktop"]').addClass("hide").removeClass("active-mode");
+    }
+    return true;
+}
+
 function viewer_create(event){
-  console.log("creating viewer");
+    var prepare = function(content){
+        if (content.attr("id") == "video")
+            $("#viewer .ui-content .active-mode").addClass("ui-video-player")
+        else
+            $("#viewer .ui-content .active-mode").removeClass("ui-video-player")
+    }
+    console.log("creating viewer");
+    viewer_resize();
+    viewerResize();
+    $('#viewer div[data-role=tabs]').tabs({
+        beforeTabShow: function(event, ui){ prepare(ui.nextContent); },
+        load: function(event, args){ prepare(args.currentContent);},
+        selector: '.active-mode[data-airi="mobile"]'
+    })
 }
 
 function setup_create(event){
-  console.log("creating setup");
+    console.log("creating setup");
+    $('#setup [data-role="tabs"]').tabs({
+            selector: 'form[id="setup-form"]'
+    })
+    $("div[data-role=page][id=setup] #reload_button").addClass("hide")
+}
+
+function viewerResizeDesktop(width, height){
+    if (width != undefined && height != undefined ){
+        console.log("viewerResize", width, height);
+        $(".active-mode #video-content").data("width", width);
+        $(".active-mode #video-content").data("height", height);
+    }
+    $(".active-mode").parent().removeClass("ui-content-marginless")
+    $("#viewer div[data-role=header] > a[id!=home_button],h1,h4").removeClass("hide")
+    $("#viewer #home_button").removeClass("top-front")
+    $(".active-mode #video-content").css("width", $("#video-content").data("width"));
+    $(".active-mode #video-content").css("height", $("#video-content").data("height"));
+}
+
+function makeFullScreen(selector){
+    var $this = $(selector);
+    $this.addClass('ui-page-fullscreen');
+    $this.find( ".ui-header:jqmData(position='fixed')" ).addClass('ui-header-fixed ui-fixed-inline fade'); //should be slidedown
+    $this.find( ".ui-footer:jqmData(position='fixed')" ).addClass('ui-footer-fixed ui-fixed-inline fade'); //should be slideup
+}
+
+function makePartialScreen(selector){
+    var $this = $(selector);
+    $this.removeClass('ui-page-fullscreen');
+    $this.find( ".ui-header:jqmData(position='fixed')" ).removeClass('ui-header-fixed ui-fixed-inline fade'); //should be slidedown
+    $this.find( ".ui-footer:jqmData(position='fixed')" ).removeClass('ui-footer-fixed ui-fixed-inline fade'); //should be slideup
+}
+
+
+function viewerResizeMobile(width, height){
+    $("#viewer div[data-role=header] > a[id!=home_button],h1,h4").addClass("hide")
+    $("#viewer #home_button").addClass("top-front")
+    $(".active-mode").parent().addClass("ui-content-marginless")
+    var height = $(document).height();
+    $.each($("div[data-role=header]"), function(a, p){
+        height -= $(p).outerHeight();
+    })
+    $(".active-mode #video-content").css("width", $(window).width()-50);
+    $(".active-mode #video-content").css("height", height);
+    $(".active-mode #video-content").css("margin", 0);
+ 
+    //makeFullScreen("#viewer");
+//    $("#viewer").attr("data-fullscreen", "true")
+//    $("#viewer div[data-role=header]").attr("data-position", "fixed")
 }
 
 function viewerResize(width, height){
-  console.log("viewerResize", width, height);
-  $("#video-content").css("width", width);
-  $("#video-content").css("height", height);
+    var current = $("#viewer .active-mode").attr("data-airi");
+    if ( current == "mobile" )
+        return viewerResizeMobile(width, height);
+    else
+        return viewerResizeDesktop(width, height);
 }
 
 function viewerReady(){
-  console.log("viewerReady")
-  connectViewer();
+    console.log("viewerReady")
+    connectViewer();
 }
 
 function hide_setup(){
@@ -283,11 +376,27 @@ function switchState(){
   )
 }
 
+function viewer_orientationchange(event){
+    if ( currentId() == "viewer" )
+    {
+        var r = viewer_resize(event);
+        viewerResize();
+        if (r){
+            update_viewer();
+        }
+    }
+}
+
 function index_init(){
-  $('div').live("pageshow", pageshow);
-  $('div').live("pagebeforehide", pagehide);
-  $('#viewer').live("pagecreate", viewer_create);
-  $('#setup').live("pagecreate", setup_create);
+    $("#back_button").live("vclick", goBack);
+    $("#home_button").live("vclick", goHome);
+    $('div').live("pageshow", pageshow);
+    $('div').live("pagebeforehide", pagehide);
+    $('#viewer').live("pagecreate", viewer_create);
+    $('#setup').live("pagecreate", setup_create);
+    $(window).bind('orientationchange', viewer_orientationchange);
+    $(window).bind('resize', viewer_orientationchange);
 }
 
 $(document).bind("mobileinit", index_init);
+
