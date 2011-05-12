@@ -36,3 +36,4 @@ public class ScriptApplication extends BaseApplication implements ConfigurationO
   }
 
 }
+

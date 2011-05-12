@@ -69,3 +69,4 @@ public class DialogActivity extends Activity {
   }
 
 }
+

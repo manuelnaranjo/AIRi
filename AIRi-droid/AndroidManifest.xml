@@ -9,7 +9,8 @@
     android:icon="@drawable/script_logo_48"
     android:label="@string/app_name"
     android:name=".ScriptApplication"
-    android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+    android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+    android:configChanges="keyboardHidden|orientation">
     <activity
       android:name=".ScriptActivity"
       android:configChanges="keyboardHidden|orientation">
@@ -30,9 +31,11 @@
       android:name=".ScriptService" />
     <activity
       android:name="com.googlecode.android_scripting.activity.FutureActivity" 
+      android:configChanges="keyboardHidden|orientation"
       />
     <activity android:theme="@android:style/Theme.Translucent.NoTitleBar" 
-      android:name=".DialogActivity"/>
+      android:name=".DialogActivity"
+      android:configChanges="keyboardHidden|orientation"/>
 </application>
   <uses-sdk android:minSdkVersion="4"/>
   <uses-permission
