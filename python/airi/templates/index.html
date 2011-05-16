@@ -4,15 +4,15 @@
 {% block header_title %}AIRi{% endblock %}
 
 {% block content %}
-{% set cameras = devices|list %}
 <ul data-role="listview" data-dividertheme="d" style="margin-top: 0;" data-split-icon="gear">
-    <li data-role="list-divider">Registered Cameras<span class="ui-li-count">{{ cameras|length}}</span></li>
-    {% for camera in cameras %}
+    <li data-role="list-divider">Registered Cameras<span class="ui-li-count">{{ devices|length}}</span></li>
+    {% for camera in devices %}
             <li {% if camera.status %} data-theme="b" {% else %} data-theme="d" {% endif %}>
             <a href="/stream.html?address={{camera.address}}">
                 <img style="height: 100%;" src="/stream/{{camera.address}}?thumbnail=True"/>
                 <h3>{{ camera.name }}</h3>
                 <p>{{ camera.address }}</p>
+                <span class="ui-li-count">Been viewed by: {{ camera.viewers|length }}</span>
             </a>
             <a href="/setup.html?address={{camera.address}}">Configure</a>
         </li>
