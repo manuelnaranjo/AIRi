@@ -40,9 +40,17 @@
 <body>
   <div data-role="page" id="{% block id %}home{% endblock %}">
     <div data-role="header">
-      {{ button (  "#" , "Back" , "arrow-l", "", "ui-btn-left", extra='id="back_button"') }}
+      {{ button (  "#" ,
+        "Back", 
+        "arrow-l",
+        class="ui-btn-left",
+        extra='id="back_button"') }}
       <h1>{% block header_title %}{% endblock %}</h1>
-      {{ button (  "#" , "" , "home", "notext", "ui-btn-right", extra='id="home_button"') }}
+      {{ button (  "#" ,
+        "Main" ,
+        "home",
+        class="ui-btn-right",
+        extra='id="home_button"') }}
       {% block extra_header %}{% endblock %}
     </div>
 
@@ -51,9 +59,12 @@
     </div>
 
     <div data-role="header" data-position="inline">
-      <h4>Powered by {{ button("http://www.aircable.net","AIRcable.net", "star") }}</h4>
-      {{ button ( "javascript: doReload()", "Reload", "refresh", class="ui-btn-right optional",
-        extra='id="reload_button"') }}
+      <h4 style="margin-left: 0px; margin-right: 0px;">Powered by {{ button("http://www.aircable.net","AIRcable.net", "star") }}</h4>
+      {{ button ( "#", 
+          "Reload", 
+          "refresh", 
+          class="ui-btn-right",
+          extra='id="reload_button"') }}
     </div>
   </div>
 </body>
