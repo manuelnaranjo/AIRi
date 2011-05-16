@@ -17,7 +17,7 @@ from airi import report, RESULT
 from functools import partial
 
 MULTIPARTRESPONSE= "--%s\r\nContent-Type: %s\r\nContent-Length: %s\r\n\r\n%s\r\n\r\n"
-
+HTTP_DISCONNECT_TIMEOUT = 10
 CATEGORY = "AIRi-Stream"
 
 class MultiPartStream():
@@ -62,15 +62,32 @@ class MultiPartStream():
     self.request.setHeader('Cache-directive', 'no-cache')
 
   @report(category=CATEGORY)
+  def connectionTimeout(self):
+      '''Called after X seconds after the http stream is closed'''
+      if len(MultiPartStream.getClients(self.target)):
+          return
+      log.msg("No more clients, closing link")
+      CameraFactory.disconnect(self.target)
+      del self
+  
+  @report(category=CATEGORY)
   def connectionLost(self, reason):
-    MultiPartStream.clients.remove(self)
+      '''Called when the http stream is closed'''
+      if self in MultiPartStream.clients:
+        MultiPartStream.clients.remove(self)
+      log.msg("Registering for disconnect in %s seconds" % HTTP_DISCONNECT_TIMEOUT)
+      reactor.callLater(HTTP_DISCONNECT_TIMEOUT, 
+          MultiPartStream.connectionTimeout,
+          self)
 
   @report(category=CATEGORY)
   def finish(self):
-    try:
-      self.request.finish()
-    except Exception, err:
-      log.err(err)
+      '''Gets called by oneshot or thumbnail modes''' 
+      try:
+          self.request.finish()
+      except Exception, err:
+          log.err(err)
+      MultiPartStream.clients.remove(self)
 
   def sendPart(self, content, mime="text/html", MULTIPART=None):
     if self.oneshot or self.thumbnail:
@@ -108,22 +125,35 @@ class MultiPartStream():
       loglevel=DEBUG,
       category="MultiPartStream")
 
+  @classmethod
+  def getClients(klass, address):
+      def internal():
+          for c in klass.clients:
+              if c.target.lower() == address:
+                  yield c
+      address = address.lower()
+      return list(internal())
+
 class StreamResource(Resource, Listener):
   isLeaf = True
+  
+  @classmethod
+  def getClients(klass, address):
+      return MultiPartStream.getClients(address)
 
   def gotFrame(self, frame, address):
     #print "StreamResource.gotFrame %s" % len(frame)
     size = len(frame)
     out=MULTIPARTRESPONSE % (MultiPartStream.BOUNDARY, "image/jpeg", size, frame)
 
-    for client in MultiPartStream.clients:
-      if client.target == address:
+    for client in StreamResource.getClients(address):
         client.sendPart(frame, "image/jpeg")
 
   @report(category=CATEGORY)
   def lostConnection(self, reason, failed, address):
+    '''Called when the Bluetooth Link is lost'''
     print "StreamResource.lostConnection", address
-    clients = [ a for a in MultiPartStream.clients if a.target == address ]
+    clients = StreamResource.getClients(address)
     for c in clients:
       c.sendPart(str(reason))
       if not c.oneshot:
@@ -185,3 +215,4 @@ if __name__ == '__main__':
   reactor.listenTCP(8800, Site(root), interface="0.0.0.0")
   reactor.callLater(0, sendFrame)
   reactor.run()#!/usr/bin/env python
+
