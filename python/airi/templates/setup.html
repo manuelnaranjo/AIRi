@@ -46,10 +46,18 @@
   </div>
 {%- endmacro %}
 
-{% if not new_device %}
 {% block extra_header %}
-{% endblock %}
+{% if not new_device %}
+    <div id="tab" data-role="tabs">
+        <ul>
+            <li><a href="#info">Information</a></li>
+            <li><a href="#connection">Connection</a></li>
+            <li><a href="#camera_setup">Controls</a></li>
+            <li><a href="#manage">Manage</a></li>
+        </ul>
+    </div>
 {% endif %}
+{% endblock %}
 
 {% block content %}
 <form id="setup-form" method="post" action="/setup.html?address={{address}}">
@@ -70,7 +78,7 @@
     <button type="submit" data-theme="b" name="save" data-icon="check" data-iconpos="right">Save</button>
   </div>
   <div class="ui-block-b">
-    {{ button (  "#" , "Cancel" , "arrow-l", "", "ui-btn-left", theme="a", extra='id="back_button"') }}
+    {{ button (  "#" , "Cancel" , "arrow-l", "", "ui-btn-left", theme="a", extra='id="cancel_button"') }}
   </div>
 {% else %}
     <div id="info">
