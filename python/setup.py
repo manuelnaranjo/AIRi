@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from setuptools import setup, find_packages
+from airi import __version__
 
 
 def read(fname):
@@ -13,7 +14,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(name="airi",
-    version="0.1.3",
+    version=__version__,
     author="Naranjo Manuel Francisco",
     author_email="manuel@aircable.net",
     description=("AIRi software package"),

@@ -36,6 +36,8 @@ class report:
       return wrap
     return fn
 
+__version__ = ('1', '0', 'c1')
+__version__ = '.'.join(__version__)
 
 import camera
 from camera import dbg, CameraProtocol
@@ -44,3 +46,4 @@ import twisted_bluetooth
 import stream
 import server
 import api
+
