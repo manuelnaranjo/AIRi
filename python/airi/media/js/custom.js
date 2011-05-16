@@ -7,6 +7,17 @@ previous_post = null;
 player = null;
 startup = True;
 
+function refreshButton(selector){
+  var text = $(selector + " .ui-btn-text").text();
+  $(selector + " > *").remove();
+  var classes = "ui-btn ui-btn-up ui-btn-up-" + $(selector).jqmData("theme") +
+    " ui-btn-inline "+
+    " ui-btn-icon-left ui-btn-icon-right ui-btn-icon-top ui-btn-icon-bottom ui-btn-icon-notext" +
+    " ui-icon-" + $(selector).jqmData("icon") +
+    " ui-icon-shadow ui-btn-corner-all ui-shadow";
+  $(selector).text(text).removeClass(classes).buttonMarkup();
+}
+
 function goBack(){
     if ($.mobile.urlHistory.stack.length == 1)
         return True;
@@ -21,9 +32,9 @@ function goBack(){
 function goHome(){
     if ($.mobile.activePage.attr("id")!="home"){
         if ( $("#home").length > 0 )
-            $.mobile.path.set($("#home").attr("data-url"))
+            $.mobile.changePage($("#home"))
         else
-            $.mobile.path.set("/index.html")
+            $.mobile.changePage($("/index.html"))
     }
     return True;
 }
@@ -186,8 +197,13 @@ function currentId(){
 
 function pageshow(event, ui){
     var id = currentId();
+    resize();
     console.log("show " + id);
     $("[data-rel=back]").remove()
+    $("#" + id + " #back_button").attr("href", "javascript: goBack()");
+    $("#" + id + " #home_button").attr("href", "javascript: goHome()");
+    $("#" + id + " #reload_button").attr("href", "javascript: doReload()");
+
     window.scrollTo(0, 1);
 
     if (startup){
@@ -271,7 +287,7 @@ function viewer_create(event){
     $('#viewer div[data-role=tabs]').tabs({
         beforeTabShow: function(event, ui){ prepare(ui.nextContent); },
         load: function(event, args){ prepare(args.currentContent);},
-        selector: '.active-mode[data-airi="mobile"]'
+        selector: 'div[data-airi="mobile"]'
     })
 }
 
@@ -286,14 +302,14 @@ function setup_create(event){
 function viewerResizeDesktop(width, height){
     if (width != undefined && height != undefined ){
         console.log("viewerResize", width, height);
-        $(".active-mode #video-content").data("width", width);
-        $(".active-mode #video-content").data("height", height);
+        $("#viewer .active-mode #video-content").data("width", width);
+        $("#viewer .active-mode #video-content").data("height", height);
     }
-    $(".active-mode").parent().removeClass("ui-content-marginless")
-    $("#viewer div[data-role=header] > a[id!=home_button],h1,h4").removeClass("hide")
+    $("#viewer .active-mode").parent().removeClass("ui-content-marginless")
+    $("#viewer div[data-role=header]").find("a[id!=home_button],h1,h4").removeClass("hide")
     $("#viewer #home_button").removeClass("top-front")
-    $(".active-mode #video-content").css("width", $("#video-content").data("width"));
-    $(".active-mode #video-content").css("height", $("#video-content").data("height"));
+    $("#viewer .active-mode #video-content").css("width", $("#video-content").data("width"));
+    $("#viewer .active-mode #video-content").css("height", $("#video-content").data("height"));
 }
 
 function makeFullScreen(selector){
@@ -312,20 +328,20 @@ function makePartialScreen(selector){
 
 
 function viewerResizeMobile(width, height){
-    $("#viewer div[data-role=header] > a[id!=home_button],h1,h4").addClass("hide")
+    $("#viewer div[data-role=header]").
+        find("a[id=back_button],a[id=reload_button],h1,h4").
+        addClass("hide")
     $("#viewer #home_button").addClass("top-front")
-    $(".active-mode").parent().addClass("ui-content-marginless")
-    var height = $(document).height();
-    $.each($("div[data-role=header]"), function(a, p){
+    $("#viewer .active-mode").parent().addClass("ui-content-marginless")
+    var height = $(window).height();
+    var width = $(window).width()-50;
+    $.each($("#viewer div[data-role=header]"), function(a, p){
         height -= $(p).outerHeight();
     })
-    $(".active-mode #video-content").css("width", $(window).width()-50);
-    $(".active-mode #video-content").css("height", height);
-    $(".active-mode #video-content").css("margin", 0);
- 
-    //makeFullScreen("#viewer");
-//    $("#viewer").attr("data-fullscreen", "true")
-//    $("#viewer div[data-role=header]").attr("data-position", "fixed")
+    console.log("new size " + width + " , " + height);
+    $("#viewer .active-mode #video-content").css("width", width);
+    $("#viewer .active-mode #video-content").css("height", height);
+    $("#viewer .active-mode #video-content").css("margin", 0);
 }
 
 function viewerResize(width, height){
@@ -361,7 +377,9 @@ function disconnectViewer(){
   if ( player == null )
     return;
 
-  player.xhrDisconnect()
+  try {
+    player.xhrDisconnect()
+  } catch (err) {}
 }
 
 
@@ -376,7 +394,18 @@ function switchState(){
   )
 }
 
-function viewer_orientationchange(event){
+function resize(event){
+    if ( $(window).width() < 768 ) {
+      $(".ui-page-active #home_button,#back_button,#reload_button").
+        jqmData("iconpos", "notext")
+    } else {
+      $(".ui-page-active #home_button,#reload_button").jqmData("iconpos", "right")
+      $(".ui-page-active #back_button").jqmData("iconpos", "left")
+    }
+    refreshButton(".ui-page-active #home_button");
+    refreshButton(".ui-page-active #back_button");
+    refreshButton(".ui-page-active #reload_button");
+
     if ( currentId() == "viewer" )
     {
         var r = viewer_resize(event);
@@ -388,14 +417,12 @@ function viewer_orientationchange(event){
 }
 
 function index_init(){
-    $("#back_button").live("vclick", goBack);
-    $("#home_button").live("vclick", goHome);
     $('div').live("pageshow", pageshow);
     $('div').live("pagebeforehide", pagehide);
     $('#viewer').live("pagecreate", viewer_create);
     $('#setup').live("pagecreate", setup_create);
-    $(window).bind('orientationchange', viewer_orientationchange);
-    $(window).bind('resize', viewer_orientationchange);
+    $(window).bind('orientationchange', resize);
+    $(window).bind('resize', resize);
 }
 
 $(document).bind("mobileinit", index_init);
