@@ -7,6 +7,7 @@ from airi.camera.protocol import CameraFactory
 from airi.camera import UnknownDevice
 from airi.settings import getSettings
 from airi.twisted_bluetooth import resolve_name
+from airi.stream import StreamResource
 import airi.twisted_bluetooth as bluetooth
 import pkg_resources, os, time
 
@@ -29,8 +30,11 @@ class Main(Resource):
     self.env.globals["home"]=home
 
   def index(self, request):
+    devices = list(CameraFactory.getCameras())
+    for dev in devices:
+        dev["viewers"] = StreamResource.getClients(dev["address"])
     return {
-      "devices": CameraFactory.getCameras()
+      "devices": devices 
     }
 
   def setup(self, request):
@@ -149,25 +153,20 @@ class PkgFile(File):
     def __init__(self, path, *args, **kwargs):
         File.__init__(self, path, *args, **kwargs)
         self.path = path
-        print "PkgFile", path
 
     def isdir(self):
         out = pkg_resources.resource_isdir("airi", self.path)
-        print "isdir", self.path, out
         return out
 
     def exists(self):
         out = pkg_resources.resource_exists("airi", self.path)
-        print "exists", self.path, out
         return out
 
     def isfile(self):
         out = not self.isdir() and self.exists()
-        print "isfile", self.path, out
         return out
 
     def child(self, path):
-        print "child", self.path
         path_ = os.path.join(self.path, path)
         def exists():
             return pkg_resources.resource_exists("airi", path_)
@@ -182,19 +181,15 @@ class PkgFile(File):
         return self.__resource
 
     def getmtime(self):
-        print "getmtime", self.path
         return time.time()
 
     def openForReading(self): 
-        print "openForReading", self.path
         return pkg_resources.resource_stream("airi", self.path)
 
     def getsize(self):
-        print "getsize", self.path
         return len(pkg_resources.resource_stream("airi", self.path).read())
 
     def getChild(self, path, request):
-        print "getChild", path
         return File.getChild(self, path, request)
 
 def main(port=8000):
@@ -202,7 +197,6 @@ def main(port=8000):
     from twisted.application.internet import TCPServer
     from twisted.web.server import Site
     from twisted.internet import reactor
-    from airi.stream import StreamResource
     from airi.api import API
     import sys
     log.startLogging(sys.stdout)
