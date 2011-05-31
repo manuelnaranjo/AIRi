@@ -39,10 +39,11 @@ class Main(Resource):
 
   def setup(self, request):
       def saveCamera(args):
-          if args["enable_pincode"][0].lower()=="true":
+          if "enable_pincode" in args:
+            if args["enable_pincode"][0].lower()=="true":
               settings.setPIN(block=args["address"][0],
                           npin=args["pincode"][0])
-          else:
+            else:
               settings.delPIN(args["address"][0])
           settings.save()
           for k in ["save", "last", "battery", "status",
@@ -148,8 +149,6 @@ class Main(Resource):
 	template = self.env.get_template(path)
 	context = self.contexts.get(path, lambda x,y: {})(self, request)
 	context["pairing_supported"]=bluetooth.isPairingSupported()
-	if bluetooth.isPairingSupported():
-		context["pairing_ready"]=bluetooth.isPairingReady()
 	return TemplateResource(template, context)
 
 class PkgFile(File):
