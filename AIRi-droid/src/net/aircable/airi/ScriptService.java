@@ -33,6 +33,7 @@ import com.googlecode.android_scripting.ForegroundService;
 import com.googlecode.android_scripting.Log;
 import com.googlecode.android_scripting.NotificationIdFactory;
 import com.googlecode.android_scripting.ScriptLauncher;
+import com.googlecode.android_scripting.facade.FacadeConfiguration;
 import com.googlecode.android_scripting.interpreter.Interpreter;
 import com.googlecode.android_scripting.interpreter.InterpreterConfiguration;
 import com.googlecode.android_scripting.interpreter.InterpreterUtils;
@@ -115,6 +116,7 @@ public class ScriptService extends ForegroundService {
 					.openRawResource(Script.ID));
 		}
 		copyResourcesToLocal(); // Copy all resources
+		FacadeConfiguration.addFacade(AIRiFacade.class);
 
 		if (Script.getFileExtension(this)
 				.equals(HtmlInterpreter.HTML_EXTENSION)) {
@@ -168,23 +170,6 @@ public class ScriptService extends ForegroundService {
 			return true;
 		}
 
-/*		Log.d("Comparing file with content");
-		try {
-			fin = new FileInputStream(filename);
-			int c;
-			while ((c = fin.read()) != -1) {
-				if (c != content.read()) {
-					Log.d("Something changed replacing");
-					return true;
-				}
-			}
-		} catch (Exception e) {
-			Log.d("Something failed during comparing");
-			Log.e(e);
-			return true;
-		}
-		Log.d("No need to update " + filename);
-*/
 		return false;
 	}
 
