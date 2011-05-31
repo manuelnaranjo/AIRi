@@ -28,10 +28,7 @@ out = stdout()
 sys.stdout = out
 sys.stderr = out
 
-def start_browser(listener):
-    droid.log(str(listener))
-    droid.log("starting view in port %s" % listener._realPortNumber)
-    droid.webViewShow("http://127.0.0.1:%s" % listener._realPortNumber)
+
 
 try:
     parent = path.dirname(path.realpath(__file__))
@@ -44,13 +41,9 @@ try:
 
     os.environ["DATA_PATH"]=parent
 
-#    from rpyc_classic import main
-    from airi.jinja import main
-    droid.log("Starting server")
-    l = main(port=0)
-    from twisted.internet import reactor
-    reactor.callWhenRunning(start_browser, listener=l)
-    reactor.run()
+    from airidroid import main
+    main()
+
 except Exception, err:
     import traceback
     droid.log(str(err))
