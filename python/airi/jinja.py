@@ -104,24 +104,24 @@ class Main(Resource):
       return {"error": str(err)}
 
   def server_setup(self, request):
-    if request.method == "POST":
-      if "delete" in request.args:
-        settings.delPIN(request.args["delete"][0])
-        settings.save()
-      elif "save" in request.args:
-        request.args.pop("save")
-        blocks = dict([ (b,request.args[b][0]) for b in request.args if b.startswith("block") ])
-        pins = dict([ (b,request.args[b][0]) for b in request.args if b.startswith("value") ])
-        sets = {}
-        for b in blocks:
-          if len(blocks[b].strip()) == 0:
-            continue
-          settings.setPIN(block=blocks[b], npin=pins["value"+b.replace("block","")])
-        settings.save()
+	if request.method == "POST":
+		if "delete" in request.args:
+			settings.delPIN(request.args["delete"][0])
+			settings.save()
+		elif "save" in request.args:
+			request.args.pop("save")
+			blocks = dict([ (b,request.args[b][0]) for b in request.args if b.startswith("block") ])
+			pins = dict([ (b,request.args[b][0]) for b in request.args if b.startswith("value") ])
+			sets = {}
+			for b in blocks:
+				if len(blocks[b].strip()) == 0:
+					continue
+				settings.setPIN(block=blocks[b], npin=pins["value"+b.replace("block","")])
+			settings.save()
 
-    out = {}
-    out["pins"]=settings.getPINs()
-    return out
+	out = {}
+	out["pins"]=settings.getPINs()
+	return out
 
   def stream(self, request):
     if "address" not in request.args:
@@ -141,13 +141,16 @@ class Main(Resource):
   }
 
   def getChild(self, path, request):
-    if "media" in path or "favicon.ico" in path:
-      return Resource.getChild(self, path, request)
-
-    if len(path) == 0:
-        path = "redirect.html"
-    template = self.env.get_template(path)
-    return TemplateResource(template, self.contexts.get(path, lambda x,y: {})(self, request))
+	if "media" in path or "favicon.ico" in path:
+		return Resource.getChild(self, path, request)
+	if len(path) == 0:
+		path = "redirect.html"
+	template = self.env.get_template(path)
+	context = self.contexts.get(path, lambda x,y: {})(self, request)
+	context["pairing_supported"]=bluetooth.isPairingSupported()
+	if bluetooth.isPairingSupported():
+		context["pairing_ready"]=bluetooth.isPairingReady()
+	return TemplateResource(template, context)
 
 class PkgFile(File):
     def __init__(self, path, *args, **kwargs):
