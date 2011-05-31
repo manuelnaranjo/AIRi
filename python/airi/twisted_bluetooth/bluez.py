@@ -24,24 +24,104 @@ from twisted.python import log
 
 from bluetooth import *
 
+SPP_UUID="00001101-0000-1000-8000-00805F9B34FB"
+if __name__=='__main__':
+    from dbus.mainloop.glib import DBusGMainLoop
+    DBusGMainLoop(set_as_default=True)
+
+flag = False
+def initalizeDBus():
+    global flag
+    if flag:
+        return
+
+    flag = True
+    global dbus, bus, manager
+    try:
+        import dbus
+        try:
+            bus = dbus.SessionBus()
+            manager = dbus.Interface(bus.get_object("org.bluez", "/"),
+                "org.bluez.Manager")
+        except:
+            bus = dbus.SystemBus()
+            manager = dbus.Interface(bus.get_object("org.bluez", "/"),
+                "org.bluez.Manager")
+    except:
+        dbus = None
+
+def isAndroid():
+    try:
+        global droid
+        import android
+        droid=android.API()
+        return True
+    except:
+        pass
+    return False
+
+def androidIsBonded(address):
+    try:
+        global droid
+        r = droid.bluetoothIsBonded(address)
+        return r
+    except Exception, err:
+        log.err(err)
+    return False
+
+def bluezIsBonded(address):
+    initalizeDBus()
+    global dbus, bus, manager
+    
+    adapter = dbus.Interface(bus.get_object("org.bluez",
+        manager.DefaultAdapter()), "org.bluez.Adapter")
+    try:
+        dev = adapter.FindDevice(address)
+    except Exception, err:
+        return False
+    dev = dbus.Interface(bus.get_object("org.bluez",dev),
+            "org.bluez.Device")
+    return bool(dev.GetProperties()["Paired"])
+    
+def isBonded(address):
+    if isAndroid():
+        return androidIsBonded(address)
+    return bluezIsBonded(address)
+
+def androidBondDevice(address):
+    res = droid.bluetoothConnect(SPP_UUID, address) 
+    droid.bluetoothStop(res)
+
+def bluezBondDevice(address):
+    initalizeDBus()
+    global dbus, bus, manager
+    
+    from airi.pair import Agent, PATH
+    path = "%s/temp/%s" % (PATH, address.replace(":", ""))
+    agent = Agent(bus, path)
+    agent.set_exit_on_release(False)
+    adapter = dbus.Interface(bus.get_object("org.bluez",
+        manager.DefaultAdapter()), "org.bluez.Adapter")
+    log.msg("Bonding device")
+    adapter.CreatePairedDevice(address, path,
+            "KeyboardOnly", reply_handler=lambda X: None,
+            error_handler=lambda X: None)
+
+def bondDevice(address):
+    if isAndroid():
+        return androidBondDevice(address)
+    return bluezBondDevice(address)
+
 def isPairingSupported():
-	try:
-		import android
-		d = android.Android()
-		return False
-	except:
-		pass
-
-	from airi.pair import Agent
-	if getattr(Agent, "bus_non_available", False):
-		return False
-
-	return True
+    if isAndroid():
+        return False
+    print "isPairingSupported", True
+    return True
 
 def isPairingReady():
-	if not isPairingSupported():
-		return False
-	return len(Agent.listeners)>0
+    if not isPairingSupported():
+        return False
+    return len(Agent.listeners)>0
 
 class BluetoothConnection(tcp.Connection):
     """
@@ -65,7 +145,8 @@ class BluetoothBaseClient(tcp.Connection):
         """(internal) Create a non-blocking socket using
         self.addressFamily, self.socketType.
         """
-        if self.proto not in [ None, bluetooth.RFCOMM, bluetooth.SCO, bluetooth.HCI, bluetooth.L2CAP ]:
+        if self.proto not in [ None, bluetooth.RFCOMM, bluetooth.SCO, 
+                bluetooth.HCI, bluetooth.L2CAP ]:
             raise RuntimeException("I only handle bluetooth sockets")
 
         print self.proto, type(self.proto)
@@ -108,23 +189,21 @@ class BluetoothBaseClient(tcp.Connection):
         print "connectResult", connectResult
         if connectResult:
             if connectResult == EISCONN or connectResult == EBADFD:
-                pass
-            # on Windows EINVAL means sometimes that we should keep trying:
-            # http://msdn.microsoft.com/library/default.asp?url=/library/en-us/winsock/winsock/connect_2.asp
-            elif ((connectResult in (EWOULDBLOCK, EINPROGRESS, EALREADY)) or
-                  (connectResult == EINVAL and platformType == "win32")):
+                pass 
+            elif connectResult in (EWOULDBLOCK, EINPROGRESS, EALREADY):
                 self.startReading()
                 self.startWriting()
                 return
             else:
-                self.failIfNotConnected(error.getConnectError((connectResult, strerror(connectResult))))
+                self.failIfNotConnected(error.getConnectError((connectResult, 
+                    strerror(connectResult))))
                 return
 
         # If I have reached this point without raising or returning, that means
         # that the socket is connected.
         del self.doWrite
         del self.doRead
-        # we first stop and then start, to reset any references to the old doRead
+        # we first stop and then start, to reset references to the old doRead
         self.stopReading()
         self.stopWriting()
         self._connectDone()
@@ -154,7 +233,8 @@ class Client(BluetoothBaseClient, tcp.Client):
     """A Bluetooth client."""
 
     def __init__(self, proto, *args, **kwargs):
-        if proto not in [ None, bluetooth.RFCOMM, bluetooth.SCO, bluetooth.HCI, bluetooth.L2CAP ]:
+        if proto not in [ None, bluetooth.RFCOMM, bluetooth.SCO, bluetooth.HCI, 
+                bluetooth.L2CAP ]:
             raise RuntimeException("I only handle bluetooth sockets")
         self.proto = proto
         super(Client, self).__init__(*args, **kwargs)
@@ -207,11 +287,13 @@ class Port(tcp.Port):
     addressFamily = 31 # socket.AF_BLUETOOTH
     proto = None
 
-    def __init__(self, proto, port, factory, backlog=50, interface='', reactor=None):
+    def __init__(self, proto, port, factory, backlog=50, interface='', 
+            reactor=None):
         """Initialize with a numeric port to listen on.
         """
         tcp.Port.__init__(self, port, factory, backlog, interface, reactor)
-        if proto not in [ None, bluetooth.RFCOMM, bluetooth.SCO, bluetooth.HCI, bluetooth.L2CAP ]:
+        if proto not in [ None, bluetooth.RFCOMM, bluetooth.SCO, bluetooth.HCI, 
+                bluetooth.L2CAP ]:
             raise RuntimeException("I only do Bluetooth")
         self.proto = proto
 
@@ -237,12 +319,16 @@ class Connector(tcp.Connector):
         self.proto = proto
 
     def _makeTransport(self):
-        return Client(self.proto, self.host, self.port, self.bindAddress, self, self.reactor)
+        return Client(self.proto, self.host, self.port, self.bindAddress, self, 
+                self.reactor)
 
     def getDestination(self):
         return (self.host, self.port)
 
-def __connectGeneric(reactor, proto, host, port, factory, timeout=30, bindAddress=None):
+def __connectGeneric(reactor, proto, host, port, factory, timeout=30, 
+        bindAddress=None):
+    if not isBonded(host):
+        bondDevice(host)
     c = Connector(proto, host, port, factory, timeout, bindAddress, reactor)
     c.connect()
     return c
@@ -265,4 +351,20 @@ def resolve_name(address):
     pass
   sock.close()
   return out
+
+if __name__=='__main__':
+    import sys
+    address = sys.argv[1]
+    import airi.pair as pair
+    def main():
+        initalizeDBus()
+        global dbus, bus, manager
+        agent = pair.Agent(bus, pair.PATH)
+        print isBonded(address)
+        print bondDevice(address)
+        print isBonded(address)
+        reactor.stop()
+    from twisted.internet import reactor
+    reactor.callWhenRunning(main)
+    reactor.run()
 
