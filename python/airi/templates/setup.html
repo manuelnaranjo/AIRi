@@ -5,50 +5,52 @@
 {% block header_title %}AIRi Camera Configuration{% endblock %}
 
 {% macro fieldcontain(id, label, type, value, readonly=False) -%}
-  <div data-role="fieldcontain">
-    <label for="{{ id }}">{{ label }}:</label>
-    <input id="{{ id }}" name="{{ id }}" type="{{ type }}"  value="{{value}}"
-      {% if readonly %} readonly="readonly" {% endif %}
-    />
-  </div>
+    <div data-role="fieldcontain">
+        <label for="{{ id }}">{{ label }}:</label>
+        <input id="{{ id }}" name="{{ id }}" type="{{ type }}"  value="{{value}}"
+            {% if readonly %} readonly="readonly" {% endif %}
+        />
+    </div>
 {%- endmacro %}
 
 {% macro selectfieldcontain(id, label, options, selected, readonly=False) -%}
-  <div data-role="fieldcontain">
-    <label for="{{ id }}">{{ label }}</label>
-    {% if options|length > 0 %}
-      <select id="{{ id }}" name="{{ id }}" {% if readonly %}readonly="readonly"{% endif %}>
-      {% for option in options %}
-        <option value="{{ option }}"
-          {% if selected==option %}
-            selected
-          {% endif %}
-          >{{ option }}</option>
-      {% endfor %}
-      </select>
-    {% else %}
-    <input type="text" id="{{ id }}" readonly="readonly" class="ui-body-e" value="Not supported feature" />
-    {% endif %}
-  </div>
+	<div data-role="fieldcontain">
+		<label for="{{ id }}">{{ label }}</label>
+		{% if options|length > 0 %}
+			<select id="{{ id }}" name="{{ id }}" 
+				{% if readonly %}readonly="readonly"{% endif %}>
+			{% for option in options %}
+				<option value="{{ option }}"
+					{% if selected==option %}selected{% endif %}
+				>{{ option }}</option>
+			{% endfor %}
+			</select>
+		{% else %}
+		<input type="text" id="{{ id }}" readonly="readonly" class="ui-body-e" 
+			value="Not supported feature" />
+		{% endif %}
+	</div>
 {%- endmacro %}
 
 {% macro checkfieldcontain(id, label, legend, value, readonly=False) -%}
-  <div data-role="fieldcontain">
-    <fieldset data-role="controlgroup">
-      <legend>{{ legend }}</legend>
-      <label for="{{ id }}">{{ label }}</label>
-      <input name="{{ id }}" id="{{ id }}" type="hidden" value="false" >
-      <input name="{{ id }}" id="{{ id }}" type="checkbox" class="custom" value="true"
-        {% if readonly %} readonly="readonly" {% endif %}
-        {% if value==True %} checked {% endif %}
-      />
-    </fieldset>
-  </div>
+	<div data-role="fieldcontain">
+		<fieldset data-role="controlgroup">
+			<legend>{{ legend }}</legend>
+				<label for="{{ id }}">{{ label }}</label>
+				<input name="{{ id }}" id="{{ id }}" type="hidden" 
+					value="false" >
+				<input name="{{ id }}" id="{{ id }}" type="checkbox" 
+					class="custom" value="true"
+					{% if readonly %} readonly="readonly" {% endif %}
+					{% if value==True %} checked {% endif %}
+				/>
+		</fieldset>
+	</div>
 {%- endmacro %}
 
 {% block extra_header %}
 {% if not new_device %}
-    <div id="tab" data-role="tabs">
+	<div id="tab" data-role="tabs">
         <ul>
             <li><a href="#info">Information</a></li>
             <li><a href="#connection">Connection</a></li>
@@ -60,111 +62,138 @@
 {% endblock %}
 
 {% block content %}
-<form id="setup-form" method="post" action="/setup.html?address={{address}}">
+	<form id="setup-form" method="post" 
+		action="/setup.html?address={{address}}">
 
-{% if new_device %}
-  <h3>New device configuration</h3>
-  {{ fieldcontain("address", "Address", "text", address, True) }}
-  {% if not name %}
-    {% set name="Unkown Device" %}
-  {% endif %}
-  {{ fieldcontain("name", "Name", "text", name) }}
-  {{ selectfieldcontain("type", "Type",  types, "AIRI") }}
-  {{ checkfieldcontain("enable_pincode", "Use device PIN code", " ",  False )}}
-  {{ fieldcontain ("pincode", "PIN code", "text",  "" ) }}
+	{% if new_device %}
+		<h3>New device configuration</h3>
+		{{ fieldcontain("address", "Address", "text", address, True) }}
+		{% if not name %}
+			{% set name="Unkown Device" %}
+		{% endif %}
+		{{ fieldcontain("name", "Name", "text", name) }}
+		{{ selectfieldcontain("type", "Type",  types, "AIRI") }}
+		{% if pairing_supported %}
+			{{ checkfieldcontain("enable_pincode", "Use device PIN code", " ",
+				False )}}
+			{{ fieldcontain ("pincode", "PIN code", "text",  "" ) }}
+		{% endif %}
+    
+		<div class="ui-grid-a">
+			<div class="ui-block-a">
+				<button type="submit" data-theme="b" name="save" 
+					data-icon="check" data-iconpos="right">Save</button>
+			</div>
+			<div class="ui-block-b">
+				{{ button (  "#" , "Cancel" , "arrow-l", "", "ui-btn-left", 
+					theme="a", extra='id="cancel_button"') }}
+			</div>
+		</div>
 
-  <div class="ui-grid-a">
-  <div class="ui-block-a">
-    <button type="submit" data-theme="b" name="save" data-icon="check" data-iconpos="right">Save</button>
-  </div>
-  <div class="ui-block-b">
-    {{ button (  "#" , "Cancel" , "arrow-l", "", "ui-btn-left", theme="a", extra='id="cancel_button"') }}
-  </div>
-{% else %}
-    <div id="info">
-        {{ fieldcontain("address", "Address", "text", address, True) }}
-        {{ fieldcontain("name", "Name", "text", name) }}
-        {{ fieldcontain("type", "Type", "text", type , True) }}
-        {{ fieldcontain("status", "Status", "text",  status , True) }}
-        {{ fieldcontain("last", "Last Connection", "text",  last , True) }}
-        <input name="new-device" value="true" type="hidden"/>
+	{% else %}
+		<div id="info">
+			{{ fieldcontain("address", "Address", "text", address, True) }}
+			{{ fieldcontain("name", "Name", "text", name) }}
+			{{ fieldcontain("type", "Type", "text", type , True) }}
+			{{ fieldcontain("status", "Status", "text",  status , True) }}
+			{{ fieldcontain("last", "Last Connection", "text",  last , True) }}
+			<input name="new-device" value="true" type="hidden"/>
 
-        {% if capabilities.battery %}
-        {% else %}
-        {% set battery="Not supported feature" %}
-        {% endif %}
-        {{ fieldcontain("battery", "Battery Status (mV)", "text", battery, True) }}
-    </div>
+			{% if capabilities.battery %}
+			{% else %}
+				{% set battery="Not supported feature" %}
+			{% endif %}
+            {{ fieldcontain("battery", "Battery Status (mV)", "text", battery, 
+                    True) }}
+		</div>
 
-    <div id="connection">
-        {{ checkfieldcontain("reconnect", "Reconnect Automatically", "Reconnect",  reconnect ) }}
-        {{ fieldcontain("reconnect_timeout", "Reconnect After (seconds)", "text",  reconnect_timeout ) }}
-        {{ selectfieldcontain("transport", "Transport",  capabilities.transport ,  transport  ) }}
+		<div id="connection">
+            {{ checkfieldcontain("reconnect", "Reconnect Automatically", 
+                    "Reconnect",  reconnect ) }}
+            {{ fieldcontain("reconnect_timeout", "Reconnect After (seconds)", 
+                    "text",  reconnect_timeout ) }}
+            {{ selectfieldcontain("transport", "Transport",  
+                    capabilities.transport ,  transport  ) }}
 
-        {{ checkfieldcontain("enable_pincode", "Use device PIN code", " ",  enable_pincode )}}
-        {% if pincode %}
-        {% else %}
-            {% set pincode="" %}
-        {% endif %}
-
-        {{ fieldcontain ("pincode", "PIN code", "text",  pincode ) }}
-        <button type="submit" data-theme="b" name="save" data-icon="check"
-                data-iconpos="right">Save</button>
-        <button type="submit" data-theme="a" name="cancel" data-icon="delete" 
-                data-iconpos="right">Cancel</button>
-    </div>
-
-    <div id="camera_setup">
-        {{ selectfieldcontain("size", "Resolution",  capabilities.size ,  size  ) }}
-
-        <div data-role="fieldcontain">
-            <fieldset data-role="controlgroup" data-role="fieldcontain">
-                <legend>Extras</legend>
-                <label for="voice">Voice</label>
-                {% if capabilities.voice %}
-                    <input name="voice" id="voice_" type="hidden" value="false" />
-                    <input name="voice" id="voice" type="checkbox" value="true" {% if voice %}checked{% endif %}/>
-                {% else %}
-                    <input type="text" id="voice" readonly="readonly" class="ui-body-e" value="Not supported feature" />
+            {% if pairing_supported %}
+                {{ checkfieldcontain("enable_pincode", "Use device PIN code", 
+                    " ",  enable_pincode )}}
+			    {% if pincode %}
+			    {% else %}
+				    {% set pincode="" %}
                 {% endif %}
 
-                <label for="flash">Flash</label>
-                {% if capabilities.flash %}
-                    <input name="flash" name="flash" id="flash_" type="hidden" value="false" />
-                    <input name="flash" name="flash" id="flash" type="checkbox" {% if flash %}checked{% endif %}/>
-                {% else %}
-                    <input type="text" id="flash" readonly="readonly" class="ui-body-e" value="Not supported feature" />
-                {% endif %}
-            </fieldset>
-        </div>
-
-        <div data-role="fieldcontain">
-            <label for="exposure">Exposure Time (milliseconds):</label>
-            {% if capabilities.exposure %}
-                <input type="number" id="exposure-display" value="{{ exposure }}" style="width: 4em;" readonly="readonly"/>
-                <input type="hidden" name="exposure" id="exposure" value="{{ exposure }}" style="width: 4em;"/>
-                <div id="exposure-slider" style="display: inline-block; height: 1.2em;"></div>
-            {% else %}
-                <input type="text" id="exposure" readonly="readonly" class="ui-body-e" value="Not supported feature" />
+			    {{ fieldcontain ("pincode", "PIN code", "text",  pincode ) }}
+			    <button type="submit" data-theme="b" name="save" data-icon="check"
+					data-iconpos="right">Save</button>
+                <button type="submit" data-theme="a" name="cancel" 
+                    data-icon="delete" data-iconpos="right">Cancel</button>
             {% endif %}
+		</div>
+        
+        <div id="camera_setup">
+            {{ selectfieldcontain("size", "Resolution", capabilities.size, 
+                size)}}
+            <div data-role="fieldcontain">
+                <fieldset data-role="controlgroup" data-role="fieldcontain">
+                    <legend>Extras</legend>
+                    <label for="voice">Voice</label>
+                    {% if capabilities.voice %}
+                        <input name="voice" id="voice_" type="hidden" 
+                            value="false" />
+                        <input name="voice" id="voice" type="checkbox" 
+                            value="true" {% if voice %}checked{% endif %}/>
+                    {% else %}
+                        <input type="text" id="voice" readonly="readonly" 
+                            class="ui-body-e" value="Not supported feature" />
+                    {% endif %}
+
+                    <label for="flash">Flash</label>
+                    {% if capabilities.flash %}
+                        <input name="flash" name="flash" id="flash_" 
+                            type="hidden" value="false" />
+                        <input name="flash" name="flash" id="flash"
+                            type="checkbox" {% if flash %}checked{% endif %}/>
+                    {% else %}
+                        <input type="text" id="flash" readonly="readonly"
+                            class="ui-body-e" value="Not supported feature" />
+                    {% endif %}
+                </fieldset>
+            </div>
+
+            <div data-role="fieldcontain">
+                <label for="exposure">Exposure Time (milliseconds):</label>
+                {% if capabilities.exposure %}
+                    <input type="number" id="exposure-display" 
+                        value="{{ exposure }}" style="width: 4em;" 
+                        readonly="readonly"/>
+                    <input type="hidden" name="exposure" id="exposure" 
+                        value="{{ exposure }}" style="width: 4em;"/>
+                    <div id="exposure-slider" 
+                        style="display: inline-block; height: 1.2em;"></div>
+                {% else %}
+                    <input type="text" id="exposure" readonly="readonly" 
+                        class="ui-body-e" value="Not supported feature" />
+                {% endif %}
+            </div>
+
+            {{ selectfieldcontain("pan", "Initial Panning",  capabilities.pan, 
+                pan ) }}
+            <button type="submit" data-theme="b" name="save" data-icon="check"
+                data-iconpos="right">Save</button>
+            <button type="submit" data-theme="a" name="cancel" 
+                data-icon="delete" data-iconpos="right">Cancel</button>
         </div>
 
-        {{ selectfieldcontain("pan", "Initial Panning",  capabilities.pan ,  pan ) }}
-        <button type="submit" data-theme="b" name="save" data-icon="check"
-                data-iconpos="right">Save</button>
-        <button type="submit" data-theme="a" name="cancel" data-icon="delete"
-                data-iconpos="right">Cancel</button>
-    </div>
-
-    <div id="manage">
-        <button onclick="javascript: return confirm('Are you sure you want to delete this camera?')"
+        <div id="manage">
+            <button onclick="javascript: return confirm('Are you sure you want to delete this camera?')"
                 type="submit" data-theme="a" name="delete" data-icon="minus"
                 data-iconpos="right">Delete Camera</button>
-        <a data-role="button" data-theme="e" href="/stream.html?address={{address}}"
+            <a data-role="button" data-theme="e" 
+                href="/stream.html?address={{address}}"
                 data-icon="arrow-r" data-iconpos="right">Stream</a>
-    </div>
-{% endif %}
-
-</form>
+        </div>
+    {% endif %}
+    </form>
 {% endblock %}
 
