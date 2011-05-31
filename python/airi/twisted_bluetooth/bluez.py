@@ -24,6 +24,25 @@ from twisted.python import log
 
 from bluetooth import *
 
+def isPairingSupported():
+	try:
+		import android
+		d = android.Android()
+		return False
+	except:
+		pass
+
+	from airi.pair import Agent
+	if getattr(Agent, "bus_non_available", False):
+		return False
+
+	return True
+
+def isPairingReady():
+	if not isPairingSupported():
+		return False
+	return len(Agent.listeners)>0
+
 class BluetoothConnection(tcp.Connection):
     """
     Superclass of all Bluetooth-socket-based Descriptors

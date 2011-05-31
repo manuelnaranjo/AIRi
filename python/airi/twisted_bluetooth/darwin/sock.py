@@ -26,6 +26,8 @@ from airi import report
 CATEGORY="darwin"
 
 from multiprocessing.connection import Listener
+def isPairingSupported():
+	return False
 
 @report(category=CATEGORY)
 def discover_devices (duration=8, flush_cache=True, lookup_names=False):

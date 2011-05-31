@@ -22,6 +22,9 @@ from twisted.python import log
 
 from bluetooth import *
 
+def isPairingSupported():
+	return False
+
 def shutdown(self, how):
   return self.close()
 
