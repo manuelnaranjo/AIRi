@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+try:
+    from twisted.internet import glib2reactor
+    glib2reactor.install()
+except:
+    pass
+
 from twisted.python import log
 import logging
 
@@ -46,4 +52,3 @@ import twisted_bluetooth
 import stream
 import server
 import api
-
