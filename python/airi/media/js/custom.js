@@ -300,16 +300,17 @@ function setup_create(event){
 }
 
 function viewerResizeDesktop(width, height){
+    var viewer = $("#viewer .active-mode #video-content");
     if (width != undefined && height != undefined ){
         console.log("viewerResize", width, height);
-        $("#viewer .active-mode #video-content").data("width", width);
-        $("#viewer .active-mode #video-content").data("height", height);
+        viewer.data("width", width);
+        viewer.data("height", height);
     }
     $("#viewer .active-mode").parent().removeClass("ui-content-marginless")
     $("#viewer div[data-role=header]").find("a[id!=home_button],h1,h4").removeClass("hide")
     $("#viewer #home_button").removeClass("top-front")
-    $("#viewer .active-mode #video-content").css("width", $("#video-content").data("width"));
-    $("#viewer .active-mode #video-content").css("height", $("#video-content").data("height"));
+    $("object", viewer).css("width", viewer.data("width"));
+    $("object", viewer).css("height", viewer.data("height"));
 }
 
 function makeFullScreen(selector){
