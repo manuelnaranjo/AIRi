@@ -135,24 +135,25 @@ function watch_device(){
         switch (index){
           case "size":
           case "pan":
-            $("#stream-"+index+" option:selected").removeAttr("selected");
-            $("#stream-"+index+" > option[value="+element+"]").attr("selected", "selected");
-            $("#stream-"+index).selectmenu("refresh");
+            $(".active-mode #stream-"+index+" option:selected").removeAttr("selected");
+            $(".active-mode #stream-"+index+" > option[value="+element+"]").attr("selected", "selected");
+            $(".active-mode #stream-"+index).selectmenu("refresh");
             break;
           case "status":
             if (element==true){
-              $("#stream-disconnect").css("display", "")
-              $("#stream-connect").css("display", "none")
+              $(".active-mode #stream-disconnect").css("display", "")
+              $(".active-mode #stream-connect").css("display", "none")
               connectViewer();
             } else if (element==false) {
-              $("#stream-connect").css("display", "")
-              $("#stream-disconnect").css("display", "none")
+              $(".active-mode #stream-connect").css("display", "")
+              $(".active-mode #stream-disconnect").css("display", "none")
               disconnectViewer();
             }
+			$(".active-mode #stream-" + index).val(element);
             break;
           case "flash":
           case "voice":
-            $("#stream-"+index).attr("data-state", element);
+            $(".active-mode #stream-"+index).attr("data-state", element);
             updateGeneric(index)
             break;
           default:
