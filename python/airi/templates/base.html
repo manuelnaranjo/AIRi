@@ -45,7 +45,7 @@
         "arrow-l",
         class="ui-btn-left",
         extra='id="back_button"') }}
-      <h1>{% block header_title %}{% endblock %}</h1>
+	  <h1>AIRi | {% block header_title %}{% endblock %}</h1>
       {{ button (  "#" ,
         "Main" ,
         "home",
@@ -59,7 +59,9 @@
     </div>
 
     <div data-role="header" data-position="inline">
-      <h4 style="margin-left: 0px; margin-right: 0px;">Powered by {{ button("http://www.aircable.net","AIRcable.net", "star") }}</h4>
+		<h4 style="margin-left: 0px; margin-right: 0px;"
+			>Powered by {{ button("http://www.aircable.net","AIRcable.net", 
+			"star") }} </h4>
       {{ button ( "#", 
           "Reload", 
           "refresh", 
