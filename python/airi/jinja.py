@@ -3,6 +3,7 @@ from twisted.web.resource import Resource
 from twisted.python import log
 from twisted.web.static import File
 from jinja2 import Environment, PackageLoader
+from airi import __version__
 from airi.camera.protocol import CameraFactory
 from airi.camera import UnknownDevice
 from airi.settings import getSettings
@@ -149,6 +150,7 @@ class Main(Resource):
 	template = self.env.get_template(path)
 	context = self.contexts.get(path, lambda x,y: {})(self, request)
 	context["pairing_supported"]=bluetooth.isPairingSupported()
+	context["version"] = __version__
 	return TemplateResource(template, context)
 
 class PkgFile(File):
