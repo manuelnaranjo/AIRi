@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os
+import os, sys
 from setuptools import setup, find_packages
 from airi import __version__
 
@@ -12,6 +12,16 @@ def read(fname):
     a raw string in below
     '''
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+REQUIRES = [
+    "Twisted >= 11.0.0",
+    "Jinja2"
+]
+
+if sys.platform.startswith("linux") or sys.platform.startswith("win"):
+    REQUIRES.append("PyBluez >= 0.18")
+elif sys.platform.startswith("darwin"):
+    REQUIRES.append("lightblue >=0.4")
 
 setup(name="airi",
     version=__version__,
@@ -43,5 +53,10 @@ setup(name="airi",
         'AIRi = airi.main:main', 
       ]
     },
+    dependency_links = [
+	"http://code.google.com/p/pybluez/downloads/list",
+	"http://prdownloads.sourceforge.net/lightblue/"
+    ],
+    install_requires = REQUIRES,
     zip_safe=False,
 )
