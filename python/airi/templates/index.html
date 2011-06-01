@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}Devices{% endblock %}
-{% block header_title %}AIRi{% endblock %}
+{% block header_title %}Devices{% endblock %}
 
 {% block content %}
 <ul data-role="listview" data-dividertheme="d" style="margin-top: 0;" data-split-icon="gear">
@@ -28,7 +28,18 @@
             <h3>Server Setup</h3>
             <p>Here you can configure things like automated PIN codes, etc</p>
         </a>
-    </li>
+	</li>
+	<li data-role="list-divider">Server Status</li>	
+	{% if pairing_supported %}
+	<li>
+		<h3>Pairing Manager</h3>
+		<p>Running</p>
+	</li>
+	{% endif %}
+	<li>
+		<h3>Version</h3>
+		<p>{{ version }}</p>
+	</li>
 </ul>
 {% endblock %}
 
