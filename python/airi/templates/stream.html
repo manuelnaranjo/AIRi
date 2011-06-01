@@ -129,8 +129,11 @@
           {{ information("Transport", camera.transport, "stream-transport") }}
           {{ information("Automatically Reconnect", camera.reconnect, "stream-reconnect") }}
           {{ information("Reconnect Timeout", camera.reconnect_timeout, "stream-reconnect_timeout") }}
-          {{ information("Use Device PIN", camera.enable_pincode, "stream-enable_pincode") }}
-          {{ information("PIN Code", camera.pin, "stream-pin") }}
+          {% if pairing_supported %}
+			{{ information("Use Device PIN", camera.enable_pincode,
+				"stream-enable_pincode") }}
+			{{ information("PIN Code", camera.pin, "stream-pin") }}
+          {% endif %}
 
           {% if camera.capabilities.battery %}
             {{ information("Battery (mv)", camera.battery, "stream-battery") }}
@@ -155,15 +158,19 @@
     <div data-role="collapsible" data-collapsed="false">
       <h4>Device Information</h4>
       {{ information("Address", camera.address, "stream-address") }}
-      {{ information("Name", camera.name, "stream-name") }}
+	  {{ information("Name", camera.name, "stream-name") }}
+	  {{ information("Stream URL", "/stream/"+camera.address, "stream-url") }}
       {{ information("Type", camera.type, "stream-type") }}
       {{ information("Status", camera.status, "stream-status") }}
       {{ information("Last Connection", camera.last, "stream-last") }}
       {{ information("Transport", camera.transport, "stream-transport") }}
       {{ information("Automatically Reconnect", camera.reconnect, "stream-reconnect") }}
       {{ information("Reconnect Timeout", camera.reconnect_timeout, "stream-reconnect_timeout") }}
-      {{ information("Use Device PIN", camera.enable_pincode, "stream-enable_pincode") }}
-      {{ information("PIN Code", camera.pin, "stream-pin") }}
+	  {% if pairing_supported %}
+			{{ information("Use Device PIN", camera.enable_pincode,
+				"stream-enable_pincode") }}
+			{{ information("PIN Code", camera.pin, "stream-pin") }}
+	  {% endif %}
 
       {% if camera.capabilities.battery %}
         {{ information("Battery (mv)", camera.battery, "stream-battery") }}
