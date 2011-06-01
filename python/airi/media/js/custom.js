@@ -204,6 +204,7 @@ function pageshow(event, ui){
     $("#" + id + " #back_button").attr("href", "javascript: goBack()");
     $("#" + id + " #home_button").attr("href", "javascript: goHome()");
     $("#" + id + " #reload_button").attr("href", "javascript: doReload()");
+	document.title = $(".ui-page-active div[data-role=header] h1").text();
 
     window.scrollTo(0, 1);
 
