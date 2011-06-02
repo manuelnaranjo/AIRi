@@ -27,19 +27,15 @@
         <a href="/server-setup.html" data-icon="gear">
             <h3>Server Setup</h3>
             <p>Here you can configure things like automated PIN codes, etc</p>
-        </a>
-	</li>
-	<li data-role="list-divider">Server Status</li>	
-	{% if pairing_supported %}
+		</a>
 	<li>
-		<h3>Pairing Manager</h3>
-		<p>Running</p>
-	</li>
-	{% endif %}
-	<li>
-		<h3>Version</h3>
-		<p>{{ version }}</p>
-	</li>
+		<h3>Server Status</h3>
+		{% if pairing_supported %}	
+		<span>Pairing Manager: <strong>Running</strong></span>
+		<br>
+		{% endif %}
+		<span>Version: <strong>{{ version }}</strong></span>
+	</li>	
 </ul>
 {% endblock %}
 
