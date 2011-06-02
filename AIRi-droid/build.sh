@@ -5,10 +5,10 @@ if [ -f res/raw/python.egg ]; then
   rm res/raw/python.egg
 fi
 
-cd python
-
+pushd python
 bash compress.sh
-cd ..
+popd
+
 ant clean
 ant debug
 adb uninstall net.aircable.airi
