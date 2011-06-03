@@ -82,6 +82,10 @@ function doConfigure(option, value){
   )
 }
 
+function switchResolution(size){
+	return doConfigure("resolution", size);
+}
+
 function select_changed(){
   var option = this.id.split("-", 2)[1];
   var value = $("option:selected", this).attr("value");
@@ -284,6 +288,7 @@ function viewer_create(event){
             $("#viewer .ui-content .active-mode").removeClass("ui-video-player")
     }
     console.log("creating viewer");
+	$(".rotate-45").rotate(-45);
     viewer_resize();
     viewerResize();
     $('#viewer div[data-role=tabs]').tabs({
