@@ -80,3 +80,41 @@
     display: none !important;
 }
 
+
+.button-33 {
+	width: 33% !important;
+}
+
+.button-33 .ui-btn-inner {
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+.maximize .ui-controlgroup-controls{
+	width: 100% !important;
+}
+
+.min-width-480px .ui-controlgroup-label{
+	width: 20% !important;
+	margin: 0px !important;
+}
+
+.min-width-480px .ui-controlgroup-controls{
+	width: 80% !important;
+	
+}
+
+.pan-control a {
+	margin: 0px !important;
+}
+
+.pan-control .ui-block-a,
+	.pan-control .ui-block-b,
+	.pan-control .ui-block-c {
+	width: 36px !important;
+}
+
+.pan-control .ui-icon-delete {
+	background-position: -1000px 50%;
+}
+
