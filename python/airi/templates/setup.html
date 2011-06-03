@@ -108,10 +108,12 @@
 		</div>
 
 		<div id="connection">
+			{#
             {{ checkfieldcontain("reconnect", "Reconnect Automatically", 
                     "Reconnect",  reconnect ) }}
             {{ fieldcontain("reconnect_timeout", "Reconnect After (seconds)", 
-                    "text",  reconnect_timeout ) }}
+			"text",  reconnect_timeout ) }}
+			#}
             {{ selectfieldcontain("transport", "Transport",  
                     capabilities.transport ,  transport  ) }}
 
