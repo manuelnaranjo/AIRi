@@ -131,10 +131,10 @@ class AIRi(CameraProtocol):
             self.doCommand(option, SIZES[value])
         elif option == "flash":
             self.doCommand(option, "0" if not value else "1")
-        elif option == "pan":
-            self.doCommand(option, value.upper()[0])
-        elif option == "exposure":
-            self.doCommand(option, value)
+        elif option == "pan" or option == "exposure":
+            self.doCommand(option, value.upper())
+        else:
+            dbg("ignored")
 
 AIRi.Capabilities = CAPABILITIES
 AIRi.Sizes = SIZES

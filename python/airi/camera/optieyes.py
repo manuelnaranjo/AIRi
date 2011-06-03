@@ -8,11 +8,11 @@ from airi.settings import getSettings
 settings=getSettings()
 
 SIZES={
-    "VGA":	4,
-    "QVGA":	5,
+    "VGA":  4,
+    "QVGA": 5,
     "QQVGA":6,
-    "SVGA":	0xc,
-    "XVGA":	0xd,
+    "SVGA": 0xc,
+    "XVGA": 0xd,
 }
 
 CAPABILITIES={ 
@@ -132,9 +132,11 @@ class OptiEye(CameraProtocol):
   def set(self, option, value):
     dbg("set %s->%s" % (option, value) )
     if option=="size":
-      self.doSetSize(value)
-      from airi.api import UpdateManager
-      UpdateManager.propagate(self.address, {"size": value})
+        self.doSetSize(value)
+        from airi.api import UpdateManager
+        UpdateManager.propagate(self.address, {"size": value})
+    else:
+        dbg("ignored")
 
   def disconnect(self):
     dbg("OptiEyes.disconnect")
