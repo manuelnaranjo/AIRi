@@ -80,10 +80,36 @@
 112 ALARM 3
 113 RETURN
 
-0 REM button press disconnects slave
+0 REM button press disconnects slave, just in case we have one
 120 A = disconnect 0
-121 A = pioclr 20
-122 RETURN
+0 REM red charger LED on
+121 A = pioout 19
+122 A = pioset 19
+0 REM we make a picture and put it into SD card
+123 A = camera 1
+0 REM this will take 5 seconds to stabilize the sensor
+124 A = camflash 1
+0 REM we take the time to open a file, which takes a while too...
+125 A = open "/*.jpg"
+
+0 REM wait for a picture
+126 A = camcopy
+127 IF A <> 0 THEN 130
+128 WAIT 1
+129 GOTO 126
+
+0 REM get picture from memory into SD card
+130 A = camcopy;
+131 IF A > 0 THEN 130;
+
+0 REM close file, get file name in $0
+132 A = close $0
+133 PRINTU $0
+0 REM switch camera off, turns SD card off too
+134 A = camera 0
+135 A = pioin 19
+136 A = pioclr 20
+137 RETURN
 
 
 @ALARM 170
@@ -104,10 +130,11 @@
 179 A = pioclr 17;
 180 A = reboot;
 
-181 FOR E = 0 TO 10
-182   WAIT 1
-183 NEXT E
-184 RETURN
+181 FOR E = 0 TO 2
+182   A = ring E
+183   WAIT 1
+184 NEXT E
+185 RETURN
 
 0 REM check if we have a connection
 190 A = status;
@@ -156,8 +183,8 @@
 407 IF $0[1]=80 THEN 440;
 408 IF $0[1]=69 THEN 450;
 409 IF $0[1]=68 THEN 460;
-409 ALARM 1
-410 RETURN
+410 ALARM 1
+411 RETURN
 
 0 REM set size
 420 B = atoi $0[2];
@@ -166,7 +193,7 @@
 423 RETURN
 
 0 REM set flash
-430 IF $0[1]=49 THEN 434;
+430 IF $0[2]=49 THEN 434;
 431 A = camflash 0
 432 ALARM 1
 433 RETURN
@@ -176,7 +203,7 @@
 436 RETURN
 
 0 REM do PAN
-440 A = campan $0[1]
+440 A = campan $0[2]
 441 ALARM 1
 442 RETURN
 
@@ -188,6 +215,7 @@
 
 0 REM date
 460 A = setdate $0[2];
-461 RETURN
+461 ALARM 1
+462 RETURN
 
 500 END
