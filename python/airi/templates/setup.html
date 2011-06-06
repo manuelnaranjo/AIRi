@@ -132,10 +132,11 @@
                     data-icon="delete" data-iconpos="right">Cancel</button>
             {% endif %}
 		</div>
-        
+
         <div id="camera_setup">
             {{ selectfieldcontain("size", "Resolution", capabilities.size, 
                 size)}}
+    
             <div data-role="fieldcontain">
                 <fieldset data-role="controlgroup" data-role="fieldcontain">
                     <legend>Extras</legend>
@@ -164,15 +165,11 @@
             </div>
 
             <div data-role="fieldcontain">
-                <label for="exposure">Exposure Time (milliseconds):</label>
+                <label for="exposure">Exposure Time:</label>
                 {% if capabilities.exposure %}
-                    <input type="number" id="exposure-display" 
-                        value="{{ exposure }}" style="width: 4em;" 
-                        readonly="readonly"/>
-                    <input type="hidden" name="exposure" id="exposure" 
-                        value="{{ exposure }}" style="width: 4em;"/>
-                    <div id="exposure-slider" 
-                        style="display: inline-block; height: 1.2em;"></div>
+		    <input type="range" name="exposure" id="exposure" 
+			value="{{ exposure }}" min="1.0" max="32.0"
+			style="display: none;"/>
                 {% else %}
                     <input type="text" id="exposure" readonly="readonly" 
                         class="ui-body-e" value="Not supported feature" />
