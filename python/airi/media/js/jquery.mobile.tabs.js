@@ -14,9 +14,10 @@ $.widget( "mobile.tabs", $.mobile.widget, {
 		iconpos: 'top',
 		grid: null,
 		load: function(event, ui) { },
-		beforeTabHide: function(event, ui) { },
-		beforeTabShow: function(event, ui) { },
-		afterTabShow:  function(event, ui) { }
+		beforeTabHide: function(event, ui) { return true; },
+		beforeTabShow: function(event, ui) { return true; },
+		afterTabShow:  function(event, ui) { return true; },
+        selector: 'div[data-role="content"]'
 	},
 	_create: function(){
 		var
@@ -24,7 +25,7 @@ $.widget( "mobile.tabs", $.mobile.widget, {
 			$tabs = this.element,
 			$navbtns = $tabs.find("a"),
 			iconpos = $navbtns.filter('[data-icon]').length ? this.options.iconpos : undefined;
-		var $content = $tabs.closest('div[data-role="page"]').find('div[data-role="content"]');
+		var $content = $tabs.closest('div[data-role="page"]').find(this.options.selector);
 
 		$tabs
 			.addClass('ui-navbar')
@@ -79,11 +80,11 @@ $.widget( "mobile.tabs", $.mobile.widget, {
 		return this.element.find('.ui-btn-active').parent().prevAll().length;
 	},
 	currentContent: function() {
-		return this.element.closest('div[data-role="page"]').find('div[data-role="content"]').children().filter('.ui-tabs-content-active');
+		return this.element.closest('div[data-role="page"]').find(this.options.selector).children().filter('.ui-tabs-content-active');
 	},
 	changeTab: function(event, ui) {
 		if( this._trigger('beforeTabHide', event, ui) )
-		ui.currentContent.siblings().andSelf().removeClass('ui-tabs-content-active');
+		    ui.currentContent.siblings().andSelf().removeClass('ui-tabs-content-active');
 		if( this._trigger('beforeTabShow', event, ui) )
 			ui.nextContent.addClass('ui-tabs-content-active');
 		this._trigger('afterTabShow', event, $.extend({}, ui, { previousContent: ui.currentContent, currentContent: ui.nextContent, nextContent: null }));
