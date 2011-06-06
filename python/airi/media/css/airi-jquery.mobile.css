@@ -45,9 +45,14 @@
 }
 
 .video-controls {
-    padding: 2px;
+    padding: 0px;
     margin: 0px;
     min-width: 200px;
+    border-width: 0px;
+}
+
+.video-controls form {
+    margin: 0px 10px;
 }
 
 .min-width-768px .video-controls {
@@ -118,3 +123,22 @@
 	background-position: -1000px 50%;
 }
 
+.min-width-480px .ui-select {
+    width: 100% !important;
+}
+
+.min-width-480px .ui-controlgroup input.ui-input-text, 
+    .min-width-480px .ui-controlgroup textarea.ui-input-text, 
+    .min-width-480px .ui-controlgroup .ui-input-search {
+    width: 99% !important;
+}
+
+.ui-slider {
+    width: 85% !important;
+    height: 36px !important;
+}
+
+.ui-slider .ui-slider-handle {
+    top: 3px !important;
+    left: 0px;
+}
