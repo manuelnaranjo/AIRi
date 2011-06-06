@@ -60,7 +60,15 @@ function update_home(){
 
 function update_setup(){
   console.log("setup");
-  create_exposure_slider("#exposure-display", "#exposure-slider", "#exposure");
+  $("#setup #exposure-text").remove()
+  b = $("<label id='exposure-text' style='display: inline-block; margin-left: 2em; margin-right: .2;'>ms</label>")
+  $(".ui-page-active #exposure").after(b)
+  $(".ui-page-active #exposure").bind("change", function(){
+    var value = $(".ui-page-active #exposure").attr("value");
+    if ( value == 0 ){ value = 1; }
+    $(".ui-page-active #exposure-text").text(value*66+" ms")
+  })
+  $(".ui-page-active #exposure").trigger("change")
 }
 
 function getPlayerApi(){
@@ -173,12 +181,6 @@ function watch_device(){
 
 function update_viewer(){
   console.log("view");
-  create_exposure_slider(".active-mode #stream-exposure-display", ".active-mode #stream-exposure-slider", ".active-mode #exposure");
-
-  $(".active-mode #stream-exposure-slider", $(".ui-page-active")).unbind("slidechange")
-  $(".active-mode #stream-exposure-slider", $(".ui-page-active")).bind("slidechange", function(event, ui){
-    doConfigure("exposure", ui.value);
-  })
 
   $(".active-mode #stream-size", $(".ui-page-active")).unbind("change")
   $(".active-mode #stream-size", $(".ui-page-active")).change(select_changed, {"origin": "stream-size"})
@@ -244,21 +246,6 @@ function create_exposure_slider(label, holder, real){
   holder=$(holder, $(".ui-page-active"));
   label=$(label, $(".ui-page-active"));
   real=$(real, $(".ui-page-active"));
-  var slide=holder.slider({
-    min: 1,
-    max: 30,
-    value: real.val(),
-    slide: function(event, ui) {
-      label.val(""+ui.value*1000/15);
-      real.val(ui.value);
-    }
-  })
-  label.val(""+slide.slider("value")*1000/15);
-  var a = slide.children()
-  var h = a.height();
-  holder.css("height", h+"px");
-  a.css("top","0px");
-  a.css("margin-top","0px");
 }
 
 function viewer_resize(event){
@@ -303,6 +290,7 @@ function setup_create(event){
     $('#setup [data-role="tabs"]').tabs({
             selector: 'form[id="setup-form"]'
     })
+
     $("div[data-role=page][id=setup] #reload_button").addClass("hide")
 }
 
