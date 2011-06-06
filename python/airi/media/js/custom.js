@@ -61,9 +61,10 @@ function update_home(){
 function update_setup(){
   console.log("setup");
   $("#setup #exposure-text").remove()
-  b = $("<label id='exposure-text' style='display: inline-block; margin-left: 2em; margin-right: .2;'>ms</label>")
-  $(".ui-page-active #exposure").after(b)
-  $(".ui-page-active #exposure").bind("change", function(){
+  b = $("<label id='exposure-text' style='display: inline-block; width: 10%'>ms</label>")
+  $(".ui-page-active #exposure[data-type=range]").after(b)
+  $(".ui-page-active #exposure[data-type=range]").unbind("change")
+  $(".ui-page-active #exposure[data-type=range]").bind("change", function(){
     var value = $(".ui-page-active #exposure").attr("value");
     if ( value == 0 ){ value = 1; }
     $(".ui-page-active #exposure-text").text(value*66+" ms")
@@ -275,20 +276,20 @@ function viewer_create(event){
             $("#viewer .ui-content .active-mode").removeClass("ui-video-player")
     }
     console.log("creating viewer");
-	$(".rotate-45").rotate(-45);
+    $(".rotate-45").rotate(-45);
     viewer_resize();
     viewerResize();
     $('#viewer div[data-role=tabs]').tabs({
         beforeTabShow: function(event, ui){ prepare(ui.nextContent); },
         load: function(event, args){ prepare(args.currentContent);},
-        selector: 'div[data-airi="mobile"]'
+        selector: 'div[data-airi=mobile]'
     })
 }
 
 function setup_create(event){
     console.log("creating setup");
-    $('#setup [data-role="tabs"]').tabs({
-            selector: 'form[id="setup-form"]'
+    $('#setup [data-role=tabs]').tabs({
+            selector: 'form[id=setup-form]'
     })
 
     $("div[data-role=page][id=setup] #reload_button").addClass("hide")
