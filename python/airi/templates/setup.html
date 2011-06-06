@@ -6,46 +6,50 @@
 
 {% macro fieldcontain(id, label, type, value, readonly=False) -%}
     <div data-role="fieldcontain">
-        <label for="{{ id }}">{{ label }}:</label>
-        <input id="{{ id }}" name="{{ id }}" type="{{ type }}"  value="{{value}}"
-            {% if readonly %} readonly="readonly" {% endif %}
-        />
+	<fieldset data-role="controlgroup">
+	    <legend>{{ label }}:</legend>
+	    <input id="{{ id }}" name="{{ id }}" type="{{ type }}"  value="{{value}}"
+        	{% if readonly %} readonly="readonly" {% endif %}
+    	    />
+    	</fieldset>
     </div>
 {%- endmacro %}
 
 {% macro selectfieldcontain(id, label, options, selected, readonly=False) -%}
 	<div data-role="fieldcontain">
-		<label for="{{ id }}">{{ label }}</label>
-		{% if options|length > 0 %}
-			<select id="{{ id }}" name="{{ id }}" 
-				{% if readonly %}readonly="readonly"{% endif %}>
-			{% for option in options %}
+	    <fieldset data-role="controlgroup">
+		<legend>{{label}}</legend>
+		<select id="{{ id }}" name="{{ id }}" 
+			{% if options|length==0 %}disabled{% endif %} >
+		    {% if options|length > 0 %}
+			{% if readonly %}readonly="readonly"{% endif %}>
+			    {% for option in options %}
 				<option value="{{ option }}"
-					{% if selected==option %}selected{% endif %}
+				    {% if selected==option %}selected{% endif %}
 				>{{ option }}</option>
-			{% endfor %}
-			</select>
-		{% else %}
-		<input type="text" id="{{ id }}" readonly="readonly" class="ui-body-e" 
-			value="Not supported feature" />
-		{% endif %}
+			    {% endfor %}
+			{% else %}
+			    <option>Not supported feature</option>
+			{% endif %}
+		</select>
+	    </fieldset>
 	</div>
 {%- endmacro %}
 
 {% macro checkfieldcontain(id, label, legend, value, readonly=False) -%}
-	<div data-role="fieldcontain">
-		<fieldset data-role="controlgroup">
-			<legend>{{ legend }}</legend>
-				<label for="{{ id }}">{{ label }}</label>
-				<input name="{{ id }}" id="{{ id }}" type="hidden" 
-					value="false" >
-				<input name="{{ id }}" id="{{ id }}" type="checkbox" 
-					class="custom" value="true"
-					{% if readonly %} readonly="readonly" {% endif %}
-					{% if value==True %} checked {% endif %}
-				/>
-		</fieldset>
-	</div>
+    <div data-role="fieldcontain">
+	<fieldset data-role="controlgroup">
+	    <legend>{{ legend }}</legend>
+	    <label for="{{ id }}">{{ label }}</label>
+	    <input name="{{ id }}" id="{{ id }}" type="hidden" 
+		value="false" >
+	    <input name="{{ id }}" id="{{ id }}" type="checkbox" 
+		class="custom" value="true"
+		{% if readonly %} readonly="readonly" {% endif %}
+		{% if value==True %} checked {% endif %}
+	    />
+	</fieldset>
+    </div>
 {%- endmacro %}
 
 {% block extra_header %}
@@ -136,44 +140,43 @@
         <div id="camera_setup">
             {{ selectfieldcontain("size", "Resolution", capabilities.size, 
                 size)}}
-    
-            <div data-role="fieldcontain">
-                <fieldset data-role="controlgroup" data-role="fieldcontain">
-                    <legend>Extras</legend>
+
+	    <div data-role="fieldcontain">
+		<fieldset data-role="controlgroup">
+		    <legend>Features:</legend>
+		    <label for="flash">Flash</label>
+		    {% if capabilities.flash %}
+		    <input name="flash" id="flash_" 
+		        type="hidden" value="false"/>
+		    {% endif %}
+            	    <input name="flash" id="flash" value="true"
+                        type="checkbox" {% if flash %}checked{% endif %}
+                        class="custom" {% if not capabilities.flash %} disabled {% endif %}
+                    />
                     <label for="voice">Voice</label>
                     {% if capabilities.voice %}
-                        <input name="voice" id="voice_" type="hidden" 
-                            value="false" />
-                        <input name="voice" id="voice" type="checkbox" 
-                            value="true" {% if voice %}checked{% endif %}/>
-                    {% else %}
-                        <input type="text" id="voice" readonly="readonly" 
-                            class="ui-body-e" value="Not supported feature" />
+                    <input name="voice" id="voice_" type="hidden" 
+                        value="false" />
                     {% endif %}
-
-                    <label for="flash">Flash</label>
-                    {% if capabilities.flash %}
-                        <input name="flash" name="flash" id="flash_" 
-                            type="hidden" value="false" />
-                        <input name="flash" name="flash" id="flash"
-                            type="checkbox" {% if flash %}checked{% endif %}/>
-                    {% else %}
-                        <input type="text" id="flash" readonly="readonly"
-                            class="ui-body-e" value="Not supported feature" />
-                    {% endif %}
+                    <input name="voice" id="voice" value="true"
+                	type="checkbox" {% if voice %}checked{% endif %}
+                        class="custom" {% if not capabilities.voice %} disabled {% endif %}
+                    />
                 </fieldset>
             </div>
 
             <div data-role="fieldcontain">
-                <label for="exposure">Exposure Time:</label>
-                {% if capabilities.exposure %}
-		    <input type="range" name="exposure" id="exposure" 
-			value="{{ exposure }}" min="1.0" max="32.0"
-			style="display: none;"/>
-                {% else %}
-                    <input type="text" id="exposure" readonly="readonly" 
-                        class="ui-body-e" value="Not supported feature" />
-                {% endif %}
+        	<fieldset data-role="controlgroup">
+        	    <legend>Exposure Time:</legend>
+            	    {% if capabilities.exposure %}
+			<input type="range" name="exposure" id="exposure" 
+			    value="{{ exposure }}" min="1.0" max="32.0"
+			    style="display: none;""/>
+            	    {% else %}
+                	<input type="text" id="exposure" readonly="readonly" 
+                    	    class="ui-body-e" value="Not supported feature"/>
+            	    {% endif %}
+            	</fieldset>
             </div>
 
             {{ selectfieldcontain("pan", "Initial Panning",  capabilities.pan, 
