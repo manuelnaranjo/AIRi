@@ -154,7 +154,7 @@
 	#}
 	{% if pairing_supported %}
 		{{ information("Use Device PIN", camera.enable_pincode, "stream-enable_pincode") }}
-		{{ information("PIN Code", camera.pin, "stream-pin") }}
+		{{ information("PIN Code", camera.pincode, "stream-pin") }}
 	{% endif %}
 
 	{% if camera.capabilities.battery %}

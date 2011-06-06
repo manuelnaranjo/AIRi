@@ -128,10 +128,14 @@ class Main(Resource):
   def stream(self, request):
     if "address" not in request.args:
       raise Exception("You need to provide with an address")
+    camera = CameraFactory.getCamera(request.args["address"][0], True)
+    if camera["enable_pincode"]:
+	camera["pincode"]="************"
+    print camera
     return {
       "isChrome": "chrome" in request.requestHeaders.getRawHeaders("user-agent")[0].lower(),
       "address": request.args["address"][0],
-      "camera": CameraFactory.getCamera(request.args["address"][0], True)
+      "camera": camera
     }
 
   contexts = {
