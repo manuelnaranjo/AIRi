@@ -92,7 +92,7 @@ function doConfigure(option, value){
 }
 
 function switchResolution(size){
-	return doConfigure("resolution", size);
+	return doConfigure("size", size);
 }
 
 function select_changed(){
