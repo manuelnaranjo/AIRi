@@ -35,7 +35,6 @@ def initalizeDBus():
     if flag:
         return
 
-    flag = True
     global dbus, bus, manager
     try:
         import dbus
@@ -47,8 +46,12 @@ def initalizeDBus():
             bus = dbus.SystemBus()
             manager = dbus.Interface(bus.get_object("org.bluez", "/"),
                 "org.bluez.Manager")
-    except:
-        dbus = None
+        log.msg("DBus available")
+        flag = True
+    except Exception, err:
+	log.msg("DBus unavailable")
+	log.error(err)
+	if isAndroid(): flag = True
 
 def isAndroid():
     try:
