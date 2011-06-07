@@ -37,7 +37,7 @@ class ConnectionTest():
 
 class DevicesManager(Resource):
   isLeaf = True
-  
+
   def render_GET(self, request):
     request.setHeader('Content-Type', 'application/json')
     request.setHeader('Cache-Control', 'no-cache')
@@ -96,7 +96,9 @@ class doConfiguration(Resource):
     address = request.args["address"][0]
     option = request.args["option"][0]
     value = request.args["value"][0]
-    print address, option, value
+    if value.lower() in ["true", "false"]:
+	value = value.lower()=="true"
+    log.msg("doConfiguration.POST(%s, %s, %s)" % (address, option, value))
     try:
       cli = CameraFactory.getConnected(address)
       if cli:
