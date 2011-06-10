@@ -12,6 +12,8 @@ package net.aircable {
 	import mx.utils.Base64Encoder;
 	import flash.external.ExternalInterface;
 	import net.aircable.XHRMultipartEvent;
+	import flash.utils.Timer;
+	import flash.events.TimerEvent;
 
 	public class XHRMultipart extends EventDispatcher{
 		private var uri: String;
@@ -25,6 +27,8 @@ package net.aircable {
 		private var type: String;
 		private var browser: String;
 		private var headers: Object = {};
+		private var timer: Timer;
+		private var loaded: int;
     
 		private function trc(content: Object): void {
 			var a: Date = new Date();
@@ -50,10 +54,11 @@ package net.aircable {
 				trc("connected")
 			} catch (error:Error){
 				trc("Unable to load requested resource");
-		    }
+			}
 			this.pending = 0;
 			this.flag = false;
 			this.buffer = new ByteArray();
+			this.loaded = 0;
 		}
 
 		public function XHRMultipart(
@@ -62,9 +67,9 @@ package net.aircable {
 				username: String = null, 
 				password: String = null){
 			trc("XHRMultipart()");
-			trc(ExternalInterface.available);
+			trc("ExternalInterface " + ExternalInterface.available);
 			var v : String = root.loaderInfo.parameters.browser;
-			trc(v);
+			trc("LoaderInfo Browser: " + v);
 			if (v){
 				v=v.toLowerCase();
 				if (v.indexOf("chrome") > -1){
@@ -76,7 +81,12 @@ package net.aircable {
 					browser=null;
 				}
 			}
-			trc(browser);
+			trc("Browser: " + browser);
+			if (browser=="chrome") {
+				// 14 fps, repeat for the time of times
+				trc("starting timer");
+				timer = new Timer(66, 0);
+			}
 			ExternalInterface.addCallback("xhrConnect", connect);
 			ExternalInterface.addCallback("xhrDisconnect", disconnect);
 		}
@@ -88,8 +98,14 @@ package net.aircable {
 			stream.addEventListener(Event.OPEN, openHandler, false, 0, true);
 			stream.addEventListener(ProgressEvent.PROGRESS, progressHandler, false, 0, true);
 			stream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler, false, 0, true);
+			
+			if (timer != null){
+				trc("adding Timer Event listener");
+				timer.addEventListener(TimerEvent.TIMER, handleTimer, false, 0, true);
+				timer.start();
+			}
 		}
-    
+
 		private function removeListeners(): void{
 			stream.removeEventListener(Event.COMPLETE, completeHandler);
 			stream.removeEventListener(HTTPStatusEvent.HTTP_STATUS, httpStatusHandler);
@@ -97,8 +113,12 @@ package net.aircable {
 			stream.removeEventListener(Event.OPEN, openHandler);
 			stream.removeEventListener(ProgressEvent.PROGRESS, progressHandler);
 			stream.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
+			if (timer != null){
+				timer.removeEventListener(TimerEvent.TIMER, handleTimer);
+				timer.stop();
+			}
 		}
-    
+
 		private function propagatePart(out: ByteArray, type: String): void{
 			trc("found " + out.length + " mime: " + type);
 			dispatchEvent(new XHRMultipartEvent(XHRMultipartEvent.GOT_DATA, true, false, out, type));
@@ -114,6 +134,7 @@ package net.aircable {
 					break;
 
 				temp = stream.readUTFBytes(1);
+				this.loaded+=1;
 				if (temp == "\r")
 					continue;
 				if (temp == "\n"){
@@ -175,6 +196,7 @@ package net.aircable {
 			var output: ByteArray = new ByteArray();
 			stream.readBytes(output, 0, pending);
 			trc("pushing " + output.bytesAvailable);
+			loaded += pending;
 
 			readLine();
 			propagatePart(output, type);
@@ -182,6 +204,7 @@ package net.aircable {
 			headers["content-type"] = "";
 			flag = false;
 			pending = 0;
+			loaded += pending;
 			return;
 		}
 		
@@ -238,8 +261,8 @@ package net.aircable {
 			findImageInBuffer();
 		}
 
-		private function extractImage(): void {
-			trc("extractImage");
+		private function extractPart(): void {
+			trc("extractPart");
 
 			if (browser == null) 
 				firefoxExtract();
@@ -272,11 +295,18 @@ package net.aircable {
 				stream = null;
 			}
 		}
+		
+		private function handleTimer(event: TimerEvent): void {
+			trc("timerEvent: " + event);
+			trc("available: " + stream.bytesAvailable);
+			trc("loaded: " + loaded);
+			extractPart();
+		}
 
 		private function progressHandler(event:ProgressEvent):void {
 			trc("progressHandler: " + event)
 			trc("available: " + stream.bytesAvailable);
-			extractImage();
+			extractPart();
 			if (event.type == ProgressEvent.PROGRESS)
 				if (event.bytesLoaded > 1048576) { 
 					//1*1024*1024 bytes = 1MB
@@ -294,7 +324,7 @@ package net.aircable {
 		private function httpStatusHandler(event:HTTPStatusEvent):void {
 			trc("httpStatusHandler: " + event);
 			trc("available: " + stream.bytesAvailable);
-			extractImage();
+			extractPart();
 		}
 
 		private function ioErrorHandler(event:IOErrorEvent):void {
@@ -303,4 +333,3 @@ package net.aircable {
 		}
 	}
 };
-
