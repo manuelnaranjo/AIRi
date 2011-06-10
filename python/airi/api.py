@@ -27,6 +27,7 @@ class ConnectionTest():
     print "ConnectionTest.lostConnection", address
     self.request.write("<html><h1>ERROR:</h1>\n<pre>%s</pre></html>" % reason)
     self.request.setResponseCode(500, str(failed))
+    self.request.finish()
     self.cleanup(address)
 
   def gotFrame(self, frame, address):
@@ -166,7 +167,7 @@ class ScanManager(Resource):
         request.write(json.dumps(self.scancache))
         request.finish()
       if len(self.waiting)==0:
-        return
+        return server.NOT_DONE_YET
     except Exception, err:
       log.err(err)
       error = err
@@ -188,6 +189,7 @@ class ScanManager(Resource):
     self.waiting = []
     self.lastscan = None
     log.msg("Scan thread done")
+    return server.NOT_DONE_YET
 
 
   def lost_connection(self, err, request):
@@ -207,8 +209,9 @@ class ScanManager(Resource):
       request.setHeader('Cache-Control', 'no-cache')
       request.setHeader('Connection', 'close')
       request.write(json.dumps(self.scancache))
+      request.finish()
       log.msg("Scan return from cache")
-      return ''
+      return server.NOT_DONE_YET
 
     self.lastscan = time()
     self.waiting.append(request)
