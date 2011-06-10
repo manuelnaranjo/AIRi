@@ -59,36 +59,62 @@ function update_home(){
 }
 
 function update_setup(){
-  console.log("setup");
-  $("#setup #exposure-text").remove()
-  b = $("<label id='exposure-text' style='display: inline-block; width: 10%'>ms</label>")
-  $(".ui-page-active #exposure[data-type=range]").after(b)
-  $(".ui-page-active #exposure[data-type=range]").unbind("change")
-  $(".ui-page-active #exposure[data-type=range]").bind("change", function(){
-    var value = $(".ui-page-active #exposure").attr("value");
-    if ( value == 0 ){ value = 1; }
-    $(".ui-page-active #exposure-text").text(value*66+" ms")
-  })
-  $(".ui-page-active #exposure").trigger("change")
+	console.log("setup");
+	$("#setup #exposure-text").remove()
+	b = $("<label id='exposure-text' style='display: inline-block; width: 10%'>ms</label>")
+	$(".ui-page-active #exposure[data-type=range]").after(b)
+	$(".ui-page-active #exposure[data-type=range]").unbind("change")
+	$(".ui-page-active #exposure[data-type=range]").bind("change", function(){
+		var value = $(".ui-page-active #exposure").attr("value");
+		if ( value == 0 ){ value = 1; }
+			$(".ui-page-active #exposure-text").text(value*66+" ms")
+	})
+	$(".ui-page-active #exposure").trigger("change")
 }
 
 function getPlayerApi(){
-  var a = $(".active-mode #video-content").data("flashembed");
-  if ( a == null){
-    console.log("no player found");
-    return null
-  }
-  return a.getApi()
+	var a = $(".active-mode #video-content").data("flashembed");
+	if ( a == null){
+		console.log("no player found");
+		return null
+	}
+	return a.getApi()
+}
+
+function doVoice(value){
+	if (value==true) {
+		if ($("#sco_holder").length > 0){
+			console.log("Voice all ready enable, not doing again");
+			return;
+		}
+		console.log("Enabling voice");
+		var voice = "<audio id='sco_holder' title='SCO Link' preload='none'>";
+		voice+="<source src='/sco/"+$(".active-mode #stream-address").val()
+		voice+="' type='audio/x-wav'></audio>"
+		console.log("Voice")
+		$(voice).appendTo("#viewer");
+		$("#sco_holder")[0].play();
+	}
+	else {
+		$("#sco_holder")[0].pause();
+		$("#sco_holder").remove();
+	}
 }
 
 function doConfigure(option, value){
-  $.post("/api/doconfigure/",
-    {
-      "address": $(".active-mode #stream-address").val(),
-      "option": option,
-      "value": value
-    }
-  )
+	$.post("/api/doconfigure/", {
+		"address": $(".active-mode #stream-address").val(),
+		"option": option,
+		"value": value
+	})
+/*	if (option=="voice"){
+		var player = getPlayerApi();
+		if (value==true)
+			player.scoConnect();
+		else
+			player.scoDisconnect();
+	}
+*/
 }
 
 function switchResolution(size){
@@ -162,7 +188,7 @@ function watch_device(){
               $(".active-mode #stream-disconnect").css("display", "none")
               disconnectViewer();
             }
-			$(".active-mode #stream-" + index).val(element);
+            $(".active-mode #stream-" + index).val(element);
             break;
           case "flash":
           case "voice":
@@ -183,20 +209,24 @@ function watch_device(){
 function update_viewer(){
   console.log("view");
 
-  $(".active-mode #stream-size", $(".ui-page-active")).unbind("change")
+/*  $(".active-mode #stream-size", $(".ui-page-active")).unbind("change")
   $(".active-mode #stream-size", $(".ui-page-active")).change(select_changed, {"origin": "stream-size"})
   $(".active-mode #stream-pan", $(".ui-page-active")).unbind("change")
   $(".active-mode #stream-pan", $(".ui-page-active")).change(select_changed, {"origin": "stream-pan"})
+*/
   watch_device();
 
   player = $(".active-mode #video-content").flashembed(
       {
         src: "/media/airi.swf",
-        quality: "low"
+        quality: "low",
+      },
+      {
+        //browser: window.navigator.userAgent,
       }
   )
-  updateGeneric("flash")
-  updateGeneric("voice")
+//  updateGeneric("flash")
+//  updateGeneric("voice")
 }
 
 function currentId(){
@@ -270,6 +300,7 @@ function viewer_resize(event){
 
 function viewer_create(event){
     var prepare = function(content){
+    	console.log("viewer_create prepare");
         if (content.attr("id") == "video")
             $("#viewer .ui-content .active-mode").addClass("ui-video-player")
         else
@@ -358,14 +389,13 @@ function hide_setup(){
 }
 
 function connectViewer(){
-  console.log("connectViewer")
-  var player = getPlayerApi();
-  if ( player == null )
-    return;
-  
-  var url = "/stream/"+$("#stream-address").val().replace(/:/g, "_");
-  url+="?flash=true&uniqId="+new Date().getTime()
-  player.xhrConnect(url)
+	console.log("connectViewer")
+	var player = getPlayerApi();
+	if ( player == null )
+		return;
+	var url = "/stream/"+$("#stream-address").val().replace(/:/g, "_");
+	url+="?flash=true&uniqId="+new Date().getTime()
+	player.xhrConnect(url)
 }
 
 function disconnectViewer(){
