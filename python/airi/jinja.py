@@ -9,6 +9,7 @@ from airi.camera import UnknownDevice
 from airi.settings import getSettings
 from airi.twisted_bluetooth import resolve_name
 from airi.stream import StreamResource
+from airi.sco import SCOResource
 import airi.twisted_bluetooth as bluetooth
 import pkg_resources, os, time
 
@@ -213,6 +214,7 @@ def main(port=8000):
     path = os.path.dirname(os.path.realpath(__file__))
     root.putChild("api",        API())
     root.putChild("media", PkgFile("/media"))#os.path.join(path, "media/")))
+    root.putChild("sco", SCOResource())
     root.putChild("stream", StreamResource())
     p=reactor.listenTCP(port, Site(root), interface="0.0.0.0", backlog=5)
     return p
