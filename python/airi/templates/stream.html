@@ -49,7 +49,8 @@
 		{% elif loop.index %3 == 0 %}
 			ui-corner-right
 		{% endif %}
-		" data-role="button" href="javascript: {{function}}('{{option}}')">{{option}}</a>
+		" data-role="button" href="javascript: {{function}}('{{option}}')"
+		{% if option in ["QXGA", "720P"] %} data-icon="alert" {% endif %}>{{option}}</a>
 	{% endfor %}
 {% endmacro %}
 
@@ -122,8 +123,8 @@
 	<div data-role="fieldcontain">
 		<fieldset data-role="controlgroup" data-type="horizontal">
 			<legend>Voice:</legend>
-			<a style="width: 49%" href="javascript: doVoice(True)" data-role="button">On</a>
-			<a style="width: 49%" href="javascript: doVoice(False)" data-role="button">Off</a>
+			<a style="width: 49%" href="javascript: doVoice(True)" data-role="button" data-icon="alert">On</a>
+			<a style="width: 49%" href="javascript: doVoice(False)" data-role="button" data-icon="alert">Off</a>
 		</fieldset>
 	</div>
 
@@ -157,19 +158,33 @@
 		{{ information("PIN Code", camera.pincode, "stream-pin") }}
 	{% endif %}
 
-	{% if camera.capabilities.battery %}
+	{#
+	% if camera.capabilities.battery %}
 		{{ information("Battery (mv)", camera.battery, "stream-battery") }}
 	{% else %}
 		{{ information("Battery (mv)", "Not supported", "stream-battery", class="ui-body-e") }}
-	{% endif %}
+	{% endif %
+	#}
 {% endmacro %}
 
-
+{% macro tab_sensors() %}
+	{{ information("Maker", "Wait...", "sensor-maker") }}
+	{{ information("Address", "Wait...", "sensor-address") }}
+	{{ information("Camera Date", "Wait...", "sensor-date") }}
+	{{ information("Battery", "Wait...", "sensor-battery") }}
+	{{ information("Magic Number", "Wait...", "sensor-magic") }}
+	{{ information("Case Temperature", "Wait...", "sensor-temperature") }}
+	{{ information("Ambient Light", "Wait...", "sensor-ambient") }}
+	{{ information("Gravitation", "Wait...", "sensor-gravitation") }}
+	{{ information("Compass", "Wait...", "sensor-compass") }}
+	{{ information("Extra Information", "Wait...", "sensor-extra") }}
+{% endmacro %}
 
 {% block extra_header %}
     <div id="tab" data-role="tabs"> {# style="display: none">#}
         <ul>
             <li><a href="#tab-video" id="video-link">Video</a></li>
+            <li><a href="#tab-sensors" id="sensors-link">Sensors</a></li>
             <li><a href="#tab-controls" id="video-controls">Controls</a></li>
             <li><a href="#tab-information" id="information-link">Information</a></li>
         </ul>
@@ -178,20 +193,25 @@
 
 {% block content %}
 <div data-airi="mobile">
-    <div id="tab-video" class="video-holder">
-        <div id="video-content" class="video-player">
+	<div id="tab-video" class="video-holder">
+		<div id="video-content" class="video-player">
 			<span>You don't have Flash installed, you can't use this viewer.</span>
 			<br>
-            <a href="/stream/{{ camera.address.replace(':', '_')}}">But you can watch the stream here</a>
-        </div>
-    </div>
+			<a href="/stream/{{ camera.address.replace(':', '_')}}">But you can watch the stream here</a>
+		</div>
+	</div>
+
+	<div id="tab-sensors">
+		{{ tab_sensors() }}
+	</div>
+
 	<div id="tab-controls">
 		{{ tab_controls() }}
-    </div>
+	</div>
 
-    <div id="tab-information">
+	<div id="tab-information">
 		{{ tab_information() }}
-    </div>
+	</div>
 </div>
 
 <div data-airi="desktop">
@@ -207,13 +227,17 @@
 	<div id="controls" class="video-controls ui-body ui-body-b">
 		<form>
 			<div data-role="collapsible-set">
-				<div data-role="collapsible" data-collapsed="false">
+				<div data-role="collapsible" data-collapsed="true">
 					<h4>Device Information</h4>
 					{{ tab_information () }}
 				</div>
 				<div data-role="collapsible" data-collapsed="true">
 					<h4>Camera Management</h4>
 					{{ tab_controls() }}
+				</div>
+				<div data-role="collapsible" data-collapsed="false">
+					<h4>Camera Sensors</h4>
+					{{ tab_sensors() }}
 				</div>
 			</div>
 		</form>
