@@ -17,7 +17,7 @@ from airi import report, RESULT
 from functools import partial
 
 MULTIPARTRESPONSE= "--%s\r\nContent-Type: %s\r\nContent-Length: %s\r\n\r\n%s\r\n\r\n"
-HTTP_DISCONNECT_TIMEOUT = 60*10 # 10 minutes timeout
+HTTP_DISCONNECT_TIMEOUT = 30 # half a minute timeout
 CATEGORY = "AIRi-Stream"
 
 class MultiPartStream():
