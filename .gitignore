@@ -16,3 +16,6 @@ python/airi/media/css/images/*
 .*
 */bin
 */gen
+*.keystore
+*.egg
+python/deps
