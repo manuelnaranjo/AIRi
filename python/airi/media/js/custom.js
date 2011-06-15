@@ -7,6 +7,21 @@ previous_post = null;
 player = null;
 startup = True;
 
+function updateSensorData(data){
+	$.each(data, function(index, value){
+		if (index == "compass" || index=="gravitation"){
+			var t = value.x+", "+value.y+", "+value.z;
+			$(".active-mode #sensor-" +index).val(t)
+		} else if (index == "magic"){
+			$(".active-mode #sensor-" +index).val(
+					'0x'+parseInt(value).toString(16)
+			);
+		}
+		else
+			$(".active-mode #sensor-" +index).val(value);
+	});
+}
+
 function refreshButton(selector){
   var text = $(selector + " .ui-btn-text").text();
   $(selector + " > *").remove();
@@ -88,15 +103,13 @@ function doVoice(value){
 			return;
 		}
 		console.log("Enabling voice");
-		var voice = "<audio id='sco_holder' title='SCO Link' preload='none'>";
-		voice+="<source src='/sco/"+$(".active-mode #stream-address").val()
-		voice+="' type='audio/x-wav'></audio>"
-		console.log("Voice")
-		$(voice).appendTo("#viewer");
-		$("#sco_holder")[0].play();
+		var voice=$("<iframe />")
+		voice.attr("id", "sco_holder");
+		voice.attr("src", "/sco/"+$(".active-mode #stream-address").val());
+		console.log(voice);
+		voice.appendTo("#viewer");
 	}
 	else {
-		$("#sco_holder")[0].pause();
 		$("#sco_holder").remove();
 	}
 }
