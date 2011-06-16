@@ -42,7 +42,7 @@ class report:
       return wrap
     return fn
 
-__version__ = ('1', '0', 'c5')
+__version__ = ('1', '0', 'c6')
 __version__ = '.'.join(__version__)
 
 try:
