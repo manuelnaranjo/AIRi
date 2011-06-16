@@ -55,7 +55,7 @@ setup(name="airi",
     },
     dependency_links = [
 	"http://code.google.com/p/pybluez/downloads/list",
-	"http://prdownloads.sourceforge.net/lightblue/"
+	"https://github.com/manuelnaranjo/LightBlue---Mac/zipball/release1#egg=lightblue-0.4.1"
     ],
     install_requires = REQUIRES,
     zip_safe=False,
