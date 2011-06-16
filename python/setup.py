@@ -21,7 +21,7 @@ REQUIRES = [
 if sys.platform.startswith("linux") or sys.platform.startswith("win"):
     REQUIRES.append("PyBluez >= 0.18")
 elif sys.platform.startswith("darwin"):
-    REQUIRES.append("lightblue >=0.4")
+    REQUIRES.append("lightblue >=0.4.1")
 
 setup(name="airi",
     version=__version__,
