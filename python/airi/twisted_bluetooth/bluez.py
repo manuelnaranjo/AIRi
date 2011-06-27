@@ -31,6 +31,9 @@ if __name__=='__main__':
 	from dbus.mainloop.glib import DBusGMainLoop
 	DBusGMainLoop(set_as_default=True)
 
+L2CAP_SUPPORTED=True
+SCO_SUPPORTED=True
+
 flag = False
 def initalizeDBus():
 	global flag
