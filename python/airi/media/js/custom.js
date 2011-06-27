@@ -208,7 +208,13 @@ function watch_device(){
             $(".active-mode #stream-"+index).attr("data-state", element);
             updateGeneric(index)
             break;
+          case "client_count":
+            console.log("Client count " + element);
+            $(".ui-page-active #header_extra").text(" | Viewed by " + element);
+            $(".active-mode #stream-" + index).val(element);
+            break;
           default:
+            console.log("using default handler " + index);
             $("#stream-" + index).val(element);
           }
         }

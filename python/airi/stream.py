@@ -81,7 +81,8 @@ class MultiPartStream():
         log.msg("Registering to disconnect in %s seconds" % HTTP_DISCONNECT_TIMEOUT)
         reactor.callLater(HTTP_DISCONNECT_TIMEOUT, 
             MultiPartStream.connectionTimeout, self)
-    
+        StreamResource.tellClientCount(self.target)
+
     @report(category=CATEGORY)
     def finish(self):
         '''Gets called by oneshot or thumbnail modes''' 
@@ -141,9 +142,15 @@ class StreamResource(Resource, Listener):
     @classmethod
     def getClients(klass, address):
         return MultiPartStream.getClients(address)
+ 
+    @classmethod
+    @report(category=CATEGORY)
+    def tellClientCount(klass, address):
+        from airi.api import UpdateManager
+        UpdateManager.propagate(address, {
+            "client_count": len(klass.getClients(address))})
 
     def gotFrame(self, frame, address):
-        #print "StreamResource.gotFrame %s" % len(frame)
         size = len(frame)
         out=MULTIPARTRESPONSE % (MultiPartStream.BOUNDARY, "image/jpeg", size, frame)
 
@@ -163,6 +170,8 @@ class StreamResource(Resource, Listener):
                 except Exception, err:
                     log.err(err)
             MultiPartStream.clients.remove(c)
+        StreamResource.tellClientCount(address)
+
 
     @report(category=CATEGORY, level=RESULT)
     def render_GET(self, request):
@@ -184,6 +193,7 @@ class StreamResource(Resource, Listener):
                     log.msg("Failed while trying to connect")
                     log.err(err)
         CameraFactory.registerListener(address, self)
+        StreamResource.tellClientCount(address)
         return server.NOT_DONE_YET
 
 class TestStreamResource(Resource):
