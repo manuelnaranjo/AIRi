@@ -25,6 +25,10 @@ from airi import report
 
 CATEGORY="darwin"
 
+L2CAP_SUPPORTED=False
+SCO_SUPPORTED=False
+PAIR_SUPPORTED=False
+
 from multiprocessing.connection import Listener
 def isPairingSupported():
     return False

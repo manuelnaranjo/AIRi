@@ -22,6 +22,10 @@ from twisted.python import log
 
 from bluetooth import *
 
+L2CAP_SUPPORTED=False
+SCO_SUPPORTED=False
+PAIR_SUPPORTED=False
+
 def isPairingSupported():
     return False
 
