@@ -61,7 +61,7 @@ class AIRi(CameraProtocol):
         "flash": 0,
         "voice": False,
         "exposure": 0,
-        "stream", True,
+        "stream": True,
         "pan": "none",
     }
 
@@ -109,7 +109,7 @@ class AIRi(CameraProtocol):
         self.doCommand("date",
                         lambda: datetime.utcnow().strftime("%Y%m%dT%H%M%SZ"))
         self.doCommand("size", SIZES[sets["size"]])
-        self.doCommnad("stream", "1" if sets["stream"] else "0")
+        self.doCommand("stream", "1" if sets["stream"] else "0")
         self.doCommand("flash", "0" if not sets["flash"] else "1")
         self.doCommand("pan", sets["pan"].upper()[0])
 
