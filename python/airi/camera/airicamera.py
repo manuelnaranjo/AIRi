@@ -44,7 +44,7 @@ class Command():
         self.command = command
         COMMANDS[name] = self
 
-Command("date", 6, "D")
+Command("date", 1, "D")
 Command("flash", 1, "F")
 Command("size", 3, "S")
 Command("pan", 1, "P")
@@ -105,7 +105,7 @@ class AIRi(CameraProtocol):
         if nsets:
             sets.update(nsets)
         dbg(sets)
-        self.callLater = reactor.callLater(4, self.internalDoCommand)
+        self.callLater = reactor.callLater(1, self.internalDoCommand)
         self.doCommand("date",
                         lambda: datetime.utcnow().strftime("%Y%m%dT%H%M%SZ"))
         self.doCommand("size", SIZES[sets["size"]])
