@@ -16,12 +16,12 @@ settings = getSettings()
 CATEGORY = "airi.camera.protocol"
 
 TYPES = {
-  'OPTIEYE': {
-      "welcome": "genie cam on",
-      "class": optieyes.OptiEye},
-  'AIRI': {
-      "welcome": "$airi",
-      "class": airicamera.AIRi},
+    'OPTIEYE': {
+        "welcome": "genie cam on",
+        "class": optieyes.OptiEye},
+    'AIRI': {
+        "welcome": "$airi",
+        "class": airicamera.AIRi},
 }
 
 
@@ -54,7 +54,6 @@ class Camera(Protocol):
         self.transport.loseConnection()
 
     def doINIT(self):
-
         def welcomeCheck():
             while len(self.buffer) > 0 and self.buffer.find('\n') > -1:
                 welcome, self.buffer = self.buffer.split('\n', 1)
