@@ -110,7 +110,6 @@ class Settings():
             out["pincode"] = self.getPIN(out["address"], perfect=True, silent=False)
             out["enable_pincode"] = True
         except Exception, err:
-            log.err(err)
             out["enable_pincode"] = False
         return out
 
