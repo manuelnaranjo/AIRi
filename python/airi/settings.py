@@ -111,13 +111,16 @@ class Settings():
             out["enable_pincode"] = True
         except Exception, err:
             out["enable_pincode"] = False
+        if "type" not in out:
+            return None
         return out
 
     #@report(debug=True)
     def getCameras(self):
         self.reload()
         for camera in self.getCameraSections():
-            yield self.__cameraDict(self._items(camera))
+            c = self.__cameraDict(self._items(camera))
+            if c: yield c
 
     def deleteCamera(self, address):
         self.reload()

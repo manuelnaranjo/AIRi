@@ -299,7 +299,8 @@ class CameraFactory(ClientFactory):
     @report(category=CATEGORY)
     def getCameras(klass):
         for camera in settings.getCameras():
-            yield klass.getCamera(camera["address"])
+            c = klass.getCamera(camera["address"], silent=True)
+            if c: yield c
 
     @classmethod
     def getTypes(klass):
