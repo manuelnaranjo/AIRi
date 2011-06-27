@@ -3,36 +3,36 @@ import logging
 from twisted.python import log
 
 def dbg(*a, **kw):
-  kw["logLevel"] = logging.DEBUG
-  log.msg(*a, **kw)
+    kw["logLevel"] = logging.DEBUG
+    log.msg(*a, **kw)
 
 class CameraProtocol():
-  def setSize(self, size):
-    raise NotImplementedError()
+    def setSize(self, size):
+        raise NotImplementedError()
 
-  def getSize(self):
-    raise NotImplementedError()
+    def getSize(self):
+        raise NotImplementedError()
 
-  def disconnect(self):
-    dbg("CameraProtocol.disconnect not implemented")
+    def disconnect(self):
+        dbg("CameraProtocol.disconnect not implemented")
 
-  def updateSettings(self):
-    dbg("CameraProtocol.updateSettings not implemented")
+    def updateSettings(self):
+        dbg("CameraProtocol.updateSettings not implemented")
 
 class Listener():
-  def lostConnection(self, reason, failed, *a, **kw):
-    raise NotImplementedError()
+    def lostConnection(self, reason, failed, *a, **kw):
+        raise NotImplementedError()
 
-  def gotFrame(self, frame, *a, **kw):
-    raise NotImplementedError()
+    def gotFrame(self, frame, *a, **kw):
+        raise NotImplementedError()
 
-  def forcedDisconnect(self, *a, **kw):
-    dbg("Listener.forcedDisconnect not implemented")
+    def forcedDisconnect(self, *a, **kw):
+        dbg("Listener.forcedDisconnect not implemented")
 
 class UnknownDevice(Exception):
 
-  def __init__(self, address):
-    self.address = address
+    def __init__(self, address):
+        self.address = address
 
-  def __str__(self):
-    return "Device unknown %s" % self.address
+    def __str__(self):
+        return "Device unknown %s" % self.address
