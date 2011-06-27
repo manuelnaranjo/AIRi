@@ -23,10 +23,10 @@ from twisted.python import log
 from bluetooth import *
 
 def isPairingSupported():
-	return False
+    return False
 
 def shutdown(self, how):
-  return self.close()
+    return self.close()
 
 bluetooth.BluetoothSocket.shutdown = shutdown
 
