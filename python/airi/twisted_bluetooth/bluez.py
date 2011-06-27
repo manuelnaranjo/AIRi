@@ -68,6 +68,11 @@ def isAndroid():
         pass
     return False
 
+if isAndroid():
+    PAIR_SUPPORTED=False
+else:
+    PAIR_SUPPORTED=True
+
 def androidIsBonded(address):
     try:
         global droid
