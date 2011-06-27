@@ -98,7 +98,7 @@ class doConfiguration(Resource):
         option = request.args["option"][0]
         value = request.args["value"][0]
         if value.lower() in ["true", "false"]:
-    value = value.lower()=="true"
+            value = value.lower()=="true"
         log.msg("doConfiguration.POST(%s, %s, %s)" % (address, option, value))
         try:
             cli = CameraFactory.getConnected(address)
