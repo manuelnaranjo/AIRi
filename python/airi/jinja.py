@@ -153,6 +153,8 @@ class Main(Resource):
         template = self.env.get_template(path)
         context = self.contexts.get(path, lambda x,y: {})(self, request)
         context["pairing_supported"]=bluetooth.isPairingSupported()
+        context["l2cap_supported"]=bluetooth.L2CAP_SUPPORTED
+        context["sco_supported"]=bluetooth.SCO_SUPPORTED
         context["version"] = __version__
         return TemplateResource(template, context)
 
