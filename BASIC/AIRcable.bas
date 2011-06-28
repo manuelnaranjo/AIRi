@@ -181,46 +181,53 @@
 406 A = status;
 0 REM lost slave connection, back to slave
 407 IF A <> 1 THEN 300;
-410 IF $0[0]<>36 THEN 400;
-411 IF $0[1]=83 THEN 420;
-412 IF $0[1]=70 THEN 430;
-413 IF $0[1]=80 THEN 440;
-414 IF $0[1]=69 THEN 450;
-415 IF $0[1]=68 THEN 460;
-416 IF $0[1]=76 THEN 470;
-417 IF $0[1]=84 THEN 480;
-419 GOTO 400;
+408 IF $0[0]<>36 THEN 400;
+409 IF $0[1]=83 THEN 420;
+410 IF $0[1]=70 THEN 430;
+411 IF $0[1]=80 THEN 440;
+412 IF $0[1]=69 THEN 450;
+413 IF $0[1]=68 THEN 460;
+414 IF $0[1]=76 THEN 470;
+415 IF $0[1]=84 THEN 480;
+418 ALARM 1
+419 RETURN
 
 0 REM set size
 420 B = atoi $0[2];
 421 A = camera B
-422 GOTO 400;
+422 ALARM 1
 423 RETURN
 
 0 REM set flash
 430 A = camflash $0[2]-48
-431 GOTO 400;
+431 ALARM 1
+432 RETURN
 
 0 REM do PAN
 440 A = campan $0[2]
-441 GOTO 400;
+441 ALARM 1
+442 RETURN
 
 0 REM exposure
 450 B = atoi $0[2];
 451 A = camexpo B
-452 GOTO 400;
+452 ALARM 1
+453 RETURN
 
 0 REM date
 460 A = setdate $0[2];
-461 GOTO 400;
+461 ALARM 1
+462 RETURN
 
 0 REM link enable/disable
 470 IF $0[2] = 49 THEN 475;
 471 A = unlink 9;
-472 GOTO 400;
+472 ALARM 1
+473 RETURN
 
 475 A = link 9;
-476 GOTO 400;
+476 ALARM 1
+477 RETURN
 
 0 REM take picture
 480 PRINTS"TAKING 
@@ -243,6 +250,7 @@
 0 REM close file, get file name in $0
 497 A = close $0
 498 PRINTS $0
-499 GOTO 400
+499 ALARM 1
+500 RETURN
 
 600 END
