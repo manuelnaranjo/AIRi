@@ -61,14 +61,25 @@
 {% endmacro %}
 
 {% macro tab_controls() %}
-    <div class="inline ui-grid-a">
+    <div class="inline ui-grid-b">
         <div class="ui-block-a">
-            {{ button( "javascript: switchState()", "Connect", extra='id="stream-connect"', theme="b", enable=not camera.status) }}
-            {{ button( "javascript: switchState()", "Disconnect", extra='id="stream-disconnect"', theme="e", enable = camera.status ) }}
+            {{ button( "javascript: connect('rfcomm')", "Connect<br>RFComm", theme="b") }}
         </div>
         <div class="ui-block-b">
-            {{ button( "/setup.html?address="+camera.address, "Setup" ) }}
+            {% if l2cap_supported %}
+                {% set url="javascript: connect('l2cap')" %}
+            {% else %}
+                {% set url="javascript: notsupported('l2cap')" %}
+            {% endif %}
+            {{ button( url, "Connect<br>L2CAP", theme="b") }}
         </div>
+        <div class="ui-block-c">
+            {{ button( "javascript: disconnect()", "Disconnect<br>", theme="e") }}
+        </div>
+    </div>
+
+    <div class="inline">
+            {{ button( "/setup.html?address="+camera.address, "Setup" ) }}
     </div>
 
     <div data-role="fieldcontain">
@@ -124,8 +135,15 @@
     <div data-role="fieldcontain">
         <fieldset data-role="controlgroup" data-type="horizontal">
             <legend>Voice:</legend>
-            <a style="width: 49%" href="javascript: doVoice(True)" data-role="button" data-icon="alert">On</a>
-            <a style="width: 49%" href="javascript: doVoice(False)" data-role="button" data-icon="alert">Off</a>
+                {% if sco_supported %}
+                    {% set url1="javascript: doVoice(True)" %}
+                    {% set url2="javascript: doVoice(False)" %}
+                {% else %}
+                    {% set url1="javascript: notsupported('sco')" %}
+                    {% set url2="javascript: notsupported('sco')" %}
+                {% endif %}
+                <a style="width: 49%" href="{{url1}}" data-role="button" data-icon="alert">On</a>
+                <a style="width: 49%" href="{{url2}}" data-role="button" data-icon="alert">Off</a>
         </fieldset>
     </div>
 
