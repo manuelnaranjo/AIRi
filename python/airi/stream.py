@@ -172,7 +172,6 @@ class StreamResource(Resource, Listener):
             MultiPartStream.clients.remove(c)
         StreamResource.tellClientCount(address)
 
-
     @report(category=CATEGORY, level=RESULT)
     def render_GET(self, request):
         address = request.path.split("/",2)[-1].replace("_", ":")
@@ -186,9 +185,10 @@ class StreamResource(Resource, Listener):
                 multipart.sendPart("")
                 return server.NOT_DONE_YET
             if not ready:
-                method = request.args.get("method", ["RFCOMM",])[-1]
+                method = CameraFactory.getCamera(address).get("transport", "rfcomm")
+                method = request.args.get("method", [method,])[-1].upper()
                 try:
-                    CameraFactory.connect(address, 1, method)
+                    CameraFactory.connect(address, method=method)
                 except Exception, err:
                     log.msg("Failed while trying to connect")
                     log.err(err)
