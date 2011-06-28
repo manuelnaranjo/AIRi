@@ -7,6 +7,19 @@ previous_post = null;
 player = null;
 startup = True;
 
+function connect(transport){
+    connectViewer("method="+transport);
+}
+
+function disconnect(){
+    disconnectViewer();
+    $.get("/api/disconnect/"+$(".active-mode #stream-address").val());
+}
+
+function notsupported(transport){
+    window.alert("Sorry but " + transport + " is not supported by your platform. You will need to run AIRi in Linux or Android to use this feature.");
+}
+
 function updateSensorData(data){
 	$.each(data, function(index, value){
 		if (index == "compass" || index=="gravitation"){
@@ -407,13 +420,16 @@ function viewerReady(){
 function hide_setup(){
 }
 
-function connectViewer(){
+function connectViewer(extra){
 	console.log("connectViewer")
 	var player = getPlayerApi();
 	if ( player == null )
 		return;
 	var url = "/stream/"+$("#stream-address").val().replace(/:/g, "_");
 	url+="?flash=true&uniqId="+new Date().getTime()
+	if (extra != null){
+		url+="&"+extra
+	}
 	player.xhrConnect(url)
 }
 
