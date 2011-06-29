@@ -5,7 +5,7 @@ True = true;
 // shared variables
 previous_post = null;
 player = null;
-startup = True;
+startup = true;
 
 function connect(transport){
     connectViewer("method="+transport);
@@ -46,58 +46,54 @@ function refreshButton(selector){
   $(selector).text(text).removeClass(classes).buttonMarkup();
 }
 
+function internalChangePage(target){
+    console.log("internalChangePage " + target);
+    $.mobile.changePage( target, {
+        "changeHash": false,
+        "reverse": false,
+        "transition": "slide",
+        "reloadPage": true,
+    })
+}
+
 function goBack(){
+    console.log("goBack")
     if ($.mobile.urlHistory.stack.length == 1)
-        return True;
+        return true;
 
     if ($.mobile.urlHistory.activeIndex == 0)
-        window.history.forward()
-    else
-        window.history.back()
-    return True;
+        return true
+    var target = $.mobile.urlHistory.getPrev();
+    internalChangePage(target.page.attr("data-url"));
+    $.mobile.urlHistory.stack.pop(); //this one is from changepage
+    $.mobile.urlHistory.stack.pop(); //this one is back it self
+    return true;
 }
 
 function goHome(){
-    if ($.mobile.activePage.attr("id")!="home"){
-        if ( $("#home").length > 0 )
-            $.mobile.changePage($("#home"))
-        else
-            $.mobile.changePage($("/index.html"))
-    }
-    return True;
+    console.log("goHome");
+    internalChangePage("/index.html"); // don't modify history
+    return true;
 }
 
 function doReload(){
-  $.mobile.changePage(
-    {
-      url: $.mobile.activePage.attr("data-url")
-    }, 
-    "slide ", false, false
-  )
-  $.mobile.urlHistory.stack = $.mobile.urlHistory.stack.slice(0, $.mobile.urlHistory.activeIndex)
-}
-
-function update_home(){
-    console.log("home")
-    if ( $.mobile.firstPage.attr("data-url") == "home" ){
-        //$.mobile.firstPage.attr("data-url", window.location.pathname);
-        //$("#back_button").live("vclick", goBack);
-        //$("#home_button").live("vclick", goHome);
-    }
+    console.log("doReload");
+    internalChangePage($.mobile.activePage.attr("data-url"))
+    $.mobile.urlHistory.stack.pop() // changePage created a new entry, take it out
 }
 
 function update_setup(){
-	console.log("setup");
-	$("#setup #exposure-text").remove()
-	b = $("<label id='exposure-text' style='display: inline-block; width: 10%'>ms</label>")
-	$(".ui-page-active #exposure[data-type=range]").after(b)
-	$(".ui-page-active #exposure[data-type=range]").unbind("change")
-	$(".ui-page-active #exposure[data-type=range]").bind("change", function(){
-		var value = $(".ui-page-active #exposure").attr("value");
-		if ( value == 0 ){ value = 1; }
-			$(".ui-page-active #exposure-text").text(value*66+" ms")
-	})
-	$(".ui-page-active #exposure").trigger("change")
+    console.log("setup");
+    $("#setup #exposure-text").remove()
+    b = $("<label id='exposure-text' style='display: inline-block; width: 10%'>ms</label>")
+    $(".ui-page-active #exposure[data-type=range]").after(b)
+    $(".ui-page-active #exposure[data-type=range]").unbind("change")
+    $(".ui-page-active #exposure[data-type=range]").bind("change", function(){
+        var value = $(".ui-page-active #exposure").attr("value");
+        if ( value == 0 ) value = 1;
+        $(".ui-page-active #exposure-text").text(value*66+" ms")
+    })
+    $(".ui-page-active #exposure").trigger("change")
 }
 
 function getPlayerApi(){
@@ -269,6 +265,12 @@ function pageshow(event, ui){
     var id = currentId();
     resize();
     console.log("show " + id);
+    console.log("pagebeforecreate");
+    $.each($(".ui-page").not(".ui-page-active"), 
+        function(index, val) {
+            console.log("removing: " + $(val).attr("id"))
+    })
+    $(".ui-page").not(".ui-page-active").remove();
     $("[data-rel=back]").remove()
     $("#" + id + " #back_button").
         attr("onclick", "javascript: goBack();").
@@ -484,6 +486,9 @@ function resize(event){
     }
 }
 
+function pagebeforecreate(){
+}
+
 function index_init(){
     $('div').live("pageshow", pageshow);
     $('div').live("pagebeforehide", pagehide);
@@ -494,4 +499,3 @@ function index_init(){
 }
 
 $(document).bind("mobileinit", index_init);
-
