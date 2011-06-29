@@ -52,7 +52,7 @@ def uncompressJQueryMobile():
 def main():
     add_dependency('jquery.mobile', 
 	base='http://code.jquery.com/mobile',
-	version='1.0a4.1',
+	version='1.0b1',
 	extension='zip')
 
     add_dependency('jquery',
