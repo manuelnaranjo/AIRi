@@ -270,9 +270,15 @@ function pageshow(event, ui){
     resize();
     console.log("show " + id);
     $("[data-rel=back]").remove()
-    $("#" + id + " #back_button").attr("href", "javascript: goBack()");
-    $("#" + id + " #home_button").attr("href", "javascript: goHome()");
-    $("#" + id + " #reload_button").attr("href", "javascript: doReload()");
+    $("#" + id + " #back_button").
+        attr("onclick", "javascript: goBack();").
+        removeClass("ui-btn-active");
+    $("#" + id + " #home_button").
+        attr("onclick", "javascript: goHome();").
+        removeClass("ui-btn-active");
+    $("#" + id + " #reload_button").
+        attr("onclick", "javascript: doReload();").
+        removeClass("ui-btn-active");
     document.title = $(".ui-page-active div[data-role=header] h1").text();
 
     window.scrollTo(0, 1);
