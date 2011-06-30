@@ -291,8 +291,8 @@ function pageshow(event, ui){
     }
 
     switch (id){
-        case "home":
-            return update_home();
+//        case "home":
+//            return update_home();
         case "setup":
             return update_setup();
         case "viewer":
