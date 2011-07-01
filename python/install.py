@@ -55,9 +55,11 @@ def dohelp():
 def install():
     print "Creating virtualenv"
     virtualenv.main()
+    print "Installing AIRi with dependencies"
+    subprocess.call([os.path.join(bin_, "pip"), "install", "AIRi"])
 
 def upgrade(bin_):
-    print "Installing AIRi"
+    print "Upgrading AIRi"
     subprocess.call([os.path.join(bin_, "easy_install"), "-U", "AIRi"])
 
 if __name__=='__main__':
@@ -77,12 +79,15 @@ if __name__=='__main__':
         try:
             path = getInstallationPath()
         except KeyboardInterrupt:
-            sys.exit(0)
+            sys.exit(1)
 
     sys.argv=sys.argv[:1]
     sys.argv.append(path)
     bin_ = virtualenv.path_locations(path)[-1]
     if method == "install":
         install()
+    if not os.path.isdir(os.path.join(path, bin_)):
+        print "You need to run install first!"
+        sys.exit(1)
     upgrade(bin_)
     print "Now you can run AIRi by executing", os.path.join(path, bin_, "AIRi")
