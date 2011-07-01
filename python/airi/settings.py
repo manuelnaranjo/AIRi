@@ -20,15 +20,20 @@ class Settings():
     def __init__(self, name=None):
         if not name:
             parent = ""
-            if access(path.dirname(path.realpath(__file__)), W_OK):
+            if "HOME" in environ:
+                print "Using $HOME"
+                parent = environ["HOME"]
+            elif "HOMEPATH" in environ:
+                print "Using $HOMEPATH"
+                parent = environ["HOMEPATH"]
+            elif "DATA_PATH" in environ:
+                print "Using $DATA_PATH"
+                parent = environ["DATA_PATH"]
+            elif access(path.dirname(path.realpath(__file__)), W_OK):
+                print "Using path.realpath"
                 parent = path.dirname(path.realpath(__file__))
             else:
-                if "HOME" in environ:
-                    parent = environ["HOME"]
-                elif "HOMEPATH" in environ:
-                    parent = environ["HOMEPATH"]
-                elif "DATA_PATH" in environ:
-                    parent = environ["DATA_PATH"]
+                raise RuntimeException("Can't find suitable path to store settings")
             if not sys.platform.startswith("win"):
                 name=path.join(parent, ".AIRi")
             else:
