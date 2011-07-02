@@ -49,10 +49,10 @@ def getInstallationPath():
     return p
 
 def dohelp():
-    print "Usage: %s --path path [install|update]" % sys.argv[0]
+    print "Usage: %s --path path [install|update|remove]" % sys.argv[0]
     sys.exit(0)
 
-def install():
+def install(bin_):
     print "Creating virtualenv"
     virtualenv.main()
     print "Installing AIRi with dependencies"
@@ -71,26 +71,39 @@ def main():
     if "--help" in sys.argv:
         dohelp()
 
-    method = sys.argv[-1]
-    if method.lower() not in ["install", "update"]:
+    method = sys.argv[-1].lower().strip()
+    if method not in ["install", "update", "remove"]:
         dohelp()
 
-    if not path:
-        try:
-            path = getInstallationPath()
-        except KeyboardInterrupt:
-            sys.exit(1)
+    if method == "install":
+        if not path:
+            try:
+                path = getInstallationPath()
+            except KeyboardInterrupt:
+                sys.exit(1)
+    else:
+        if not hasattr(sys, "real_prefix"):
+            print "Need to be called from a virtualenv"
+            sys.exit(0)
+        path = sys.prefix
+    print "Doing", method, "in", path
+
+    if method=="remove":
+        from twisted.python.filepath import FilePath
+        FilePath(path).remove()
+        sys.exit(0)
 
     sys.argv=sys.argv[:1]
     sys.argv.append(path)
     bin_ = virtualenv.path_locations(path)[-1]
     if method == "install":
-        install()
+        install(bin_)
     if not os.path.isdir(os.path.join(path, bin_)):
         print "You need to run install first!"
         sys.exit(1)
     upgrade(bin_)
-    print "Now you can run AIRi by executing", os.path.join(path, bin_, "AIRi")
+    print "Run AIRi:", os.path.join(path, bin_, "AIRi")
+    print "Handle AIRi package":, os.path.join(path, bin_, "AIRi-setup")
 
 if __name__=='__main__':
     main()
