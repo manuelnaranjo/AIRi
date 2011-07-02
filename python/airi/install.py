@@ -103,7 +103,7 @@ def main():
         sys.exit(1)
     upgrade(bin_)
     print "Run AIRi:", os.path.join(path, bin_, "AIRi")
-    print "Handle AIRi package":, os.path.join(path, bin_, "AIRi-setup")
+    print "Handle AIRi package:", os.path.join(path, bin_, "AIRi-setup")
 
 if __name__=='__main__':
     main()
