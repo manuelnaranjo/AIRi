@@ -14,7 +14,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 REQUIRES = [
-    "Twisted >= 11.0.0",
+    "Twisted >= 10.0.0",
     "Jinja2"
 ]
 
