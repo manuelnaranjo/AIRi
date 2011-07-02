@@ -62,7 +62,7 @@ def upgrade(bin_):
     print "Upgrading AIRi"
     subprocess.call([os.path.join(bin_, "easy_install"), "-U", "AIRi"])
 
-if __name__=='__main__':
+def main():
     path = None
     method = None
     i = 0
@@ -91,3 +91,6 @@ if __name__=='__main__':
         sys.exit(1)
     upgrade(bin_)
     print "Now you can run AIRi by executing", os.path.join(path, bin_, "AIRi")
+
+if __name__=='__main__':
+    main()
