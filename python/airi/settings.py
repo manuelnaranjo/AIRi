@@ -2,7 +2,7 @@
 import ConfigParser
 from os import path, access, W_OK, environ
 from twisted.python import log
-import logging, sys
+import logging, sys, os
 from airi import report
 
 DEFAULTS={
@@ -14,26 +14,28 @@ DEFAULTS={
     }
 }
 
+def resolvehome():
+    paths = [ path.expanduser("~") ]
+    for i in ["HOME", "HOMEPATH", "DATA_PATH"]:
+        if i in os.environ:
+            print "Has", i
+            paths.append(os.environ[i])
+    for i in paths:
+        if access(i, W_OK):
+            return i
+
 class Settings():
     instance = None
 
     def __init__(self, name=None):
         if not name:
-            parent = ""
-            if "HOME" in environ:
-                print "Using $HOME"
-                parent = environ["HOME"]
-            elif "HOMEPATH" in environ:
-                print "Using $HOMEPATH"
-                parent = environ["HOMEPATH"]
-            elif "DATA_PATH" in environ:
-                print "Using $DATA_PATH"
-                parent = environ["DATA_PATH"]
-            elif access(path.dirname(path.realpath(__file__)), W_OK):
-                print "Using path.realpath"
-                parent = path.dirname(path.realpath(__file__))
-            else:
-                raise RuntimeException("Can't find suitable path to store settings")
+            parent = resolvehome()
+            if not parent:
+                if access(path.dirname(path.realpath(__file__)), W_OK):
+                    print "Using path.realpath"
+                    parent = path.dirname(path.realpath(__file__))
+                else:
+                    raise RuntimeException("Can't find suitable path to store settings")
             if not sys.platform.startswith("win"):
                 name=path.join(parent, ".AIRi")
             else:
@@ -238,7 +240,7 @@ if __name__=='__main__':
     import logging
     logging.basicConfig(level=logging.DEBUG)
     logging.info("starting demo")
-    s=Settings("test.ini")
+    s=Settings()
     logging.info(s.getDongle("00:25:BF:11:22:33"))
     s.setDongle("00:25:BF", "false")
     logging.info(s.getDongle("00:25:BF:11:22:33"))
