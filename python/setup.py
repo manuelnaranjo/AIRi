@@ -51,6 +51,7 @@ setup(name="airi",
     entry_points = {
       'console_scripts': [
         'AIRi = airi.main:main', 
+        'AIRi-setup = airi.install:main'
       ]
     },
     dependency_links = [
