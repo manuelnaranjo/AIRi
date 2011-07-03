@@ -59,7 +59,7 @@ public class ScriptService extends ForegroundService {
 
 	private InterpreterConfiguration mInterpreterConfiguration;
 	private RpcReceiverManager mFacadeManager;
-    private AndroidProxy mProxy;
+	private AndroidProxy mProxy;
     
 	public class LocalBinder extends Binder {
 		public ScriptService getService() {
@@ -70,6 +70,10 @@ public class ScriptService extends ForegroundService {
 	public ScriptService() {
 		super(NOTIFICATION_ID);
 		mBinder = new LocalBinder();
+	}
+	
+	public static int getNotificationID(){
+	    return NOTIFICATION_ID;
 	}
 
 	@Override
@@ -151,11 +155,17 @@ public class ScriptService extends ForegroundService {
 
 	@Override
 	protected Notification createNotification() {
-	    Notification notification =
-	        new Notification(R.drawable.ic_launcher_airi_72, this.getString(R.string.loading), System.currentTimeMillis());
+	    Notification notification;
+	    notification = new Notification(
+	        R.drawable.ic_launcher_airi_72, 
+	        this.getString(R.string.loading), 
+	        System.currentTimeMillis()
+	    );
 	    // This contentIntent is a noop.
-	    PendingIntent contentIntent = PendingIntent.getService(this, 0, new Intent(), 0);
-	    notification.setLatestEventInfo(this, this.getString(R.string.app_name), this.getString(R.string.loading), contentIntent);
+	    PendingIntent contentIntent = PendingIntent.getService(this, 0, 
+	        new Intent(), 0);
+	    notification.setLatestEventInfo(this, this.getString(R.string.app_name), 
+	        this.getString(R.string.loading), contentIntent);
 	    notification.flags = Notification.FLAG_AUTO_CANCEL;
 		return notification;
 	}
