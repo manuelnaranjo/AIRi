@@ -3,6 +3,7 @@ from android import API
 from twisted.internet import reactor
 from twisted.python import log
 droid = API()
+os.environ["HOME"] = "/data/data/net.aircable.airi/files"
 
 class EventSocket(object):
     # based on https://github.com/jdavisp3/twisted-intro/raw/master/twisted-client-1/get-poetry.py
@@ -72,18 +73,18 @@ def start_browser(listener):
     droid.addOptionsMenuItem("Exit", "airi", "exit", "ic_menu_close_clear_cancel")
 
 def main():
-	droid.log("Checking if bluetooth is available")
-	if not droid.checkBluetoothState():
-		droid.toggleBluetoothState(True, True)
-		if not droid.checkBluetoothState():
-			droid.makeToast("I can't work if you don't enable Bluetooth")
-			time.sleep(1)
-			sys.exit(1)
-	from airi.jinja import main as jmain
-	from airi.stream import MultiPartStream
-	droid.log("Starting server")
-	l = jmain(port=0)
-	portnumber = int(droid.startEventDispatcher())
-	sockl = EventSocket(('127.0.0.1', portnumber))
-	reactor.callWhenRunning(start_browser, listener=l)
-	reactor.run()
+    droid.log("Checking if bluetooth is available")
+    if not droid.checkBluetoothState():
+        droid.toggleBluetoothState(True, True)
+        if not droid.checkBluetoothState():
+            droid.makeToast("I can't work if you don't enable Bluetooth")
+            time.sleep(1)
+            sys.exit(1)
+    from airi.jinja import main as jmain
+    from airi.stream import MultiPartStream
+    droid.log("Starting server")
+    l = jmain(port=0)
+    portnumber = int(droid.startEventDispatcher())
+    sockl = EventSocket(('127.0.0.1', portnumber))
+    reactor.callWhenRunning(start_browser, listener=l)
+    reactor.run()
