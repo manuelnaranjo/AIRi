@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.googlecode.android_scripting.Constants;
 import com.googlecode.android_scripting.facade.ActivityResultFacade;
@@ -32,12 +33,15 @@ import com.googlecode.android_scripting.jsonrpc.RpcReceiverManager;
  * @author Alexey Reznichenko (alexey.reznichenko@gmail.com)
  */
 public class ScriptActivity extends Activity {
+    private static final String TAG = "AIRiActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (Constants.ACTION_LAUNCH_SCRIPT_FOR_RESULT.equals(getIntent().getAction())) {
             setTheme(android.R.style.Theme_Dialog);
             setContentView(R.layout.dialog);
+            Log.v(TAG, "LAUNCH_SCRIPT_FOR_RESULT");
             ServiceConnection connection = new ServiceConnection() {
                 @Override
                 public void onServiceConnected(ComponentName name, IBinder service) {
@@ -59,6 +63,7 @@ public class ScriptActivity extends Activity {
             bindService(new Intent(this, ScriptService.class), connection, Context.BIND_AUTO_CREATE);
             startService(new Intent(this, ScriptService.class));
         } else {
+            Log.v(TAG, "NO LAUNCH_SCRIPT_FOR_RESULT");
             ScriptApplication application = (ScriptApplication) getApplication();
             if (application.readyToStart()) {
                 startService(new Intent(this, ScriptService.class));
