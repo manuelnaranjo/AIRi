@@ -103,7 +103,7 @@ class Settings():
             "reconnect": False,
             "voice": False,
             "flash": False,
-            "exposure": 15,
+            "exposure": 0,
             "pan": "none"
         }
         for key, val in items:
