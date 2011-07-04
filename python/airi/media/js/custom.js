@@ -496,6 +496,7 @@ function index_init(){
     $('#setup').live("pagecreate", setup_create);
     $(window).bind('orientationchange', resize);
     $(window).bind('resize', resize);
+    $("#loading").remove();
 }
 
 $(document).bind("mobileinit", index_init);
