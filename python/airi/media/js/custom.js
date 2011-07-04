@@ -52,7 +52,7 @@ function internalChangePage(target){
         "changeHash": false,
         "reverse": false,
         "transition": "slide",
-        "reloadPage": true,
+        "reloadPage": true
     })
 }
 
@@ -182,7 +182,7 @@ function watch_device(){
   }
   previous_post = $.post("/api/updates/",
     { 
-      "address": $("#stream-address").val(),
+      "address": $("#stream-address").val()
     },
     function(data){
       previous_post = null;
@@ -247,7 +247,7 @@ function update_viewer(){
   player = $(".active-mode #video-content").flashembed(
       {
         src: "/media/airi.swf",
-        quality: "low",
+        quality: "low"
       },
       {
         //browser: window.navigator.userAgent,
