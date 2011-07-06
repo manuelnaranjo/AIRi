@@ -158,49 +158,6 @@ class Main(Resource):
         context["version"] = __version__
         return TemplateResource(template, context)
 
-class PkgFile(File):
-    def __init__(self, path, *args, **kwargs):
-        File.__init__(self, path, *args, **kwargs)
-        self.path = path
-
-    def isdir(self):
-        out = pkg_resources.resource_isdir("airi", self.path)
-        return out
-
-    def exists(self):
-        out = pkg_resources.resource_exists("airi", self.path)
-        return out
-
-    def isfile(self):
-        out = not self.isdir() and self.exists()
-        return out
-
-    def child(self, path):
-        path_ = os.path.join(self.path, path)
-        def exists():
-            return pkg_resources.resource_exists("airi", path_)
-        o = self.clonePath(path_)
-        o.exists = exists
-        o.path = path_
-        return o
-
-    def __getresource(self):
-        if not self.__resource:
-            self.__resource = pkg_resources.resource_stream("airi", self.path)
-        return self.__resource
-
-    def getmtime(self):
-        return time.time()
-
-    def openForReading(self): 
-        return pkg_resources.resource_stream("airi", self.path)
-
-    def getsize(self):
-        return len(pkg_resources.resource_stream("airi", self.path).read())
-
-    def getChild(self, path, request):
-        return File.getChild(self, path, request)
-
 def main(port=8000):
     from twisted.application.service import Application
     from twisted.application.internet import TCPServer
@@ -210,13 +167,17 @@ def main(port=8000):
     import sys
     log.startLogging(sys.stdout)
 
+    MEDIA = pkg_resources.resource_filename("airi", "/media")
+    FAVICON = pkg_resources.resource_filename("airi", "/media/favicon.ico")
+    print "serving static content from", MEDIA
+
     root = Main()
     path = os.path.dirname(os.path.realpath(__file__))
     root.putChild("api",        API())
-    root.putChild("favicon.ico", PkgFile("/media/favicon.ico"))
-    root.putChild("media", PkgFile("/media"))
+    root.putChild("media", File( MEDIA, defaultType=None ) )
     root.putChild("sco", SCOResource())
     root.putChild("stream", StreamResource())
+    root.putChild("favicon.ico", File( FAVICON, defaultType=None) )
     p=reactor.listenTCP(port, Site(root), interface="0.0.0.0", backlog=5)
     return p
 
