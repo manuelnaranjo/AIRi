@@ -82,6 +82,40 @@ function doReload(){
     $.mobile.urlHistory.stack.pop() // changePage created a new entry, take it out
 }
 
+function centerDeviceImg(target){
+    $(target).css("left", 50-$(target).width()/2)
+}
+
+function update_home(){
+    console.log("update-home");
+    $(".register-camera").remove()
+    $.get("/api/devices", null, function(data){
+        prev=$("#cameras");
+        $.each(data, function(index, val){
+            console.log(index);
+            console.log(val);
+            var o=$("<li class='register-camera'></li>")
+            prev.after(o)
+            prev=o;
+            var a=$("<a href='/stream.html?address="+val.address+"'></a>")
+            var img = $("<img onload='centerDeviceImg(this);' class='device-img' style='height: 100%; margin-left: 0px;'/>")
+            if (val.status){
+                o.attr("data-theme", "b")
+                img.attr("src", "/stream/"+val.address+"?thumbnail=True")
+            }
+            else{
+                o.attr("data-theme", "d")
+                img.attr("src", "/media/images/airi-offline.jpeg")
+            }
+            a.append(img)
+            a.append($("<h3>"+val.name+"</h3>"))
+            a.append($("<p>"+val.address+"</p>"))
+            o.append(a)
+        })
+        $("#home ul").listview("refresh")
+    })
+}
+
 function update_setup(){
     console.log("setup");
     $("#setup #exposure-text").remove()
@@ -129,14 +163,6 @@ function doConfigure(option, value){
 		"option": option,
 		"value": value
 	})
-/*	if (option=="voice"){
-		var player = getPlayerApi();
-		if (value==true)
-			player.scoConnect();
-		else
-			player.scoDisconnect();
-	}
-*/
 }
 
 function switchResolution(size){
@@ -237,24 +263,14 @@ function watch_device(){
 function update_viewer(){
   console.log("view");
 
-/*  $(".active-mode #stream-size", $(".ui-page-active")).unbind("change")
-  $(".active-mode #stream-size", $(".ui-page-active")).change(select_changed, {"origin": "stream-size"})
-  $(".active-mode #stream-pan", $(".ui-page-active")).unbind("change")
-  $(".active-mode #stream-pan", $(".ui-page-active")).change(select_changed, {"origin": "stream-pan"})
-*/
   watch_device();
 
   player = $(".active-mode #video-content").flashembed(
       {
         src: "/media/airi.swf",
         quality: "low"
-      },
-      {
-        //browser: window.navigator.userAgent,
       }
   )
-//  updateGeneric("flash")
-//  updateGeneric("voice")
 }
 
 function currentId(){
@@ -265,13 +281,7 @@ function pageshow(event, ui){
     var id = currentId();
     resize();
     console.log("show " + id);
-    console.log("pagebeforecreate");
-    $.each($(".ui-page").not(".ui-page-active"), 
-        function(index, val) {
-            console.log("removing: " + $(val).attr("id"))
-    })
-    $(".ui-page").not(".ui-page-active").remove();
-    $("[data-rel=back]").remove()
+    $("[data-rel=back]").remove();
     $("#" + id + " #back_button").
         attr("onclick", "javascript: goBack();").
         removeClass("ui-btn-active");
@@ -291,8 +301,8 @@ function pageshow(event, ui){
     }
 
     switch (id){
-//        case "home":
-//            return update_home();
+        case "home":
+            return update_home();
         case "setup":
             return update_setup();
         case "viewer":
@@ -301,16 +311,14 @@ function pageshow(event, ui){
     console.log("show not known id " + id);
 }
 
-function pagehide(event, ui){
-  var id = currentId();
-  console.log("hide " + id);
-
-  switch (id){
-    case "setup":
-      return hide_setup();
-  }
-  console.log("hide not known id " + id);
-
+function pagebeforehide(event, ui){
+    var id = currentId();
+    console.log("beforehide " + id + ", next " + ui.nextPage.attr("id"));
+    switch (id){
+        case "setup":
+            return hide_setup();
+    }
+    console.log("hide not known id " + id);
 }
 
 function create_exposure_slider(label, holder, real){
@@ -486,17 +494,14 @@ function resize(event){
     }
 }
 
-function pagebeforecreate(){
-}
-
 function index_init(){
     $('div').live("pageshow", pageshow);
-    $('div').live("pagebeforehide", pagehide);
     $('#viewer').live("pagecreate", viewer_create);
     $('#setup').live("pagecreate", setup_create);
     $(window).bind('orientationchange', resize);
     $(window).bind('resize', resize);
     $("#loading").remove();
+
 }
 
 $(document).bind("mobileinit", index_init);
