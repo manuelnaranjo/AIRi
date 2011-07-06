@@ -27,11 +27,14 @@ def main():
         from pair import main
         reactor.callWhenRunning(main)
     log.startLogging(sys.stdout)
+    nobrowser = "--nobrowser" in sys.argv
+    if nobrowser:
+        sys.argv.remove("--nobrowser")
     if len(sys.argv) > 1:
         jmain(int(sys.argv[1]))
     else:
         jmain()
-    if browser_ready():
+    if browser_ready() and not nobrowser:
         import webbrowser
         reactor.callLater(1, startbrowser)
     reactor.run()
