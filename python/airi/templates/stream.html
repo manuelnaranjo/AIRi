@@ -201,14 +201,29 @@
 {% endmacro %}
 
 {% block extra_header %}
-        <div id="tab" data-role="tabs"> {# style="display: none">#}
-                <ul>
-                        <li><a href="#tab-video" id="video-link">Video</a></li>
-                        <li><a href="#tab-sensors" id="sensors-link">Sensors</a></li>
-                        <li><a href="#tab-controls" id="video-controls">Controls</a></li>
-                        <li><a href="#tab-information" id="information-link">Information</a></li>
-                </ul>
-        </div>
+    <div id="tabs" 
+            data-role="navbar" 
+            data-selector="[data-airi=mobile] > div">
+        <ul>
+            <li><a
+                data-href="#tab-video"
+                id="video-link"
+                class="ui-btn-active"
+                >Video</a></li>
+            <li><a
+                data-href="#tab-sensors"
+                id="sensors-link"
+                >Sensors</a></li>
+            <li><a
+                data-href="#tab-controls"
+                id="video-controls"
+                >Controls</a></li>
+            <li><a
+                data-href="#tab-information"
+                id="information-link"
+                >Information</a></li>
+        </ul>
+    </div>
 {% endblock %}
 
 {% block content %}

@@ -7,6 +7,22 @@ previous_post = null;
 player = null;
 startup = true;
 
+// used by navbars to switch in javascript fashion
+function changeTab(event){
+    var source = $( this )
+    var navbar = source.parents().filter("div[data-role=navbar]");
+    var selector = navbar.attr("data-selector");
+    navbar.find("a").not(".ui-state-persist").removeClass($.mobile.activeBtnClass)
+    source.addClass($.mobile.activeBtnClass);
+    console.log("ChangeTab ", selector,  source.attr("data-href"))
+    selector=$(selector);
+    $.each(navbar.find("a").not(source), function(index, obj){
+        obj=selector.filter($($(obj).attr("data-href")))
+        obj.removeClass("tab-visible").addClass("tab-hidden")
+    })
+    selector.filter(source.attr("data-href")).removeClass("tab-hidden").addClass("tab-visible")
+}
+
 function connect(transport){
     connectViewer("method="+transport);
 }
@@ -111,6 +127,7 @@ function update_home(){
             a.append($("<h3>"+val.name+"</h3>"))
             a.append($("<p>"+val.address+"</p>"))
             o.append(a)
+            o.append($("<a href='/setup.html?address="+val.address+"'>Configure</a>"))
         })
         $("#home ul").listview("refresh")
     })
@@ -128,6 +145,7 @@ function update_setup(){
         $(".ui-page-active #exposure-text").text(value*66+" ms")
     })
     $(".ui-page-active #exposure").trigger("change")
+    $("div[data-role=navbar]").find("."+$.mobile.activeBtnClass).trigger("vclick")
 }
 
 function getPlayerApi(){
@@ -271,6 +289,7 @@ function update_viewer(){
         quality: "low"
       }
   )
+  $("div[data-role=navbar]").find("."+$.mobile.activeBtnClass).trigger("vclick")
 }
 
 function currentId(){
@@ -335,11 +354,11 @@ function viewer_resize(event){
         }
     }
     if ( $(window).width() > 768 ){
-        $('#viewer [data-role="tabs"]').addClass("hide");
+        $('#viewer [data-role="navbar"]').addClass("hide");
         $('#viewer [data-airi="mobile"]').addClass("hide").removeClass("active-mode");
         $('#viewer [data-airi="desktop"]').removeClass("hide").addClass("active-mode");
     } else {
-        $('#viewer [data-role="tabs"]').removeClass("hide");
+        $('#viewer [data-role="navbar"]').removeClass("hide");
         $('#viewer [data-airi="mobile"]').removeClass("hide").addClass("active-mode");
         $('#viewer [data-airi="desktop"]').addClass("hide").removeClass("active-mode");
     }
@@ -348,7 +367,7 @@ function viewer_resize(event){
 
 function viewer_create(event){
     var prepare = function(content){
-    	console.log("viewer_create prepare");
+        console.log("viewer_create prepare");
         if (content.attr("id") == "video")
             $("#viewer .ui-content .active-mode").addClass("ui-video-player")
         else
@@ -358,19 +377,14 @@ function viewer_create(event){
     $(".rotate-45").rotate(-45);
     viewer_resize();
     viewerResize();
-    $('#viewer div[data-role=tabs]').tabs({
-        beforeTabShow: function(event, ui){ prepare(ui.nextContent); },
-        load: function(event, args){ prepare(args.currentContent);},
-        selector: 'div[data-airi=mobile]'
-    })
+    $("[data-role=navbar]").undelegate("a", "vclick");
+    $("[data-role=navbar]").delegate("a", "vclick", changeTab);
 }
 
 function setup_create(event){
     console.log("creating setup");
-    $('#setup [data-role=tabs]').tabs({
-            selector: 'form[id=setup-form]'
-    })
-
+    $("[data-role=navbar]").undelegate("a", "vclick");
+    $("[data-role=navbar]").delegate("a", "vclick", changeTab);
     $("div[data-role=page][id=setup] #reload_button").addClass("hide")
 }
 

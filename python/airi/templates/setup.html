@@ -54,12 +54,18 @@
 
 {% block extra_header %}
 {% if not new_device %}
-	<div id="tab" data-role="tabs">
+    <div id="setup-form-tab" 
+            data-role="navbar" 
+            data-selector="#setup-form > div">
         <ul>
-            <li><a href="#info">Information</a></li>
-            <li><a href="#connection">Connection</a></li>
-            <li><a href="#camera_setup">Controls</a></li>
-            <li><a href="#manage">Manage</a></li>
+            <li><a 
+                data-href="#info"
+                class="ui-btn-active">Information</a></li>
+            <li><a 
+                data-href="#connection"
+                >Connection</a></li>
+            <li><a data-href="#camera_setup">Controls</a></li>
+            <li><a data-href="#manage">Manage</a></li>
         </ul>
     </div>
 {% endif %}
