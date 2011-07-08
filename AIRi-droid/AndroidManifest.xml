@@ -9,7 +9,7 @@
     android:icon="@drawable/ic_launcher_airi_72"
     android:label="@string/app_name"
     android:name=".ScriptApplication"
-    android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+    android:theme="@style/Theme.NoBackground"
     android:configChanges="keyboardHidden|orientation">
     <activity
       android:name=".ScriptActivity"
@@ -40,8 +40,8 @@
   <uses-sdk android:minSdkVersion="4"/>
   <uses-permission
     android:name="android.permission.INTERNET" />
-  <!-- <uses-permission
-    android:name="android.permission.VIBRATE" /> -->
+  <uses-permission
+    android:name="android.permission.VIBRATE" />
   <!-- <uses-permission
    android:name="android.permission.ACCESS_CHECKIN_PROPERTIES"/> -->
   <!-- <uses-permission
@@ -96,10 +96,10 @@
    android:name="android.permission.CAMERA"/> -->
   <!-- <uses-permission
    android:name="android.permission.CHANGE_BACKGROUND_DATA_SETTING"/> -->
-  <!-- <uses-permission
-   android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/> -->
-  <!-- <uses-permission
-   android:name="android.permission.CHANGE_CONFIGURATION"/> -->
+  <uses-permission
+   android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
+  <uses-permission
+   android:name="android.permission.CHANGE_CONFIGURATION"/>
   <!-- <uses-permission
    android:name="android.permission.CHANGE_NETWORK_STATE"/> -->
   <!-- <uses-permission
@@ -124,8 +124,8 @@
    android:name="android.permission.DISABLE_KEYGUARD"/> -->
   <!-- <uses-permission
    android:name="android.permission.DUMP"/> -->
-  <!-- <uses-permission
-   android:name="android.permission.EXPAND_STATUS_BAR"/> -->
+  <uses-permission
+   android:name="android.permission.EXPAND_STATUS_BAR"/>
   <!-- <uses-permission
    android:name="android.permission.FACTORY_TEST"/> -->
   <!-- <uses-permission
@@ -210,8 +210,8 @@
    android:name="android.permission.RECEIVE_WAP_PUSH"/> -->
   <!-- <uses-permission
    android:name="android.permission.RECORD_AUDIO"/> -->
-  <!-- <uses-permission
-   android:name="android.permission.REORDER_TASKS"/> -->
+  <uses-permission
+   android:name="android.permission.REORDER_TASKS"/>
   <!-- <uses-permission
    android:name="android.permission.RESTART_PACKAGES"/> -->
   <!-- <uses-permission
@@ -242,16 +242,16 @@
    android:name="android.permission.SHUTDOWN"/> -->
   <!-- <uses-permission
    android:name="android.permission.SIGNAL_PERSISTENT_PROCESSES"/> -->
-  <!-- <uses-permission
-   android:name="android.permission.STATUS_BAR"/> -->
+  <uses-permission
+   android:name="android.permission.STATUS_BAR"/>
   <!-- <uses-permission
    android:name="android.permission.STOP_APP_SWITCHES"/> -->
   <!-- <uses-permission
    android:name="android.permission.SUBSCRIBED_FEEDS_READ"/> -->
   <!-- <uses-permission
    android:name="android.permission.SUBSCRIBED_FEEDS_WRITE"/> -->
-  <!-- <uses-permission
-   android:name="android.permission.SYSTEM_ALERT_WINDOW"/> -->
+  <uses-permission
+   android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
   <!-- <uses-permission
    android:name="android.permission.UPDATE_DEVICE_STATS"/> -->
   <!-- <uses-permission
@@ -274,16 +274,15 @@
    android:name="android.permission.WRITE_OWNER_DATA"/> -->
   <!-- <uses-permission
    android:name="android.permission.WRITE_SECURE_SETTINGS"/> -->
-  <!-- <uses-permission
-   android:name="android.permission.WRITE_SETTINGS"/> -->
+  <uses-permission
+   android:name="android.permission.WRITE_SETTINGS"/>
   <!-- <uses-permission
    android:name="android.permission.WRITE_SMS"/> -->
   <!-- <uses-permission
    android:name="android.permission.WRITE_SYNC_SETTINGS"/> -->
   <!-- <uses-permission
    android:name="android.permission.WRITE_USER_DICTIONARY"/> -->
-  <uses-permission android:name="android.permission.VIBRATE">
-  </uses-permission>
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE">
+  <uses-permission 
+    android:name="android.permission.WRITE_EXTERNAL_STORAGE">
   </uses-permission>
 </manifest>
