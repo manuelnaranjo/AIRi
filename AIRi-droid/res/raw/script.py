@@ -36,6 +36,8 @@ def createSymbolicLinks(files):
     libs=os.path.join(path.dirname(parent), "lib")
     A=open(os.path.join(parent, "filelist.txt"), "r")
     for l in A.readlines():
+        if len(l.split()) < 2:
+            continue
         src,dest=l.split()
         src,dest=[os.path.join(libs, src), os.path.join(files, dest)]
         print dest, "->", src,
@@ -59,7 +61,7 @@ try:
     [ sys.path.insert(1, path.join(parent,i)) for i in listdir(parent) if i.endswith("egg") ]
 
     import pkg_resources
-    pkg_resources.set_extraction_path(droid.environment()["appcache"])
+    pkg_resources.set_extraction_path(parent)
 
     os.environ["DATA_PATH"]=parent
 
