@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 rm -rf ../temp
 mkdir ../temp

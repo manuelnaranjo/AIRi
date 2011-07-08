@@ -5,4 +5,5 @@ set -e
 
 source common.sh
 
+ant clean
 ant release
