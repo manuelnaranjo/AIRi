@@ -161,3 +161,24 @@
     position: absolute;
     margin: -1.5em 0 0 -150px;
 }
+
+.tab-hidden {
+    display: none;
+}
+
+.tab-visible {
+    display: block;
+}
+
+#tab-video.tab-hidden {
+    visibility: hidden;
+    display: block !important;
+    width: 0px;
+    height: 0px;
+}
+
+#tab-video.tab-visible {
+    visibility: visible !important;
+    width: 100%;
+    height: 100%;
+}
