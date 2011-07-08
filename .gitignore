@@ -20,3 +20,5 @@ python/airi/media/css/images/*
 *.egg
 python/deps
 LightBlue
+lib_airi_*.so
+filelist.txt
