@@ -152,10 +152,14 @@ class Main(Resource):
             path = "redirect.html"
         template = self.env.get_template(path)
         context = self.contexts.get(path, lambda x,y: {})(self, request)
-        context["pairing_supported"]=bluetooth.isPairingSupported()
-        context["l2cap_supported"]=bluetooth.L2CAP_SUPPORTED
-        context["sco_supported"]=bluetooth.SCO_SUPPORTED
+        context["pairing_supported"] = bluetooth.isPairingSupported()
+        context["l2cap_supported"] = bluetooth.L2CAP_SUPPORTED
+        context["sco_supported"] = bluetooth.SCO_SUPPORTED
         context["version"] = __version__
+        try:
+            context["android"] = bluetooth.isAndroid()
+        except:
+            context["android"] = False
         return TemplateResource(template, context)
 
 def main(port=8000):

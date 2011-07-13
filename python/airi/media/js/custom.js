@@ -7,6 +7,9 @@ previous_post = null;
 player = null;
 startup = true;
 
+// used when running in android
+droid = null;
+
 // used by navbars to switch in javascript fashion
 function changeTab(event){
     var source = $( this )
@@ -508,14 +511,28 @@ function resize(event){
     }
 }
 
-function index_init(){
+function mobileinit(){
+    console.log("mobileinit");
     $('div').live("pageshow", pageshow);
     $('#viewer').live("pagecreate", viewer_create);
     $('#setup').live("pagecreate", setup_create);
     $(window).bind('orientationchange', resize);
     $(window).bind('resize', resize);
     $("#loading").remove();
-
+    try {
+        droid = new Android();
+        console.log("Running on Android");
+        droid.registerCallback("sl4a", function(data) {
+            data.data=eval("("+data.data+")");
+            console.log("sl4a event " + data.data.shutdown);
+            if (data.data.shutdown != undefined){
+                console.log("Calling dismiss");
+                droid.dismiss();
+            }
+        });
+    } catch ( err ) {
+        console.log( "" + err);
+    }
 }
 
-$(document).bind("mobileinit", index_init);
+$(document).bind("mobileinit", mobileinit);
