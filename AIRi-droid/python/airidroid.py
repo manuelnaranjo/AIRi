@@ -70,7 +70,7 @@ class EventSocket(object):
 def start_browser(listener):
     droid.log(str(listener))
     droid.log("starting view in port %s" % listener._realPortNumber)
-    droid.webViewShow("http://127.0.0.1:%s" % listener._realPortNumber)
+    droid.webViewShow("http://127.0.0.1:%s/index.html" % listener._realPortNumber)
     droid.addOptionsMenuItem("Exit", "airi", "exit", "ic_menu_close_clear_cancel")
 
 def main():
@@ -90,3 +90,5 @@ def main():
     reactor.callWhenRunning(start_browser, listener=l)
     reactor.run()
     droid.log("Reactor stopped")
+    droid.airiRemoveNotification()
+
