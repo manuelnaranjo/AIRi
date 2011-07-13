@@ -1,0 +1,10 @@
+In order to build you need a fullfill a few dependencies. You need to download
+Jinja2 from pypi and build an egg file by doing:
+python26 setup.py bdist_egg --exclude-source-files
+
+A file named: Jinja2-<version>-py2.6.egg will be generated for you in dist, copy
+it to the deps folder.
+
+You also need twisted-r1 and zope-r1 from Py4A project. Change the extension to
+egg and put them into deps as well.
+
