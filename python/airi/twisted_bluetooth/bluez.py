@@ -68,10 +68,7 @@ def isAndroid():
         pass
     return False
 
-if isAndroid():
-    PAIR_SUPPORTED=False
-else:
-    PAIR_SUPPORTED=True
+PAIR_SUPPORTED = True
 
 def androidIsBonded(address):
     try:
@@ -85,7 +82,7 @@ def androidIsBonded(address):
 def bluezIsBonded(address):
     initalizeDBus()
     global dbus, bus, manager
-    
+
     adapter = dbus.Interface(bus.get_object("org.bluez",
         manager.DefaultAdapter()), "org.bluez.Adapter")
     try:
@@ -95,20 +92,23 @@ def bluezIsBonded(address):
     dev = dbus.Interface(bus.get_object("org.bluez",dev),
             "org.bluez.Device")
     return bool(dev.GetProperties()["Paired"])
-    
+
 def isBonded(address):
     if isAndroid():
         return androidIsBonded(address)
     return bluezIsBonded(address)
 
 def androidBondDevice(address):
-    res = droid.bluetoothConnect(SPP_UUID, address) 
-    droid.bluetoothStop(res)
+    from airi import settings
+    s = settings.getSettings()
+    pincode = s.getPIN(address)
+    ret = droid.bluetoothPair(address, pincode)
+    print ret
 
 def bluezBondDevice(address):
     initalizeDBus()
     global dbus, bus, manager
-    
+
     from airi.pair import Agent, PATH
     path = "%s/temp/%s" % (PATH, address.replace(":", ""))
     agent = Agent(bus, path)
