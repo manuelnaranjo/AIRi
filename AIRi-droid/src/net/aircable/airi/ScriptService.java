@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2011 Naranjo Manuel Francisco <manuel@aircable.net>
  * Copyright (C) 2010 Google Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -16,9 +17,11 @@
 
 package net.aircable.airi;
 
-import android.app.Dialog;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Binder;
@@ -33,6 +36,7 @@ import com.googlecode.android_scripting.ForegroundService;
 import com.googlecode.android_scripting.Log;
 import com.googlecode.android_scripting.NotificationIdFactory;
 import com.googlecode.android_scripting.ScriptLauncher;
+import com.googlecode.android_scripting.ScriptProcess;
 import com.googlecode.android_scripting.facade.FacadeConfiguration;
 import com.googlecode.android_scripting.interpreter.Interpreter;
 import com.googlecode.android_scripting.interpreter.InterpreterConfiguration;
@@ -41,8 +45,8 @@ import com.googlecode.android_scripting.interpreter.html.HtmlActivityTask;
 import com.googlecode.android_scripting.interpreter.html.HtmlInterpreter;
 import com.googlecode.android_scripting.jsonrpc.RpcReceiverManager;
 
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.concurrent.CountDownLatch;
 
@@ -53,6 +57,8 @@ import java.util.concurrent.CountDownLatch;
  * @author Manuel Naranjo (manuel@aircable.net)
  */
 public class ScriptService extends ForegroundService {
+	@SuppressWarnings("unused")
+	private final static String TAG = "ScriptService";
     private final static int NOTIFICATION_ID = NotificationIdFactory.create();
     private final CountDownLatch mLatch = new CountDownLatch(1);
     private final IBinder mBinder;
@@ -60,6 +66,7 @@ public class ScriptService extends ForegroundService {
     private InterpreterConfiguration mInterpreterConfiguration;
     private RpcReceiverManager mFacadeManager;
     private AndroidProxy mProxy;
+    private ScriptProcess mProcess;
     
     public class LocalBinder extends Binder {
         public ScriptService getService() {
@@ -89,8 +96,27 @@ public class ScriptService extends ForegroundService {
     }
 
     @Override
-    public void onStart(Intent intent, final int startId) {
-        super.onStart(intent, startId);
+    public void onDestroy() {
+        Log.v("onDestroy"); 
+        NotificationManager mNotificationManager = (NotificationManager) 
+        	getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.cancelAll();
+        if (this.mProcess != null){
+        	this.mProcess.kill();
+        	this.mProcess = null;
+        }
+        if (this.mProxy != null){
+        	try {
+        		this.mProxy.shutdown();
+        	} catch (Exception e){
+        		Log.e(e);
+        	}
+        	this.mProxy = null;
+        }
+        super.onDestroy();
+    }
+
+    public void startCompat(Intent intent, final int startId){
         String fileName = Script.getFileName(this);
         Interpreter interpreter = mInterpreterConfiguration
                 .getInterpreterForScript(fileName);
@@ -107,6 +133,11 @@ public class ScriptService extends ForegroundService {
                                 + fileName);
             }
             stopSelf(startId);
+            return;
+        }
+        
+        if (mProcess != null && mProcess.getPid() > -1){
+            Log.v("All ready running " + mProcess.getPid());
             return;
         }
 
@@ -133,15 +164,32 @@ public class ScriptService extends ForegroundService {
             mProxy = new AndroidProxy(this, null, true);
             mProxy.startLocal();
             mLatch.countDown();
-            ScriptLauncher.launchScript(script, mInterpreterConfiguration,
-                    mProxy, new Runnable() {
+            mProcess = ScriptLauncher.launchScript(script,
+                    mInterpreterConfiguration, mProxy, new Runnable() {
                         @Override
                         public void run() {
+                            Log.v("killing proxy");
                             mProxy.shutdown();
+                            mProxy = null;
+                            mProcess = null;
                             stopSelf(startId);
                         }
                     });
         }
+    }
+    
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.v("onStart " + intent + ", " + flags + ", " + startId);
+        startCompat(intent, startId);
+        return Service.START_STICKY;
+    }
+
+    @Override
+    public void onStart(Intent intent, final int startId) {
+        super.onStart(intent, startId);
+        startCompat(intent, startId);
+        
     }
 
     RpcReceiverManager getRpcReceiverManager() throws InterruptedException {
@@ -153,27 +201,33 @@ public class ScriptService extends ForegroundService {
         return mFacadeManager;
     }
 
-    @Override
-    protected Notification createNotification() {
+    public static Notification createNotification(int string, Context ctx){
         Notification notification;
         notification = new Notification(
             R.drawable.ic_launcher_airi_72, 
-            this.getString(R.string.loading), 
+            ctx.getString(string), 
             System.currentTimeMillis()
         );
-        // This contentIntent is a noop.
-        PendingIntent contentIntent = PendingIntent.getService(this, 0, 
-            new Intent(), 0);
-        notification.setLatestEventInfo(this, this.getString(R.string.app_name), 
-            this.getString(R.string.loading), contentIntent);
-        notification.flags = Notification.FLAG_AUTO_CANCEL;
-        return notification;
+        Intent notificationIntent = new Intent(ctx, ScriptActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(ctx, 0, 
+            notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        notification.setLatestEventInfo(ctx, ctx.getString(R.string.app_name), 
+            ctx.getString(string), contentIntent);
+        notification.flags = Notification.FLAG_FOREGROUND_SERVICE | 
+            Notification.FLAG_NO_CLEAR |
+            Notification.FLAG_ONGOING_EVENT;
+        notification.contentIntent = contentIntent;
+        return notification;    	
+    }
+    
+    @Override
+    protected Notification createNotification() {
+    	return createNotification(R.string.loading, this);
     }
 
     private boolean needsToBeUpdated(String filename, InputStream content) {
         File script = new File(filename);
-        FileInputStream fin;
-        Log.d("Checking if " + filename + " exists");
+        Log.v("Checking if " + filename + " exists");
 
         if (!script.exists()) {
             Log.d("not found");
