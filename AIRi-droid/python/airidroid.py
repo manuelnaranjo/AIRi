@@ -29,10 +29,11 @@ class EventSocket(object):
 
     def connectionLost(self, reason):
         self.socket.close()
-
-        # stop monitoring this socket
-        from twisted.internet import reactor
-        reactor.removeReader(self)
+        # it may happen that the sl4a dies
+        try:
+            reactor.stop()
+        except:
+            pass
 
     def handleEvent(self, name, data, time):
         if name=='airi':
@@ -88,3 +89,4 @@ def main():
     sockl = EventSocket(('127.0.0.1', portnumber))
     reactor.callWhenRunning(start_browser, listener=l)
     reactor.run()
+    droid.log("Reactor stopped")
