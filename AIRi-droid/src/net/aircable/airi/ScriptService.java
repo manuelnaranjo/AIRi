@@ -172,7 +172,7 @@ public class ScriptService extends ForegroundService {
                             mProxy.shutdown();
                             mProxy = null;
                             mProcess = null;
-                            stopSelf(startId);
+                            stopSelf();
                         }
                     });
         }
@@ -195,24 +195,24 @@ public class ScriptService extends ForegroundService {
     RpcReceiverManager getRpcReceiverManager() throws InterruptedException {
         mLatch.await();
         if (mFacadeManager==null) { // Facade manage may not be available on startup.
-        mFacadeManager = mProxy.getRpcReceiverManagerFactory()
-        .getRpcReceiverManagers().get(0);
+        	mFacadeManager = mProxy.getRpcReceiverManagerFactory()
+        		.getRpcReceiverManagers().get(0);
         }
         return mFacadeManager;
     }
 
-    public static Notification createNotification(int string, Context ctx){
+    public static Notification createNotification(String text, Context ctx){
         Notification notification;
         notification = new Notification(
             R.drawable.ic_launcher_airi_72, 
-            ctx.getString(string), 
+            text, 
             System.currentTimeMillis()
         );
         Intent notificationIntent = new Intent(ctx, ScriptActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(ctx, 0, 
             notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         notification.setLatestEventInfo(ctx, ctx.getString(R.string.app_name), 
-            ctx.getString(string), contentIntent);
+            text, contentIntent);
         notification.flags = Notification.FLAG_FOREGROUND_SERVICE | 
             Notification.FLAG_NO_CLEAR |
             Notification.FLAG_ONGOING_EVENT;
@@ -222,7 +222,7 @@ public class ScriptService extends ForegroundService {
     
     @Override
     protected Notification createNotification() {
-    	return createNotification(R.string.loading, this);
+    	return createNotification(this.getString(R.string.loading), this);
     }
 
     private boolean needsToBeUpdated(String filename, InputStream content) {

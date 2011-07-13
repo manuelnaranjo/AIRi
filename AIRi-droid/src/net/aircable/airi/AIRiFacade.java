@@ -1,6 +1,9 @@
 package net.aircable.airi;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.IntentFilter;
 
 import com.googlecode.android_scripting.MainThread;
@@ -28,9 +31,10 @@ import com.hexad.bluezime.ImprovedBluetoothDevice;
  */
 
 public class AIRiFacade extends RpcReceiver {
-    private Service mService;
-    private BluetoothAdapter mBluetoothAdapter;
+    private final Service mService;
+    private final BluetoothAdapter mBluetoothAdapter;
     private static final String TAG="AIRiFacade";
+	private final NotificationManager mNotificationManager;
 
     public AIRiFacade(FacadeManager manager) {
         super(manager);
@@ -42,6 +46,9 @@ public class AIRiFacade extends RpcReceiver {
                     return BluetoothAdapter.getDefaultAdapter();    
                 }
         });
+        String ns = Context.NOTIFICATION_SERVICE;
+        mNotificationManager = (NotificationManager) 
+				this.mService.getSystemService(ns);
     }
 
     @Rpc(description = "Tells if a given address is bonded")
@@ -93,9 +100,26 @@ public class AIRiFacade extends RpcReceiver {
         Log.v(TAG, "setPin( " + pincode + " ) -> " + out);
         return out;
     }
+    
+    @Rpc(description = "Remove AIRi notification")
+    public void airiRemoveNotification() {
+    	this.mNotificationManager.cancel(ScriptService.getNotificationID());
+    }
 
+    @Rpc(description = "Update AIRi notification")
+    public void airiUpdateNotification(
+        @RpcParameter(name="text") String text
+    ) throws IllegalArgumentException, Exception{
+    	Notification notification = ScriptService.
+    			createNotification(text, this.mService);
+    	int id = ScriptService.getNotificationID();
+    	this.mNotificationManager.notify(id, notification);
+    	
+    }
+    
     @Override
     public void shutdown() {
+    	airiRemoveNotification();
     }
 }
 
