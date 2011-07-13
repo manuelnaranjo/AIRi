@@ -530,6 +530,7 @@ function mobileinit(){
                 droid.dismiss();
             }
         });
+        droid.airiUpdateNotification("Ready, press to open.");
     } catch ( err ) {
         console.log( "" + err);
     }
