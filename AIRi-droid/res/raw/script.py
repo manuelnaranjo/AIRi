@@ -70,6 +70,7 @@ try:
 
 except Exception, err:
     import traceback
+    droid.makeToast(str(err))
     droid.log(str(err))
     traceback.print_exc(file=out)
 
