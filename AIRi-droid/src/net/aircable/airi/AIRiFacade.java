@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 
 import com.googlecode.android_scripting.MainThread;
@@ -115,6 +116,14 @@ public class AIRiFacade extends RpcReceiver {
     	int id = ScriptService.getNotificationID();
     	this.mNotificationManager.notify(id, notification);
     	
+    }
+    
+    @Rpc(description = "Call this method when AIRi is ready to hide the splash screen")
+    public void airiHideSplashScreen(){
+    	Log.v(TAG, "Broadcasting " + ScriptActivity.HIDE_SPLASHSCREEN);
+    	Intent intent = new Intent();
+    	intent.setAction(ScriptActivity.HIDE_SPLASHSCREEN);
+    	this.mService.sendBroadcast(intent);
     }
     
     @Override
