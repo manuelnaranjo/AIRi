@@ -9,6 +9,7 @@ startup = true;
 
 // used when running in android
 droid = null;
+hidesplash = true;
 
 // used by navbars to switch in javascript fashion
 function changeTab(event){
@@ -133,6 +134,12 @@ function update_home(){
             o.append($("<a href='/setup.html?address="+val.address+"'>Configure</a>"))
         })
         $("#home ul").listview("refresh")
+        if (droid != null && hidesplash){
+            console.log("hidding splash screen");
+            hidesplash = false;
+            //droid.airiHideSplashScreen();
+            droid.dialogDismiss();
+        }
     })
 }
 
@@ -511,6 +518,21 @@ function resize(event){
     }
 }
 
+function androidinit(){
+    droid = new Android();
+    console.log("Running on Android");
+    droid.registerCallback("sl4a", function(data) {
+        data.data=eval("("+data.data+")");
+        console.log("sl4a event " + data.data.shutdown);
+        if (data.data.shutdown != undefined){
+            console.log("Calling dismiss");
+            droid.dismiss();
+        }
+    });
+    droid.airiUpdateNotification("Ready, press to open.");
+    
+}
+
 function mobileinit(){
     console.log("mobileinit");
     $('div').live("pageshow", pageshow);
@@ -519,19 +541,11 @@ function mobileinit(){
     $(window).bind('orientationchange', resize);
     $(window).bind('resize', resize);
     $("#loading").remove();
+
     try {
-        droid = new Android();
-        console.log("Running on Android");
-        droid.registerCallback("sl4a", function(data) {
-            data.data=eval("("+data.data+")");
-            console.log("sl4a event " + data.data.shutdown);
-            if (data.data.shutdown != undefined){
-                console.log("Calling dismiss");
-                droid.dismiss();
-            }
-        });
-        droid.airiUpdateNotification("Ready, press to open.");
+        androidinit();
     } catch ( err ) {
+        console.log("Failure while calling androidinit, quite possible not running on android");
         console.log( "" + err);
     }
 }
