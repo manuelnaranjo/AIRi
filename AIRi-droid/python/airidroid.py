@@ -72,6 +72,9 @@ def start_browser(listener):
     droid.log("starting view in port %s" % listener._realPortNumber)
     droid.webViewShow("http://127.0.0.1:%s/index.html" % listener._realPortNumber)
     droid.addOptionsMenuItem("Exit", "airi", "exit", "ic_menu_close_clear_cancel")
+    droid.airiHideSplashScreen();
+    droid.dialogCreateSpinnerProgress("AIRi", "AIRi is Loading. Please wait...");
+    droid.dialogShow();
 
 def main():
     droid.log("Checking if bluetooth is available")
