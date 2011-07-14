@@ -126,14 +126,11 @@ def bondDevice(address):
     return bluezBondDevice(address)
 
 def isPairingSupported():
-    if isAndroid():
-        return False
-    print "isPairingSupported", True
     return True
 
 def isPairingReady():
-    if not isPairingSupported():
-        return False
+    if isAndroid():
+        return True
     return len(Agent.listeners)>0
 
 class BluetoothConnection(tcp.Connection):

@@ -56,14 +56,12 @@ public class AIRiFacade extends RpcReceiver {
     public boolean bluetoothIsBonded(
             @RpcParameter(name="address") String address
     ){
-        address = address.toLowerCase();
-        Set<BluetoothDevice> devices =
-            mBluetoothAdapter.getBondedDevices();
-        for (BluetoothDevice e: devices){
-            if (e.getAddress().toLowerCase().equals(address))
-                    return true;
-        }
-        return false;
+    	int bondstate;
+        address = address.toUpperCase();
+        BluetoothDevice mDevice = mBluetoothAdapter.getRemoteDevice(address);
+        bondstate = mDevice.getBondState();
+        Log.v(TAG, "Internal bluetoothIsBondend " + address + " -> " + bondstate);
+        return bondstate == BluetoothDevice.BOND_BONDED;
     }
 
     @Rpc(description = "Try to pair with the given PIN code")
@@ -71,34 +69,50 @@ public class AIRiFacade extends RpcReceiver {
         @RpcParameter(name="address") String address,
         @RpcParameter(name="pincode") String pincode
     ) throws IllegalArgumentException, Exception{
-        boolean out;
+        boolean out = false;
         BluetoothDevice mDevice;
         ImprovedBluetoothDevice mImproved;
         PairingListener mListener;
         IntentFilter mIFilter;
         CountDownLatch mLatch;
+        int i = 0;
         
         address = address.toUpperCase();
+        Log.v(TAG, "Bonding to " + address);
         mDevice = mBluetoothAdapter.getRemoteDevice(address);
         mImproved = new ImprovedBluetoothDevice(mDevice);
-        mLatch = new CountDownLatch(1);
-        
-        mListener = new PairingListener( address, mLatch );
-        
-        // wait until the pairing request is generated
-        mIFilter = new IntentFilter();
-        mIFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        mService.registerReceiver(mListener, mIFilter);
-        Log.v(TAG, "CreatingBond");
-        mImproved.createBond();
-        mLatch.await(20, TimeUnit.SECONDS);
-        mService.unregisterReceiver(mListener);
-        Log.v(TAG, "PairingDialog back");
-        
-        Thread.sleep(500);
-        Log.v(TAG, "Sleep done");
-        out = mImproved.setPin(pincode);
-        Log.v(TAG, "setPin( " + pincode + " ) -> " + out);
+        if (mDevice.getBondState() == BluetoothDevice.BOND_NONE){
+        	Log.v(TAG, "Not bonded at all bonding");
+        	mLatch = new CountDownLatch(1);
+        	mListener = new PairingListener( address, mLatch );
+            
+        	//wait until the pairing request is generated
+        	mIFilter = new IntentFilter();
+        	mIFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        	mService.registerReceiver(mListener, mIFilter);
+        	Log.v(TAG, "CreatingBond " + mImproved.createBond());
+        	mLatch.await(4, TimeUnit.SECONDS);
+        	mService.unregisterReceiver(mListener);
+        	Log.v(TAG, "PairingDialog back");
+        	Thread.sleep(500);
+        	Log.v(TAG, "Sleep done");
+        }
+
+        // seems timing is crucial, some logs show that on the first call to
+        // setPin BlueZ wasn't ready, so we try over and over until we're done
+        // with the bond, just in case we only do this no more than 20 times
+        // if the pin code is wrong it seems the OS still lets the user know
+        // and sometimes it even pop ups a window to put in the correct code.
+        while (mDevice.getBondState() == BluetoothDevice.BOND_BONDING && i < 20){
+        	Log.v(TAG, "Bonding state " + mDevice.getBondState());
+        	out = mImproved.setPin(pincode);
+        	Log.v(TAG, "setPin( " + pincode + " ) -> " + out);
+        	if (out)
+        		break;
+        	Thread.sleep(500);
+        	Log.v(TAG, "Sleep");
+        	i++;
+        }
         return out;
     }
     
