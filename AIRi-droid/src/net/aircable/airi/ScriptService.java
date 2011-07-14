@@ -57,8 +57,10 @@ import java.util.concurrent.CountDownLatch;
  * @author Manuel Naranjo (manuel@aircable.net)
  */
 public class ScriptService extends ForegroundService {
+	public final static String FROM_NOTIFICATION = "net.aircable.airi.ScriptService.FROM_NOTIFICATION";
 	@SuppressWarnings("unused")
 	private final static String TAG = "ScriptService";
+	
     private final static int NOTIFICATION_ID = NotificationIdFactory.create();
     private final CountDownLatch mLatch = new CountDownLatch(1);
     private final IBinder mBinder;
@@ -140,6 +142,8 @@ public class ScriptService extends ForegroundService {
             Log.v("All ready running " + mProcess.getPid());
             return;
         }
+        
+        
 
         // Copies script to internal memory.
         fileName = InterpreterUtils.getInterpreterRoot(this).getAbsolutePath()
@@ -189,7 +193,6 @@ public class ScriptService extends ForegroundService {
     public void onStart(Intent intent, final int startId) {
         super.onStart(intent, startId);
         startCompat(intent, startId);
-        
     }
 
     RpcReceiverManager getRpcReceiverManager() throws InterruptedException {
@@ -209,6 +212,7 @@ public class ScriptService extends ForegroundService {
             System.currentTimeMillis()
         );
         Intent notificationIntent = new Intent(ctx, ScriptActivity.class);
+        notificationIntent.putExtra(FROM_NOTIFICATION, true);
         PendingIntent contentIntent = PendingIntent.getActivity(ctx, 0, 
             notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         notification.setLatestEventInfo(ctx, ctx.getString(R.string.app_name), 
