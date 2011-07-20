@@ -62,20 +62,20 @@
 				{% if not pins %}{% set pins=() %}{% endif %}
 				{% for b,p in pins.iteritems() %}
 					<div class="ui-block-a" style="width: 50%;">
-						<input name="block_{{ loop.index0 }}" value="{{ b }}"  style="width: 95%"/>
+						<input name="block_{{ loop.index0 }}" value="{{ b }}" title="Address Filter" style="width: 95%"/>
 					</div>
 					<div class="ui-block-b" style="width: 47%;">
-						<input name="value_{{ loop.index0 }}" value="{{ p }}"  style="width: 95%"/>
+						<input name="value_{{ loop.index0 }}" value="{{ p }}" title="PIN Code" style="width: 95%"/>
 					</div>
 					<div class="ui-block-c" style="width: 3%;">
 						<button type="submit" name="delete" data-icon="delete" value="{{ b }}" data-iconpos="notext"></button>
 					</div>
 				{% endfor %}
 				<div class="ui-block-a" style="width: 50%;">
-					<input name="block" value="" style="width: 95%"/>
+					<input name="block" value="" title="New Address Filter" style="width: 95%"/>
 				</div>
 				<div class="ui-block-b" style="width: 47%;">
-					<input name="value" value="" style="width: 95%" />
+					<input name="value" value="" title="PIN Code" style="width: 95%" />
 				</div>
 			</div>
 		{% else %}

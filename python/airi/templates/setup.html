@@ -9,6 +9,7 @@
 	<fieldset data-role="controlgroup">
 	    <legend>{{ label }}:</legend>
 	    <input id="{{ id }}" name="{{ id }}" type="{{ type }}"  value="{{value}}"
+	        title="{{ label }}"
         	{% if readonly %} readonly="readonly" {% endif %}
     	    />
     	</fieldset>
