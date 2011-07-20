@@ -11,6 +11,16 @@ startup = true;
 droid = null;
 hidesplash = true;
 
+function log(){
+    // helper log funcion, will only log when console is available
+    // and will add a timestamp
+    if (this.console){
+        var args = Array.prototype.slice.call([""+new Date().getTime()]);
+        args = args.concat(Array.prototype.slice.call(arguments));
+        console.log.apply(console, args);
+    }
+}
+
 // used by navbars to switch in javascript fashion
 function changeTab(event){
     var source = $( this )
@@ -18,7 +28,7 @@ function changeTab(event){
     var selector = navbar.attr("data-selector");
     navbar.find("a").not(".ui-state-persist").removeClass($.mobile.activeBtnClass)
     source.addClass($.mobile.activeBtnClass);
-    console.log("ChangeTab ", selector,  source.attr("data-href"))
+    log("ChangeTab ", selector,  source.attr("data-href"))
     selector=$(selector);
     $.each(navbar.find("a").not(source), function(index, obj){
         obj=selector.filter($($(obj).attr("data-href")))
@@ -67,7 +77,7 @@ function refreshButton(selector){
 }
 
 function internalChangePage(target){
-    console.log("internalChangePage " + target);
+    log("internalChangePage " + target);
     $.mobile.changePage( target, {
         "changeHash": false,
         "reverse": false,
@@ -77,7 +87,7 @@ function internalChangePage(target){
 }
 
 function goBack(){
-    console.log("goBack")
+    log("goBack")
     if ($.mobile.urlHistory.stack.length == 1)
         return true;
 
@@ -91,13 +101,13 @@ function goBack(){
 }
 
 function goHome(){
-    console.log("goHome");
+    log("goHome");
     internalChangePage("/index.html"); // don't modify history
     return true;
 }
 
 function doReload(){
-    console.log("doReload");
+    log("doReload");
     internalChangePage($.mobile.activePage.attr("data-url"))
     $.mobile.urlHistory.stack.pop() // changePage created a new entry, take it out
 }
@@ -106,14 +116,47 @@ function centerDeviceImg(target){
     $(target).css("left", 50-$(target).width()/2)
 }
 
+function addPrompt(selector){
+    // this function will display a prompt on all the matching elements
+    // to prevent getting tons of prompt displays it makes sure prompts
+    // are only displayed at least each 100ms
+    var focus = function(event){
+        log(event.type, "starting");
+        if ($(this).attr("data-lastevent")){
+            if (new Date().getTime() - $(this).attr("data-lastevent") < 1000){
+                log("ignoring event");
+                return false;
+            }
+        }
+        // lock events
+        $(this).attr("data-lastevent", new Date().getTime()*1000*60);
+        var o=$(this).attr("value");
+        var n=prompt("Assign new value for " + $(this).attr("title"), o);
+        log("old value", o)
+        log("new value", n)
+        if (n != null)
+            $(this).attr("value", n);
+        log(event.type+" done");
+        // unlock events, prevent reshooting too quickly
+        $(this).attr("data-lastevent", new Date().getTime());
+        return false;
+    };
+    $(selector).
+        filter("[data-flag!=true]").
+        bind("focus", focus).
+        bind("vclick", focus).
+        attr("data-flag", true);
+}
+
+
 function update_home(){
-    console.log("update-home");
+    log("update-home");
     $(".register-camera").remove()
     $.get("/api/devices", null, function(data){
         prev=$("#cameras");
         $.each(data, function(index, val){
-            console.log(index);
-            console.log(val);
+            log(index);
+            log(val);
             var o=$("<li class='register-camera'></li>")
             prev.after(o)
             prev=o;
@@ -135,16 +178,15 @@ function update_home(){
         })
         $("#home ul").listview("refresh")
         if (droid != null && hidesplash){
-            console.log("hidding splash screen");
+            log("hidding splash screen");
             hidesplash = false;
-            //droid.airiHideSplashScreen();
             droid.dialogDismiss();
         }
     })
 }
 
 function update_setup(){
-    console.log("setup");
+    log("setup");
     $("#setup #exposure-text").remove()
     b = $("<label id='exposure-text' style='display: inline-block; width: 10%'>ms</label>")
     $(".ui-page-active #exposure[data-type=range]").after(b)
@@ -156,12 +198,27 @@ function update_setup(){
     })
     $(".ui-page-active #exposure").trigger("change")
     $("div[data-role=navbar]").find("."+$.mobile.activeBtnClass).trigger("vclick")
+    if (droid!=null){
+        // on Android devices we want to get an input box so the software keyboard
+        // can't mess with us
+        addPrompt("#setup.ui-page-active #pincode")
+    }
+}
+
+function update_serversetup(){
+    // this function gets called when server-setup is been displayed
+    // on Android devices we prefer to display an prompt instead of
+    // relying in the regular input boxes, to avoid the soft keyboard
+    // taking over our fields
+    log("server-setup init")
+    if (droid != null)
+        addPrompt("#server-setup input")
 }
 
 function getPlayerApi(){
 	var a = $(".active-mode #video-content").data("flashembed");
 	if ( a == null){
-		console.log("no player found");
+		log("no player found");
 		return null
 	}
 	return a.getApi()
@@ -170,14 +227,14 @@ function getPlayerApi(){
 function doVoice(value){
 	if (value==true) {
 		if ($("#sco_holder").length > 0){
-			console.log("Voice all ready enable, not doing again");
+			log("Voice all ready enable, not doing again");
 			return;
 		}
-		console.log("Enabling voice");
+		log("Enabling voice");
 		var voice=$("<iframe />")
 		voice.attr("id", "sco_holder");
 		voice.attr("src", "/sco/"+$(".active-mode #stream-address").val());
-		console.log(voice);
+		log(voice);
 		voice.appendTo("#viewer");
 	}
 	else {
@@ -240,7 +297,7 @@ function watch_device(){
     },
     function(data){
       previous_post = null;
-      console.log(data)
+      log(data)
       if (data.address != $("#stream-address").val()){
         return watch_device();
       }
@@ -272,12 +329,12 @@ function watch_device(){
             updateGeneric(index)
             break;
           case "client_count":
-            console.log("Client count " + element);
+            log("Client count " + element);
             $(".ui-page-active #header_extra").text(" | Viewed by " + element);
             $(".active-mode #stream-" + index).val(element);
             break;
           default:
-            console.log("using default handler " + index);
+            log("using default handler " + index);
             $("#stream-" + index).val(element);
           }
         }
@@ -289,7 +346,7 @@ function watch_device(){
 
 
 function update_viewer(){
-  console.log("view");
+  log("view");
 
   watch_device();
 
@@ -309,7 +366,7 @@ function currentId(){
 function pageshow(event, ui){
     var id = currentId();
     resize();
-    console.log("show " + id);
+    log("show " + id);
     $("[data-rel=back]").remove();
     $("#" + id + " #back_button").
         attr("onclick", "javascript: goBack();").
@@ -336,18 +393,20 @@ function pageshow(event, ui){
             return update_setup();
         case "viewer":
             return update_viewer();
+        case "server-setup":
+            return update_serversetup();
     }
-    console.log("show not known id " + id);
+    log("show not known id " + id);
 }
 
 function pagebeforehide(event, ui){
     var id = currentId();
-    console.log("beforehide " + id + ", next " + ui.nextPage.attr("id"));
+    log("beforehide " + id + ", next " + ui.nextPage.attr("id"));
     switch (id){
         case "setup":
             return hide_setup();
     }
-    console.log("hide not known id " + id);
+    log("hide not known id " + id);
 }
 
 function create_exposure_slider(label, holder, real){
@@ -377,13 +436,13 @@ function viewer_resize(event){
 
 function viewer_create(event){
     var prepare = function(content){
-        console.log("viewer_create prepare");
+        log("viewer_create prepare");
         if (content.attr("id") == "video")
             $("#viewer .ui-content .active-mode").addClass("ui-video-player")
         else
             $("#viewer .ui-content .active-mode").removeClass("ui-video-player")
     }
-    console.log("creating viewer");
+    log("creating viewer");
     $(".rotate-45").rotate(-45);
     viewer_resize();
     viewerResize();
@@ -392,7 +451,7 @@ function viewer_create(event){
 }
 
 function setup_create(event){
-    console.log("creating setup");
+    log("creating setup");
     $("[data-role=navbar]").undelegate("a", "vclick");
     $("[data-role=navbar]").delegate("a", "vclick", changeTab);
     $("div[data-role=page][id=setup] #reload_button").addClass("hide")
@@ -401,7 +460,7 @@ function setup_create(event){
 function viewerResizeDesktop(width, height){
     var viewer = $("#viewer .active-mode #video-content");
     if (width != undefined && height != undefined ){
-        console.log("viewerResize", width, height);
+        log("viewerResize", width, height);
         viewer.data("width", width);
         viewer.data("height", height);
     }
@@ -438,7 +497,7 @@ function viewerResizeMobile(width, height){
     $.each($("#viewer div[data-role=header]"), function(a, p){
         height -= $(p).outerHeight();
     })
-    console.log("new size " + width + " , " + height);
+    log("new size " + width + " , " + height);
     $("#viewer .active-mode #video-content").css("width", width);
     $("#viewer .active-mode #video-content").css("height", height);
     $("#viewer .active-mode #video-content").css("margin", 0);
@@ -453,7 +512,7 @@ function viewerResize(width, height){
 }
 
 function viewerReady(){
-    console.log("viewerReady")
+    log("viewerReady")
     connectViewer();
 }
 
@@ -461,7 +520,7 @@ function hide_setup(){
 }
 
 function connectViewer(extra){
-	console.log("connectViewer")
+	log("connectViewer")
 	var player = getPlayerApi();
 	if ( player == null )
 		return;
@@ -474,7 +533,7 @@ function connectViewer(extra){
 }
 
 function disconnectViewer(){
-  console.log("disconnectViewer")
+  log("disconnectViewer")
   var player = getPlayerApi();
   if ( player == null )
     return;
@@ -491,7 +550,7 @@ function switchState(){
     {
       "address": $("#stream-address").val()
     },function(data){
-      console.log("switchState result", data)
+      log("switchState result", data)
     }
   )
 }
@@ -520,12 +579,12 @@ function resize(event){
 
 function androidinit(){
     droid = new Android();
-    console.log("Running on Android");
+    log("Running on Android");
     droid.registerCallback("sl4a", function(data) {
         data.data=eval("("+data.data+")");
-        console.log("sl4a event " + data.data.shutdown);
+        log("sl4a event " + data.data.shutdown);
         if (data.data.shutdown != undefined){
-            console.log("Calling dismiss");
+            log("Calling dismiss");
             droid.dismiss();
         }
     });
@@ -534,7 +593,7 @@ function androidinit(){
 }
 
 function mobileinit(){
-    console.log("mobileinit");
+    log("mobileinit");
     $('div').live("pageshow", pageshow);
     $('#viewer').live("pagecreate", viewer_create);
     $('#setup').live("pagecreate", setup_create);
@@ -545,8 +604,8 @@ function mobileinit(){
     try {
         androidinit();
     } catch ( err ) {
-        console.log("Failure while calling androidinit, quite possible not running on android");
-        console.log( "" + err);
+        log("Failure while calling androidinit, quite possible not running on android");
+        log( "" + err);
     }
 }
 
