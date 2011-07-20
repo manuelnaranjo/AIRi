@@ -3,4 +3,10 @@
     <style name="Theme.NoBackground" parent="android:Theme.NoTitleBar.Fullscreen">
         <item name="android:windowBackground">@null</item>
     </style>
+    
+    <style name="Theme.AIRi" parent="android:Theme">
+        <item name="android:windowTitleSize">0px</item>
+        <item name="android:windowSoftInputMode">stateHidden|adjustResize</item>
+        <!--item name="android:windowFullscreen">true</item-->
+    </style>
 </resources>
