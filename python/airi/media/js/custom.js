@@ -50,10 +50,30 @@ function notsupported(transport){
     window.alert("Sorry but " + transport + " is not supported by your platform. You will need to run AIRi in Linux or Android to use this feature.");
 }
 
+function gravitationToG(value){
+    var out=new Object();
+    out.x=(value.x-90.0)*22.0/90.0*0.047;
+    out.y=-(value.y-90.0)*22.0/90.0*0.047;
+    out.z=(value.z-90.0)*22.0/90.0;
+    if (out.z>0){
+        out.z=22-out.z;
+    }
+    else {
+        out.z=-22-out.z;
+    }
+    out.z=out.z*0.047;
+    return out;
+}
+
+
 function updateSensorData(data){
 	$.each(data, function(index, value){
 		if (index == "compass" || index=="gravitation"){
 			var t = value.x+", "+value.y+", "+value.z;
+			if (index=="gravitation"){
+			    value = gravitationToG(value);
+			    t+="\t"+value.x.toFixed(3)+", "+value.y.toFixed(3)+", "+value.z.toFixed(3)
+			}
 			$(".active-mode #sensor-" +index).val(t)
 		} else if (index == "magic"){
 			$(".active-mode #sensor-" +index).val(
