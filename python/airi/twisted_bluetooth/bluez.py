@@ -16,6 +16,8 @@ import operator
 import bluetooth
 import struct
 
+from functools import partial
+
 from twisted.internet import tcp, reactor
 from twisted.internet.tcp import *
 
@@ -155,6 +157,13 @@ class BluetoothBaseClient(tcp.Connection):
         """(internal) Create a non-blocking socket using
         self.addressFamily, self.socketType.
         """
+        def internal_shutdown(self, flag):
+            try:
+                print "internal_shutdown", self, flag
+                bluetooth.BluetoothSocket.shutdown(self, flag)
+            except btcommon.BluetoothError, err:
+                raise socket.error(err.errno, err.message)
+
         if self.proto not in [ None, bluetooth.RFCOMM, bluetooth.SCO, 
                 bluetooth.HCI, bluetooth.L2CAP ]:
             raise RuntimeException("I only handle bluetooth sockets")
@@ -162,6 +171,7 @@ class BluetoothBaseClient(tcp.Connection):
         print self.proto, type(self.proto)
         s = bluetooth.BluetoothSocket(self.proto)
         s.setblocking(0)
+        s.shutdown = partial(internal_shutdown, s)
         tcp.fdesc._setCloseOnExec(s.fileno())
         return s
     
