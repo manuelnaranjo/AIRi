@@ -162,15 +162,9 @@ class Main(Resource):
             context["android"] = False
         return TemplateResource(template, context)
 
-def main(port=8000):
-    from twisted.application.service import Application
-    from twisted.application.internet import TCPServer
+def service():
     from twisted.web.server import Site
-    from twisted.internet import reactor
     from airi.api import API
-    import sys
-    log.startLogging(sys.stdout)
-
     MEDIA = pkg_resources.resource_filename("airi", "/media")
     FAVICON = pkg_resources.resource_filename("airi", "/media/favicon.ico")
     print "serving static content from", MEDIA
@@ -182,7 +176,14 @@ def main(port=8000):
     root.putChild("sco", SCOResource())
     root.putChild("stream", StreamResource())
     root.putChild("favicon.ico", File( FAVICON, defaultType=None) )
-    p=reactor.listenTCP(port, Site(root), interface="0.0.0.0", backlog=5)
+    return Site(root)
+
+
+def main(port=8000):
+    import sys
+    log.startLogging(sys.stdout)
+
+    p=reactor.listenTCP(port, service(), interface="0.0.0.0", backlog=5)
     return p
 
 if __name__=='__main__':
