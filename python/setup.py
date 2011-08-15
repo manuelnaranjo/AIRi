@@ -45,7 +45,7 @@ setup(name="airi",
     ],
     include_package_data=True,
     package_data={
-      'airi': ['airi/media/*.*', 'airi/templates/*.*'],
+      'airi': ['airi/media/*.*', 'airi/templates/*.*', 'airi.tap'],
     },
     #scripts=["AIRi"],
     entry_points = {
