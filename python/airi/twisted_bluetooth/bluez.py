@@ -377,7 +377,11 @@ def setupSCO():
     status, acl_mtu, sco_mtu, acl_nbufs, sco_nbufs = struct.unpack(
                 ">BHBHH", response)
     return acl_mtu, sco_mtu, acl_nbufs, sco_nbufs
-acl_mtu, sco_mtu, acl_nbufs, sco_nbufs = setupSCO()
+try:
+    acl_mtu, sco_mtu, acl_nbufs, sco_nbufs = setupSCO()
+except Exception, err:
+    log.exception(err)
+    acl_mtu, sco_mtu, acl_nbufs, sco_nbufs = (None, None, None, None)
 
 def connectSCO(reactor, *a, **kw):
     return __connectGeneric(reactor, bluetooth.SCO, *a, **kw)
