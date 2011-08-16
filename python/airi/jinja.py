@@ -182,6 +182,7 @@ def service():
 def main(port=8000):
     import sys
     log.startLogging(sys.stdout)
+    from twisted.internet import reactor
 
     p=reactor.listenTCP(port, service(), interface="0.0.0.0", backlog=5)
     return p

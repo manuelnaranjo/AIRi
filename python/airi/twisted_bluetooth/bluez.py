@@ -380,7 +380,7 @@ def setupSCO():
 try:
     acl_mtu, sco_mtu, acl_nbufs, sco_nbufs = setupSCO()
 except Exception, err:
-    log.exception(err)
+    log.err(err)
     acl_mtu, sco_mtu, acl_nbufs, sco_nbufs = (None, None, None, None)
 
 def connectSCO(reactor, *a, **kw):
